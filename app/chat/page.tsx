@@ -1,10 +1,15 @@
 import { PageHeader } from "@/components/page-header";
+import { ChatPanel } from "@/components/chat/chat-panel";
 
-export default function Page() {
+export const dynamic = "force-dynamic";
+
+export default function ChatPage() {
   return (
-    <div>
-      <PageHeader title="Chat" description="Coming online…" />
-      <div className="p-8 text-sm text-muted-foreground">This module is under construction.</div>
+    <div className="flex h-screen flex-col">
+      <PageHeader title="Talk to Your Data" description="ChatGPT for your fleet's spending — charts and follow-ups included" />
+      <div className="flex-1 overflow-hidden">
+        <ChatPanel />
+      </div>
     </div>
   );
 }
