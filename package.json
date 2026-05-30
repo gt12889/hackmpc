@@ -38,6 +38,7 @@
     "recharts": "^2.8.0",
     "remark-gfm": "^4.0.0",
     "sonner": "^1.2.4",
+    "swr": "^2.4.1",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
