@@ -27,7 +27,7 @@ export function SidebarNav() {
   return (
     <aside className="sticky top-0 flex h-screen w-60 shrink-0 flex-col border-r border-border bg-card/40">
       <div className="flex items-center gap-2.5 px-5 py-5">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-[hsl(262_90%_64%)] to-[hsl(286_84%_58%)] shadow-lg shadow-primary/25">
+        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-[hsl(189_100%_29%)] to-[hsl(187_95%_45%)] shadow-lg shadow-primary/25">
           <Truck className="h-5 w-5 text-white" />
         </div>
         <div className="leading-tight">
