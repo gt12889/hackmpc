@@ -14,7 +14,7 @@
     "db:reset": "rm -f .data/hackmpc.db .data/hackmpc.db-wal .data/hackmpc.db-shm && tsx scripts/etl.ts && tsx scripts/seed-policies.ts"
   },
   "dependencies": {
-    "@google/genai": "^0.21.0",
+    "@google/genai": "^2.7.0",
     "@radix-ui/react-dialog": "^1.0.5",
     "@radix-ui/react-dropdown-menu": "^2.0.6",
     "@radix-ui/react-label": "^2.0.2",
