@@ -1,13 +1,13 @@
-import { PageHeader } from "@/components/page-header";
-import { InsightsView } from "@/components/insights/insights-view";
+import { NextResponse } from "next/server";
 import { duplicateCharges, roundNumberCharges, largestCharges, anomalySummary } from "@/lib/anomaly";
 import { consolidationOpportunities, vendorSummary } from "@/lib/vendors";
 import { categoryForecasts, forecastSummary } from "@/lib/forecast";
 
+export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-export default function InsightsPage() {
-  const data = {
+export async function GET() {
+  return NextResponse.json({
     anomaly: {
       summary: anomalySummary(),
       duplicates: duplicateCharges(12),
@@ -16,14 +16,5 @@ export default function InsightsPage() {
     },
     vendors: { summary: vendorSummary(), opportunities: consolidationOpportunities(3) },
     forecast: { summary: forecastSummary(), categories: categoryForecasts(6) },
-  };
-  return (
-    <div>
-      <PageHeader
-        title="Insights"
-        description="Anomaly detection, vendor consolidation savings, and burn-rate forecasting"
-      />
-      <InsightsView data={data} />
-    </div>
-  );
+  });
 }
