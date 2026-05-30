@@ -1,10 +1,18 @@
 import { PageHeader } from "@/components/page-header";
+import { ReportsView } from "@/components/reports/reports-view";
+import { getReports, getReportsSummary } from "@/lib/reports";
 
-export default function Page() {
+export const dynamic = "force-dynamic";
+
+export default function ReportsPage() {
+  const initial = { reports: getReports(), summary: getReportsSummary() };
   return (
     <div>
-      <PageHeader title="Reports" description="Coming online…" />
-      <div className="p-8 text-sm text-muted-foreground">This module is under construction.</div>
+      <PageHeader
+        title="Expense Reports"
+        description="Auto-grouped transactions with category breakdowns, policy checks, and AI summaries — CFO-ready"
+      />
+      <ReportsView initial={initial} />
     </div>
   );
 }
