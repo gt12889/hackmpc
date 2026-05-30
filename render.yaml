@@ -1,0 +1,19 @@
+# Render.com blueprint. Deploys FleetLedger with a persistent disk for the
+# SQLite database. Set GEMINI_API_KEY in the Render dashboard (marked sync:false).
+services:
+  - type: web
+    name: fleetledger
+    runtime: docker
+    plan: starter
+    healthCheckPath: /
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-2.5-flash
+      - key: HACKMPC_DB_DIR
+        value: /data
+    disk:
+      name: fleetledger-data
+      mountPath: /data
+      sizeGB: 1

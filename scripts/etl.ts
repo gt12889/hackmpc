@@ -13,8 +13,9 @@ import path from "path";
 import { classify, MCC_MAP } from "../lib/mcc-seed";
 
 const ROOT = process.cwd();
-const DB_DIR = path.join(ROOT, ".data");
-const DB_PATH = path.join(DB_DIR, "hackmpc.db");
+// Respect the same env overrides as lib/db.ts so deploy volumes line up.
+const DB_DIR = process.env.HACKMPC_DB_DIR || path.join(ROOT, ".data");
+const DB_PATH = process.env.HACKMPC_DB_PATH || path.join(DB_DIR, "hackmpc.db");
 const XLSX_PATH =
   process.env.HACKMPC_XLSX || path.join(ROOT, "data", "transactions.xlsx");
 
