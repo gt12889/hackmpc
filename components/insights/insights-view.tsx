@@ -15,6 +15,8 @@ import {
   BarChart3,
   RefreshCw,
   ShieldCheck,
+  ChevronDown,
+  X,
 } from "lucide-react";
 import { cn, formatCAD } from "@/lib/utils";
 import { SectionCard } from "@/components/kpi-card";
@@ -31,70 +33,230 @@ import {
 import { ScrollSpyAccordion, type ScrollSpyItem } from "@/components/ui/scroll-spy";
 import { SectionBadge } from "@/components/ui/section-badge";
 
+type ReactNodeT = ReactNode;
+
+/** A compact headline figure for a bento tile. */
+function Stat({ value, label, tone }: { value: string; label: string; tone?: string }) {
+  return (
+    <div className="min-w-0">
+      <div className={cn("truncate text-2xl font-semibold tabular-nums md:text-[1.65rem]", tone ?? "text-neutral-900")}>{value}</div>
+      <div className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</div>
+    </div>
+  );
+}
+
+function Chip({ children, tone }: { children: ReactNode; tone?: string }) {
+  return <span className={cn("inline-block rounded px-1.5 py-0.5 text-[11px] font-medium", tone ?? "bg-secondary text-muted-foreground")}>{children}</span>;
+}
+
+type Tile = {
+  id: string;
+  title: string;
+  tag: string;
+  body: string;
+  icon: typeof Sparkles;
+  span: string;
+  summary: ReactNodeT;
+  panel: ReactNodeT;
+};
+
+/** A clickable bento summary tile; expands its full panel inline below the grid. */
+function BentoTile({ tile, active, onClick }: { tile: Tile; active: boolean; onClick: () => void }) {
+  const Icon = tile.icon;
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        "group flex h-full w-full flex-col rounded-2xl border bg-card/50 p-5 text-left ring-1 ring-white/[0.02] backdrop-blur-md transition-all duration-300",
+        "hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lg",
+        active ? "border-primary ring-2 ring-primary/50" : "border-border/60"
+      )}
+    >
+      <div className="flex items-center gap-2">
+        <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 ring-1 ring-primary/20">
+          <Icon className="h-4 w-4 text-primary" />
+        </span>
+        <span className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">{tile.tag}</span>
+        <ChevronDown className={cn("ml-auto h-4 w-4 text-muted-foreground transition-transform", active && "rotate-180")} />
+      </div>
+      <div className="mt-3 min-h-0 flex-1">{tile.summary}</div>
+      <div className="mt-3">
+        <h3 className="text-sm font-semibold text-neutral-900">{tile.title}</h3>
+        <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{tile.body}</p>
+      </div>
+    </button>
+  );
+}
+
+/** The full panel for the active tile, revealed inline below the bento grid. */
+function DetailPanel({ tile, onClose }: { tile: Tile; onClose: () => void }) {
+  const Icon = tile.icon;
+  return (
+    <div className="animate-fade-up rounded-2xl border border-border/60 bg-card/50 p-6 ring-1 ring-white/[0.02] backdrop-blur-md">
+      <div className="mb-5 flex items-center gap-2 border-b border-border/60 pb-3">
+        <Icon className="h-4 w-4 text-primary" />
+        <h2 className="text-sm font-semibold text-neutral-900">{tile.title}</h2>
+        <span className="text-[11px] uppercase tracking-widest text-muted-foreground">{tile.tag}</span>
+        <button onClick={onClose} className="ml-auto inline-flex items-center gap-1 rounded-md border border-border px-2 py-1 text-xs text-muted-foreground hover:bg-secondary">
+          <X className="h-3.5 w-3.5" /> Close
+        </button>
+      </div>
+      {tile.panel}
+    </div>
+  );
+}
+
 export function InsightsView({ data }: { data: any }) {
-  const items: ScrollSpyItem[] = [
+  const [open, setOpen] = useState<string | null>(null);
+
+  // Mini-visual data derived from the summaries.
+  const fc0 = data.forecast?.categories?.[0];
+  const fcData = fc0 ? [...fc0.history, { period: fc0.projectedMonth, spend: fc0.projected }] : [];
+  const fxPie = [
+    { key: "USD", value: data.fx?.summary?.usdValue ?? 0 },
+    { key: "CAD", value: data.fx?.summary?.cadValue ?? 0 },
+  ];
+  const profCats = data.profiles?.categories ?? [];
+  const profMax = Math.max(1, ...profCats.map((c: any) => c.vsBaseline ?? 0));
+
+  const TILES: Tile[] = [
     {
-      id: "feed",
-      title: "AI Summary",
-      tag: "DAILY DIGEST",
+      id: "feed", title: "AI Summary", tag: "DAILY DIGEST", icon: Sparkles, span: "md:col-span-4",
       body: "Most important highlights and key takeaways from your recently uploaded spend file.",
+      summary: (
+        <div className="space-y-1.5">
+          <Stat value={String(data.feed?.length ?? 0)} label="key highlights" tone="text-primary" />
+          {(data.feed ?? []).slice(0, 2).map((f: any, i: number) => (
+            <p key={i} className="line-clamp-1 text-xs text-neutral-700"><span className="text-primary">•</span> {f.title}</p>
+          ))}
+        </div>
+      ),
       panel: <FeedTab initial={data.feed} />,
     },
     {
-      id: "anomaly",
-      title: "Anomaly",
-      tag: "FRAUD SIGNALS",
-      body: "Duplicate charges, round-number transactions, and settlement payments flagged for review.",
-      panel: <AnomalyTab a={data.anomaly} />,
-    },
-    {
-      id: "fraud",
-      title: "Fraud Watch",
-      tag: "RISK SCORING",
-      body: "Transactions ranked by an explainable fraud-risk score.",
-      panel: <FraudTab f={data.fraud} />,
-    },
-    {
-      id: "vendors",
-      title: "Vendors",
-      tag: "SAVINGS",
-      body: "Fragmented vendor spend across categories - consolidation opportunities and estimated annual savings.",
-      panel: <VendorTab v={data.vendors} />,
-    },
-    {
-      id: "forecast",
-      title: "Forecast",
-      tag: "PROJECTION",
-      body: "Category-level spend projections for the next period with budget overrun risk signals.",
+      id: "forecast", title: "Forecast", tag: "PROJECTION", icon: TrendingUp, span: "md:col-span-2 md:row-span-2",
+      body: "Category-level spend projections with budget overrun risk signals.",
+      summary: (
+        <div className="flex h-full flex-col">
+          <div className="flex items-end gap-5">
+            <Stat value={String(data.forecast?.summary?.atRisk ?? 0)} label="overrun risk" tone="text-destructive" />
+            <Stat value={formatCAD(data.forecast?.summary?.projectedOverrun ?? 0, { compact: true })} label="projected" tone="text-warning" />
+          </div>
+          {fc0 && (
+            <div className="mt-3 flex-1">
+              <div className="mb-1 text-[11px] text-muted-foreground">{fc0.category}</div>
+              <TrendLine data={fcData} series={[{ key: "spend", label: fc0.category }]} height={130} />
+            </div>
+          )}
+        </div>
+      ),
       panel: <ForecastTab f={data.forecast} />,
     },
     {
-      id: "recurring",
-      title: "Recurring",
-      tag: "COMMITMENTS",
-      body: "Subscriptions and recurring charges on autopilot - your fixed monthly committed spend.",
-      panel: <RecurringTab r={data.recurring} />,
+      id: "anomaly", title: "Anomaly", tag: "FRAUD SIGNALS", icon: AlertTriangle, span: "md:col-span-2",
+      body: "Duplicate charges, round-number transactions, and settlement payments flagged for review.",
+      summary: (
+        <div className="space-y-2">
+          <div className="flex items-end gap-5">
+            <Stat value={String(data.anomaly?.summary?.duplicateGroups ?? 0)} label="duplicate groups" tone="text-warning" />
+            <Stat value={formatCAD(data.anomaly?.summary?.duplicateExposure ?? 0, { compact: true })} label="exposure" tone="text-destructive" />
+          </div>
+          <Chip tone="bg-warning/15 text-warning">{data.anomaly?.summary?.roundNumberCount ?? 0} round-number charges</Chip>
+        </div>
+      ),
+      panel: <AnomalyTab a={data.anomaly} />,
     },
     {
-      id: "fx",
-      title: "Cross-Border",
-      tag: "CURRENCY",
+      id: "fraud", title: "Fraud Watch", tag: "RISK SCORING", icon: ShieldCheck, span: "md:col-span-2",
+      body: "Transactions ranked by an explainable fraud-risk score.",
+      summary: (
+        <div className="space-y-2">
+          <div className="flex items-end gap-5">
+            <Stat value={String(data.fraud?.summary?.flagged ?? 0)} label="flagged" tone="text-destructive" />
+            <Stat value={String(data.fraud?.summary?.byTier?.high ?? 0)} label="high-risk" tone="text-warning" />
+          </div>
+          {data.fraud?.summary?.topReason && <Chip tone="bg-destructive/10 text-destructive">Top signal: {data.fraud.summary.topReason}</Chip>}
+        </div>
+      ),
+      panel: <FraudTab f={data.fraud} />,
+    },
+    {
+      id: "fx", title: "Cross-Border", tag: "CURRENCY", icon: Globe, span: "md:col-span-2 md:row-span-2",
       body: "USD vs CAD spend split, estimated FX cost, and cross-border trends by month.",
+      summary: (
+        <div className="flex h-full flex-col">
+          <div className="flex items-end gap-5">
+            <Stat value={`${data.fx?.summary?.usdShare ?? 0}%`} label="cross-border" tone="text-warning" />
+            <Stat value={formatCAD(data.fx?.summary?.estFxCost ?? 0, { compact: true })} label="est. FX cost" tone="text-destructive" />
+          </div>
+          <div className="mt-2 flex-1">
+            <CategoryPie data={fxPie} height={150} />
+          </div>
+        </div>
+      ),
       panel: <FxTab x={data.fx} />,
     },
     {
-      id: "profiles",
-      title: "Profiles",
-      tag: "BASELINE",
+      id: "vendors", title: "Vendors", tag: "SAVINGS", icon: Store, span: "md:col-span-2",
+      body: "Fragmented vendor spend across categories - consolidation opportunities and estimated annual savings.",
+      summary: (
+        <div className="space-y-1.5">
+          <Stat value={formatCAD(data.vendors?.summary?.estimatedAnnualSavings ?? 0, { compact: true })} label="est. annual savings" tone="text-primary" />
+          <p className="text-xs text-muted-foreground">{data.vendors?.summary?.fragmentedCategories ?? 0} fragmented categories · {data.vendors?.summary?.totalVendors ?? 0} vendors</p>
+        </div>
+      ),
+      panel: <VendorTab v={data.vendors} />,
+    },
+    {
+      id: "recurring", title: "Recurring", tag: "COMMITMENTS", icon: Repeat, span: "md:col-span-2",
+      body: "Subscriptions and recurring charges on autopilot - your fixed monthly committed spend.",
+      summary: (
+        <div className="space-y-1.5">
+          <Stat value={formatCAD(data.recurring?.summary?.monthlyCommitted ?? 0, { compact: true })} label="committed / month" tone="text-warning" />
+          <p className="text-xs text-muted-foreground">{data.recurring?.summary?.count ?? 0} recurring · {formatCAD(data.recurring?.summary?.annualized ?? 0, { compact: true })}/yr</p>
+        </div>
+      ),
+      panel: <RecurringTab r={data.recurring} />,
+    },
+    {
+      id: "profiles", title: "Profiles", tag: "BASELINE", icon: BarChart3, span: "md:col-span-4",
       body: "Category spend profiles benchmarked against the company average transaction size with trend direction.",
+      summary: (
+        <div className="space-y-2">
+          <Stat value={formatCAD(data.profiles?.summary?.baselineAvg ?? 0)} label="company avg txn" />
+          <div className="space-y-1">
+            {profCats.slice(0, 3).map((c: any, i: number) => (
+              <div key={i} className="flex items-center gap-2 text-[11px]">
+                <span className="w-24 shrink-0 truncate text-muted-foreground">{c.category}</span>
+                <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-secondary">
+                  <div className="h-full rounded-full" style={{ width: `${Math.min(100, (c.vsBaseline / profMax) * 100)}%`, background: CHART_COLORS[i % CHART_COLORS.length] }} />
+                </div>
+                <span className="w-8 shrink-0 text-right tabular-nums text-muted-foreground">{c.vsBaseline}×</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      ),
       panel: <ProfilesTab p={data.profiles} />,
     },
   ];
 
+  const openTile = TILES.find((t) => t.id === open) ?? null;
+
   return (
     <div className="space-y-6 p-8">
       <SectionBadge>Insights</SectionBadge>
-      <ScrollSpyAccordion items={items} />
+
+      {/* Animated bento mosaic of all insight components. Click a tile to expand its full panel. */}
+      <div className="grid grid-cols-1 gap-4 md:auto-rows-[210px] md:grid-cols-6">
+        {TILES.map((tile, i) => (
+          <Reveal key={tile.id} delay={i * 60} className={cn("min-w-0", tile.span)}>
+            <BentoTile tile={tile} active={open === tile.id} onClick={() => setOpen(open === tile.id ? null : tile.id)} />
+          </Reveal>
+        ))}
+      </div>
+
+      {openTile && <DetailPanel key={openTile.id} tile={openTile} onClose={() => setOpen(null)} />}
     </div>
   );
 }
