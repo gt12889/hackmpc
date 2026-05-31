@@ -1,18 +1,19 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
-import { Send, Sparkles, User, Loader2, Wrench } from "lucide-react";
+import { Send, Sparkles, User, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { ChartRenderer } from "./chart-renderer";
-import type { VizPayload } from "@/lib/agent";
+import { Lineage } from "./lineage";
+import type { VizPayload, ToolCallTrace } from "@/lib/agent";
 import { cn } from "@/lib/utils";
 
 type Msg = {
   role: "user" | "model";
   text: string;
   viz?: VizPayload | null;
-  tools?: { name: string; args: any }[];
+  tools?: ToolCallTrace[];
 };
 
 const SUGGESTIONS = [
@@ -143,16 +144,7 @@ function Message({ msg }: { msg: Msg }) {
           <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.text}</ReactMarkdown>
         </div>
 
-        {msg.tools && msg.tools.length > 0 && (
-          <div className="flex flex-wrap gap-1.5">
-            {msg.tools.map((t, i) => (
-              <span key={i} className="inline-flex items-center gap-1 rounded-md bg-secondary/60 px-2 py-0.5 text-[10px] text-muted-foreground">
-                <Wrench className="h-3 w-3" />
-                {t.name}
-              </span>
-            ))}
-          </div>
-        )}
+        {msg.tools && msg.tools.length > 0 && <Lineage tools={msg.tools} />}
 
         {msg.viz && (
           <div className="w-full rounded-xl border border-border bg-card p-4">

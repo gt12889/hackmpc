@@ -14,10 +14,28 @@ export type VizPayload = {
   title?: string;
 };
 
+/** One step of provenance: the tool the model chose, the whitelisted args it
+ *  passed, and a summary of what came back. This is the data-lineage trail the
+ *  UI renders so every answer traces back to the rows behind it. */
+export type ToolCallTrace = {
+  name: string;
+  args: any;
+  ok: boolean;
+  rowCount: number;
+  total?: number;
+  error?: string;
+  /** First few result rows, so the lineage can show the actual numbers behind
+   *  the answer (not just a count). Bounded to keep the payload small. */
+  sample?: any[];
+  /** Result metadata (money flag, group_by, metric, compare labels…) used to
+   *  format the sample correctly in the UI. */
+  meta?: Record<string, any>;
+};
+
 export type AgentResult = {
   text: string;
   viz: VizPayload | null;
-  toolCalls: { name: string; args: any }[];
+  toolCalls: ToolCallTrace[];
 };
 
 /** Reality primer + live schema facts. Identical each turn (cache-friendly). */
@@ -63,7 +81,7 @@ export async function runAgent(history: ChatTurn[], userMessage: string): Promis
   const contents: any[] = history.map((t) => ({ role: t.role, parts: [{ text: t.text }] }));
   contents.push({ role: "user", parts: [{ text: userMessage }] });
 
-  const toolCalls: { name: string; args: any }[] = [];
+  const toolCalls: ToolCallTrace[] = [];
   let lastViz: VizPayload | null = null;
 
   for (let iter = 0; iter < MAX_ITERS; iter++) {
@@ -87,7 +105,22 @@ export async function runAgent(history: ChatTurn[], userMessage: string): Promis
         const name = call.name as string;
         const args = (call.args as any) ?? {};
         const result = runTool(name, args);
-        toolCalls.push({ name, args });
+        const rowCount = Array.isArray(result.data) ? result.data.length : result.data == null ? 0 : 1;
+        const sample = Array.isArray(result.data)
+          ? result.data.slice(0, 5)
+          : result.data != null
+          ? [result.data]
+          : [];
+        toolCalls.push({
+          name,
+          args,
+          ok: result.ok,
+          rowCount,
+          total: typeof result.meta?.total === "number" ? result.meta.total : undefined,
+          error: result.error,
+          sample,
+          meta: result.meta,
+        });
         if (result.ok) {
           lastViz = { tool: name, suggested_viz: result.suggested_viz, data: result.data, meta: result.meta };
         }
