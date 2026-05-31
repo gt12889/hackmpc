@@ -117,14 +117,18 @@ function Connector({ active }: { active: boolean }) {
   );
 }
 
+export type SwarmFindings = { headline: string; items: string[] };
+
 export function AgentSwarmVisualizer({
   feature,
   running,
   runKey = 0,
+  findings = null,
 }: {
   feature: SwarmFeature;
   running: boolean;
   runKey?: number;
+  findings?: SwarmFindings | null;
 }) {
   const g = GRAPHS[feature];
   const [stage, setStage] = useState(3);
@@ -179,6 +183,26 @@ export function AgentSwarmVisualizer({
           <NodeCard def={g.output} state={stage >= 3 ? "done" : "idle"} />
         </div>
       </div>
+
+      {/* findings — what this run actually surfaced */}
+      {!running && findings && (
+        <div className="mt-3 rounded-lg border border-primary/20 bg-primary/5 p-3 animate-fade-up">
+          <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-primary">
+            <Check className="h-3.5 w-3.5" /> Findings
+          </div>
+          <p className="mt-1 text-sm font-medium text-neutral-900">{findings.headline}</p>
+          {findings.items.length > 0 && (
+            <ul className="mt-1.5 space-y-0.5">
+              {findings.items.map((it, i) => (
+                <li key={i} className="flex gap-1.5 text-[13px] text-neutral-700">
+                  <span className="text-primary">•</span>
+                  <span className="min-w-0 flex-1">{it}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
     </div>
   );
 }

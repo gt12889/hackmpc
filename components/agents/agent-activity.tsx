@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { Sparkles, Gavel, ShieldAlert, Search, Lightbulb, RefreshCw, Play } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SectionCard } from "@/components/kpi-card";
-import { AgentSwarmVisualizer, type SwarmFeature } from "@/components/agents/agent-swarm-visualizer";
+import { AgentSwarmVisualizer, type SwarmFeature, type SwarmFindings } from "@/components/agents/agent-swarm-visualizer";
 import { notifyApiError } from "@/components/api-error-modal";
 
 const fetcher = (u: string) => fetch(u).then((r) => r.json());
@@ -19,12 +19,62 @@ const FEATURE_META: Record<string, { label: string; icon: any }> = {
 };
 
 // Demo triggers: each fires the REAL endpoint (so the activity feed below updates)
-// while the visualizer animates the graph that's running.
-const DEMOS: { feature: SwarmFeature; label: string; endpoint: string }[] = [
-  { feature: "approval-debate", label: "Run debate", endpoint: "/api/requests" },
-  { feature: "fraud-investigator", label: "Investigate fraud", endpoint: "/api/fraud/investigate" },
-  { feature: "compliance-swarm", label: "Review compliance", endpoint: "/api/policies/scan" },
-  { feature: "insights-swarm", label: "Sweep insights", endpoint: "/api/insights/feed" },
+// while the visualizer animates the graph that's running. `collect` reads the real
+// results back so the visualizer can show what the run actually found.
+const DEMOS: { feature: SwarmFeature; label: string; endpoint: string; collect: (res: any) => Promise<SwarmFindings> }[] = [
+  {
+    feature: "approval-debate",
+    label: "Run debate",
+    endpoint: "/api/requests",
+    collect: async (res) => {
+      const d = await fetch("/api/requests").then((r) => r.json()).catch(() => null);
+      const reqs = (d?.requests ?? []).filter((r: any) => r.ai_recommendation);
+      const n = res?.debated ?? reqs.length;
+      return {
+        headline: `${n} request${n === 1 ? "" : "s"} debated`,
+        items: reqs.slice(0, 4).map((r: any) => `${r.merchant_name}: ${r.ai_recommendation}${r.ai_confidence != null ? ` (${Math.round(r.ai_confidence * 100)}%)` : ""}`),
+      };
+    },
+  },
+  {
+    feature: "fraud-investigator",
+    label: "Investigate fraud",
+    endpoint: "/api/fraud/investigate",
+    collect: async (res) => {
+      const cases = (res?.cases ?? []).filter((c: any) => c.verdict && c.verdict !== "unreviewed");
+      const n = res?.investigated ?? cases.length;
+      return {
+        headline: `${n} suspect${n === 1 ? "" : "s"} investigated`,
+        items: cases.slice(0, 4).map((c: any) => `${c.merchant_name}: ${String(c.verdict).replace(/_/g, " ")}${c.confidence != null ? ` (${Math.round(c.confidence * 100)}%)` : ""}`),
+      };
+    },
+  },
+  {
+    feature: "compliance-swarm",
+    label: "Review compliance",
+    endpoint: "/api/policies/scan",
+    collect: async (res) => {
+      const d = await fetch("/api/policies").then((r) => r.json()).catch(() => null);
+      const counts = d?.summary?.counts ?? {};
+      const reviewed = res?.adjusted?.reviewed ?? d?.summary?.total ?? 0;
+      return {
+        headline: `${reviewed} violation${reviewed === 1 ? "" : "s"} reviewed`,
+        items: ["critical", "high", "medium", "low"].filter((k) => counts[k]).map((k) => `${counts[k]} ${k}`),
+      };
+    },
+  },
+  {
+    feature: "insights-swarm",
+    label: "Sweep insights",
+    endpoint: "/api/insights/feed",
+    collect: async (res) => {
+      const feed = res?.feed ?? [];
+      return {
+        headline: `${feed.length} insight${feed.length === 1 ? "" : "s"} ranked`,
+        items: feed.slice(0, 4).map((f: any) => f.title),
+      };
+    },
+  },
 ];
 
 function relativeTime(iso: string): string {
@@ -43,28 +93,29 @@ export function AgentActivity() {
   const { data, mutate, isLoading } = useSWR("/api/agents", fetcher, { refreshInterval: 5000 });
   const runs: any[] = data?.runs ?? [];
 
-  const [demo, setDemo] = useState<{ feature: SwarmFeature; running: boolean; runKey: number } | null>(null);
+  const [demo, setDemo] = useState<{ feature: SwarmFeature; running: boolean; runKey: number; findings: SwarmFindings | null } | null>(null);
   const [busy, setBusy] = useState(false);
 
-  async function runDemo(feature: SwarmFeature, endpoint: string) {
+  async function runDemo(d: (typeof DEMOS)[number]) {
     if (busy) return;
     setBusy(true);
-    setDemo((d) => ({ feature, running: true, runKey: (d?.runKey ?? 0) + 1 }));
+    setDemo((prev) => ({ feature: d.feature, running: true, runKey: (prev?.runKey ?? 0) + 1, findings: null }));
     try {
       // Fire the real swarm; hold the animation for a readable minimum either way.
       const [res] = await Promise.all([
-        fetch(endpoint, { method: "POST" }).then((r) => r.json()).catch(() => null),
+        fetch(d.endpoint, { method: "POST" }).then((r) => r.json()).catch(() => null),
         new Promise((r) => setTimeout(r, 2200)),
       ]);
-      setDemo((d) => (d ? { ...d, running: false } : d));
-      await mutate();
       // Treat a hard failure, an explicit ok:false, or a degraded/fallback run
       // (what happens when the AI credits/quota are exhausted) as an error.
       const degraded = !res || res.ok === false || res.mode === "degraded" || res?.adjusted?.mode === "degraded";
+      const findings = degraded ? null : await d.collect(res).catch(() => null);
+      setDemo((prev) => (prev ? { ...prev, running: false, findings } : prev));
+      await mutate();
       if (degraded) notifyApiError();
-      else toast.success(`${FEATURE_META[feature].label} run complete`);
+      else toast.success(`${FEATURE_META[d.feature].label} run complete`);
     } catch {
-      setDemo((d) => (d ? { ...d, running: false } : d));
+      setDemo((prev) => (prev ? { ...prev, running: false, findings: null } : prev));
       notifyApiError();
     } finally {
       setBusy(false);
@@ -89,7 +140,7 @@ export function AgentActivity() {
             return (
               <button
                 key={d.feature}
-                onClick={() => runDemo(d.feature, d.endpoint)}
+                onClick={() => runDemo(d)}
                 disabled={busy}
                 className={cn(
                   "inline-flex items-center gap-1.5 rounded-md border px-3 py-2 text-xs font-medium transition-colors disabled:opacity-50",
@@ -105,7 +156,7 @@ export function AgentActivity() {
 
         {demo && (
           <div className="mt-4">
-            <AgentSwarmVisualizer feature={demo.feature} running={demo.running} runKey={demo.runKey} />
+            <AgentSwarmVisualizer feature={demo.feature} running={demo.running} runKey={demo.runKey} findings={demo.findings} />
           </div>
         )}
       </SectionCard>
