@@ -12,6 +12,7 @@
 import { getDb } from "../lib/db";
 import { setReportStatus } from "../lib/reports";
 import { decideRequest } from "../lib/approvals";
+import { syncFromViolations } from "../lib/notifications";
 import { buildSnapshot, canonicalHash, listAnchors, type RecordType } from "../lib/solana";
 import type Database from "better-sqlite3";
 
@@ -44,6 +45,16 @@ function main() {
   for (const q of reqs) {
     decideRequest(q.id, "approved", "Finance Manager");
     if (seedConfirmed(db, "request", String(q.id))) console.log(`[seed-anchors] request #${q.id}: confirmed`);
+  }
+
+  // Raise + anchor a few HIGH/CRITICAL compliance alerts (the third anchor type) so the
+  // trail shows all record types. syncFromViolations populates the notifications ledger.
+  syncFromViolations(db);
+  const alerts = db
+    .prepare(`SELECT alert_key FROM notifications WHERE lower(severity) IN ('high','critical') ORDER BY amount_involved DESC LIMIT 3`)
+    .all() as { alert_key: string }[];
+  for (const a of alerts) {
+    if (seedConfirmed(db, "alert", a.alert_key)) console.log(`[seed-anchors] alert ${a.alert_key}: confirmed`);
   }
 
   // Never leave non-confirmed rows in the trail.

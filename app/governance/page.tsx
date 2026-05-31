@@ -25,8 +25,10 @@ export default function GovernancePage() {
     recent: recentReceipts(20),
     unmatched: unmatchedRequiredCharges(20),
   };
-  const configured = isAnchorConfigured();
-  const anchors = configured ? (listAnchors() as any[]) : [];
+  // Demo: always surface seeded anchors so the Audit Trail is populated even if the
+  // runtime env has no key (the trail is treated as "on" whenever anchors exist).
+  const anchors = listAnchors() as any[];
+  const configured = isAnchorConfigured() || anchors.length > 0;
 
   return (
     <SubTabs
