@@ -49,6 +49,9 @@ flowchart LR
     G -->|"VIOLATION"| J
     H -->|"insight +\nviz"| K```
 
+
+
+
 Full docs live in [`docs/`](docs/):
 
 - [Submission](docs/SUBMISSION.md) - the writeup (Inspiration / build / challenges), full tech list, and judging scorecard
