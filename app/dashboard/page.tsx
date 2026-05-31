@@ -25,12 +25,14 @@ export default function DashboardPage() {
 
   return (
     <div>
+      <div className="flex justify-center px-8 pt-7 pb-2">
+        <ImportDialog variant="prominent" />
+      </div>
+
       <PageHeader
         title="Spend Overview"
         description={`${kpis.dateStart} → ${kpis.dateEnd} · ${kpis.txnCount.toLocaleString()} card transactions`}
-      >
-        <ImportDialog />
-      </PageHeader>
+      />
 
       <div className="space-y-6 p-8">
         {/* KPIs */}

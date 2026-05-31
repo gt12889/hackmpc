@@ -2,129 +2,124 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   LayoutDashboard,
   ShieldCheck,
   CheckSquare,
   FileText,
   Sparkles,
-  ChevronDown,
-  LayoutGrid,
+  Menu,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type Item = { href: string; label: string; icon: any; desc?: string };
 
-const PRIMARY: Item[] = [{ href: "/dashboard", label: "Dashboard", icon: LayoutDashboard }];
-
-const GROUPS: { label: string; icon: any; items: Item[] }[] = [
-  {
-    label: "Menu",
-    icon: LayoutGrid,
-    items: [
-      { href: "/compliance", label: "Compliance", icon: ShieldCheck, desc: "Policy rules & violations" },
-      { href: "/approvals", label: "Approvals", icon: CheckSquare, desc: "AI pre-approval queue" },
-      { href: "/reports", label: "Expense Reports", icon: FileText, desc: "Grouped, CFO-ready" },
-      { href: "/insights", label: "Insights", icon: Sparkles, desc: "Anomaly · vendors · forecast" },
-    ],
-  },
+const NAV_ITEMS: Item[] = [
+  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, desc: "Spend overview & KPIs" },
+  { href: "/compliance", label: "Compliance", icon: ShieldCheck, desc: "Policy rules & violations" },
+  { href: "/approvals", label: "Approvals", icon: CheckSquare, desc: "AI pre-approval queue" },
+  { href: "/reports", label: "Expense Reports", icon: FileText, desc: "Grouped, CFO-ready" },
+  { href: "/insights", label: "Insights", icon: Sparkles, desc: "Anomaly · vendors · forecast" },
 ];
 
 export function TopNav() {
   const pathname = usePathname();
-  return (
-    <header className="sticky top-0 z-50 border-b border-border/60 bg-background/60 backdrop-blur-xl">
-      <div className="grid h-14 grid-cols-[1fr_auto_1fr] items-center gap-2 px-5">
-        {/* Left nav */}
-        <nav className="flex items-center gap-1 justify-self-start">
-          {PRIMARY.map(({ href, label, icon: Icon }) => {
-            const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
-            return (
-              <Link key={href} href={href} className={navItemCls(active)}>
-                <Icon className="h-4 w-4" />
-                <span className="hidden sm:inline">{label}</span>
-              </Link>
-            );
-          })}
-          {GROUPS.map((g) => (
-            <NavDropdown key={g.label} group={g} pathname={pathname} />
-          ))}
-        </nav>
-
-        {/* Center title */}
-        <Link href="/" className="justify-self-center text-[17px] tracking-tight text-foreground transition-opacity hover:opacity-80">
-          Brim It
-        </Link>
-
-        {/* Right badge */}
-        <div className="hidden shrink-0 items-center gap-2 justify-self-end rounded-full border border-border/60 bg-foreground/[0.03] px-3 py-1.5 lg:flex">
-          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />
-          <span className="text-[11px] text-muted-foreground">Brim × MPC Hacks</span>
-        </div>
-      </div>
-    </header>
-  );
-}
-
-function navItemCls(active: boolean) {
-  return cn(
-    "flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-all duration-200",
-    active
-      ? "bg-primary/15 text-primary ring-1 ring-inset ring-primary/25"
-      : "text-muted-foreground hover:bg-foreground/[0.06] hover:text-foreground"
-  );
-}
-
-function NavDropdown({ group, pathname }: { group: { label: string; icon: any; items: Item[] }; pathname: string }) {
   const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-  const Icon = group.icon;
-  const active = group.items.some((i) => pathname.startsWith(i.href));
 
-  useEffect(() => {
-    if (!open) return;
-    const onClick = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    };
-    document.addEventListener("mousedown", onClick);
-    return () => document.removeEventListener("mousedown", onClick);
-  }, [open]);
-
-  // Close on route change.
   useEffect(() => setOpen(false), [pathname]);
 
+  useEffect(() => {
+    document.body.style.overflow = open ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
+
   return (
-    <div ref={ref} className="relative">
-      <button onClick={() => setOpen((o) => !o)} className={navItemCls(active)}>
-        <Icon className="h-4 w-4" />
-        <span className="hidden sm:inline">{group.label}</span>
-        <ChevronDown className={cn("h-3.5 w-3.5 transition-transform duration-200", open && "rotate-180")} />
-      </button>
+    <>
+      <header className="sticky top-0 z-40 border-b border-border/60 bg-background/60 backdrop-blur-xl">
+        <div className="grid h-16 grid-cols-[1fr_auto_1fr] items-center gap-2 px-5">
+          <div className="justify-self-start" />
+
+          <Link
+            href="/"
+            className="justify-self-center text-2xl tracking-tight text-foreground transition-opacity hover:opacity-80 md:text-3xl"
+          >
+            Brim It
+          </Link>
+
+          <div className="flex items-center justify-self-end">
+            <button
+              type="button"
+              onClick={() => setOpen(true)}
+              aria-label="Open menu"
+              aria-expanded={open}
+              className="flex h-10 w-10 items-center justify-center rounded-lg text-foreground transition-colors hover:bg-foreground/[0.06]"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+      </header>
 
       {open && (
-        <div className="absolute left-0 top-[calc(100%+8px)] w-64 origin-top-left animate-fade-up rounded-xl border border-border/70 bg-popover/85 p-1.5 shadow-2xl shadow-black/40 ring-1 ring-inset ring-white/[0.03] backdrop-blur-xl">
-          {group.items.map(({ href, label, icon: ItemIcon, desc }) => {
-            const itemActive = pathname.startsWith(href) && href !== "/";
+        <div
+          className="fixed inset-0 z-50 bg-foreground/15 backdrop-blur-sm animate-in fade-in-0 duration-200"
+          onClick={() => setOpen(false)}
+          aria-hidden
+        />
+      )}
+
+      <aside
+        className={cn(
+          "fixed right-0 top-0 z-50 flex h-full w-72 flex-col border-l border-border/60 bg-background/95 shadow-2xl backdrop-blur-xl transition-transform duration-300 ease-out",
+          open ? "translate-x-0" : "translate-x-full"
+        )}
+        aria-hidden={!open}
+      >
+        <div className="flex h-16 items-center justify-between border-b border-border/60 px-5">
+          <span className="text-sm text-muted-foreground">Menu</span>
+          <button
+            type="button"
+            onClick={() => setOpen(false)}
+            aria-label="Close menu"
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-foreground/[0.06] hover:text-foreground"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        <nav className="flex-1 overflow-y-auto p-3">
+          {NAV_ITEMS.map(({ href, label, icon: Icon, desc }) => {
+            const active = pathname.startsWith(href) && href !== "/";
             return (
               <Link
                 key={href}
                 href={href}
                 className={cn(
-                  "flex items-start gap-3 rounded-lg px-3 py-2.5 transition-colors",
-                  itemActive ? "bg-primary/15" : "hover:bg-foreground/[0.06]"
+                  "flex items-start gap-3 rounded-lg px-3 py-3 transition-colors",
+                  active ? "bg-primary/15 ring-1 ring-inset ring-primary/25" : "hover:bg-foreground/[0.06]"
                 )}
               >
-                <ItemIcon className={cn("mt-0.5 h-4 w-4 shrink-0", itemActive ? "text-primary" : "text-muted-foreground")} />
+                <Icon className={cn("mt-0.5 h-4 w-4 shrink-0", active ? "text-primary" : "text-muted-foreground")} />
                 <div className="min-w-0">
-                  <div className={cn("text-[13px]", itemActive ? "text-primary" : "text-foreground")}>{label}</div>
+                  <div className={cn("text-[13px]", active ? "text-primary" : "text-foreground")}>{label}</div>
                   {desc && <div className="text-[11px] text-muted-foreground">{desc}</div>}
                 </div>
               </Link>
             );
           })}
+        </nav>
+
+        <div className="border-t border-border/60 p-4">
+          <div className="flex items-center gap-2 rounded-full border border-border/60 bg-foreground/[0.03] px-3 py-2">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />
+            <span className="text-[11px] text-muted-foreground">Brim × MPC Hacks</span>
+          </div>
         </div>
-      )}
-    </div>
+      </aside>
+    </>
   );
 }

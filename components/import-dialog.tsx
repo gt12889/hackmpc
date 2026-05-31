@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { Upload, FileSpreadsheet, Loader2, CheckCircle2, X } from "lucide-react";
 import { cn, formatCAD } from "@/lib/utils";
 
-export function ImportDialog() {
+export function ImportDialog({ variant = "default" }: { variant?: "default" | "prominent" }) {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [drag, setDrag] = useState(false);
@@ -46,10 +46,15 @@ export function ImportDialog() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="flex shrink-0 items-center gap-2 rounded-lg border border-border/60 bg-foreground/[0.03] px-3 py-2 text-[13px] text-muted-foreground transition-colors hover:border-primary/30 hover:text-foreground"
+        className={cn(
+          "flex shrink-0 items-center gap-2 transition-colors",
+          variant === "prominent"
+            ? "rounded-full bg-amber-500 px-6 py-2.5 text-sm text-white shadow-md shadow-amber-500/25 hover:bg-amber-600"
+            : "rounded-lg border border-border/60 bg-foreground/[0.03] px-3 py-2 text-[13px] text-muted-foreground hover:border-primary/30 hover:text-foreground"
+        )}
       >
         <Upload className="h-4 w-4" />
-        <span className="hidden sm:inline">Import</span>
+        <span className={variant === "prominent" ? "inline" : "hidden sm:inline"}>Upload</span>
       </button>
 
       {open && (
@@ -60,8 +65,8 @@ export function ImportDialog() {
               <X className="h-4 w-4" />
             </button>
 
-            <h2 className="text-lg">Import Transactions</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <h2 className="text-lg text-neutral-900">Upload Transactions</h2>
+            <p className="mt-1 text-sm text-neutral-600">
               Upload a card-transaction export (.csv or .xlsx). New rows are normalized, categorized, and scanned against your policy — then <b>added to your existing data</b>.
             </p>
 
@@ -114,7 +119,7 @@ export function ImportDialog() {
                     : " · AI enrichment skipped (quota) — use the in-page Re-scan/Regenerate buttons later"}
                 </div>
                 <div className="flex justify-end gap-2">
-                  <button onClick={() => setResult(null)} className="rounded-md border border-border px-3 py-2 text-sm hover:bg-secondary">Import another</button>
+                  <button onClick={() => setResult(null)} className="rounded-md border border-border px-3 py-2 text-sm text-neutral-800 hover:bg-secondary">Upload another</button>
                   <button onClick={() => setOpen(false)} className="rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground hover:opacity-90">Done</button>
                 </div>
               </div>
