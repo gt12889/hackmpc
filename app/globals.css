@@ -115,8 +115,16 @@
   }
 }
 
+/* Agent swarm visualizer: a gradient pulse that sweeps along a connector while
+   the upstream node is active. Illustrative only (demo). */
+@keyframes agentflow {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(320%); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-fade-up { animation: none !important; }
+  .animate-\[agentflow_1s_linear_infinite\] { animation: none !important; }
 }
 
 /* Scoped serif display layer - wins over `* { font-weight: 700 !important }` via

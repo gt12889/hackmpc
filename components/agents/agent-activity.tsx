@@ -1,9 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import useSWR from "swr";
-import { Sparkles, Gavel, ShieldAlert, Search, Lightbulb, RefreshCw } from "lucide-react";
+import { toast } from "sonner";
+import { Sparkles, Gavel, ShieldAlert, Search, Lightbulb, RefreshCw, Play } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SectionCard } from "@/components/kpi-card";
+import { AgentSwarmVisualizer, type SwarmFeature } from "@/components/agents/agent-swarm-visualizer";
 
 const fetcher = (u: string) => fetch(u).then((r) => r.json());
 
@@ -14,8 +17,16 @@ const FEATURE_META: Record<string, { label: string; icon: any }> = {
   "insights-swarm": { label: "Insights sweep", icon: Lightbulb },
 };
 
+// Demo triggers: each fires the REAL endpoint (so the activity feed below updates)
+// while the visualizer animates the graph that's running.
+const DEMOS: { feature: SwarmFeature; label: string; endpoint: string }[] = [
+  { feature: "approval-debate", label: "Run debate", endpoint: "/api/requests" },
+  { feature: "fraud-investigator", label: "Investigate fraud", endpoint: "/api/fraud/investigate" },
+  { feature: "compliance-swarm", label: "Review compliance", endpoint: "/api/policies/scan" },
+  { feature: "insights-swarm", label: "Sweep insights", endpoint: "/api/insights/feed" },
+];
+
 function relativeTime(iso: string): string {
-  // agent_runs.created_at is UTC "YYYY-MM-DD HH:MM:SS"
   const then = new Date(iso.replace(" ", "T") + "Z").getTime();
   if (Number.isNaN(then)) return "";
   const s = Math.max(0, Math.round((Date.now() - then) / 1000));
@@ -31,7 +42,32 @@ export function AgentActivity() {
   const { data, mutate, isLoading } = useSWR("/api/agents", fetcher, { refreshInterval: 5000 });
   const runs: any[] = data?.runs ?? [];
 
-  // group by feature, preserving newest-first order
+  const [demo, setDemo] = useState<{ feature: SwarmFeature; running: boolean; runKey: number } | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  async function runDemo(feature: SwarmFeature, endpoint: string) {
+    if (busy) return;
+    setBusy(true);
+    setDemo((d) => ({ feature, running: true, runKey: (d?.runKey ?? 0) + 1 }));
+    try {
+      // Fire the real swarm; hold the animation for a readable minimum either way.
+      const [res] = await Promise.all([
+        fetch(endpoint, { method: "POST" }).then((r) => r.json()).catch(() => null),
+        new Promise((r) => setTimeout(r, 2200)),
+      ]);
+      setDemo((d) => (d ? { ...d, running: false } : d));
+      await mutate();
+      if (res && res.ok === false) toast.warning("Run completed with fallback (sidecar offline?)");
+      else toast.success(`${FEATURE_META[feature].label} run complete`);
+    } catch {
+      setDemo((d) => (d ? { ...d, running: false } : d));
+      toast.error("Run failed");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  // group recent runs by feature, preserving newest-first order
   const groups = new Map<string, any[]>();
   for (const r of runs) {
     if (!groups.has(r.feature)) groups.set(r.feature, []);
@@ -40,6 +76,37 @@ export function AgentActivity() {
 
   return (
     <div className="space-y-6">
+      {/* Live demo runner */}
+      <SectionCard title="Live demo" description="Trigger a swarm and watch the agents work. Fires the real endpoint — the activity log below updates when it finishes.">
+        <div className="flex flex-wrap gap-2">
+          {DEMOS.map((d) => {
+            const Icon = FEATURE_META[d.feature].icon;
+            const isActive = busy && demo?.feature === d.feature;
+            return (
+              <button
+                key={d.feature}
+                onClick={() => runDemo(d.feature, d.endpoint)}
+                disabled={busy}
+                className={cn(
+                  "inline-flex items-center gap-1.5 rounded-md border px-3 py-2 text-xs font-medium transition-colors disabled:opacity-50",
+                  isActive ? "border-primary bg-primary/10 text-primary" : "border-border hover:bg-secondary"
+                )}
+              >
+                {isActive ? <Sparkles className="h-3.5 w-3.5 animate-pulse" /> : <Play className="h-3.5 w-3.5" />}
+                <Icon className="h-3.5 w-3.5" /> {d.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {demo && (
+          <div className="mt-4">
+            <AgentSwarmVisualizer feature={demo.feature} running={demo.running} runKey={demo.runKey} />
+          </div>
+        )}
+      </SectionCard>
+
+      {/* Recent agent runs */}
       <SectionCard
         title="Agent activity"
         description="Every role-agent run across the Brim Agents swarm — debate, investigation, review, and sweep — newest first."
@@ -58,9 +125,7 @@ export function AgentActivity() {
           <div className="flex flex-col items-center gap-2 py-10 text-center">
             <Sparkles className="h-8 w-8 text-primary" />
             <p className="text-sm font-medium text-neutral-900">No agent runs yet</p>
-            <p className="text-xs text-muted-foreground">
-              Trigger a debate, fraud investigation, compliance scan, or insights sweep — the agents will show up here.
-            </p>
+            <p className="text-xs text-muted-foreground">Hit a demo button above — the agents will show up here.</p>
           </div>
         ) : (
           <div className="space-y-5">
