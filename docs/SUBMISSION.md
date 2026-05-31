@@ -9,6 +9,9 @@ AI-powered expense intelligence for SMBs. Built for **Brim Financial x MPC Hacks
 
 The Brim challenge: SMBs generate thousands of card transactions a month but have no way to
 understand their own spending. Brim wanted to change that, and asked us to "make the data talk."
+Concretely the brief asked for four capabilities — **talk to your data**, **digitize & enforce
+policy**, **run pre-approvals**, and **generate expense reports** — all on the provided
+company-card dataset. We built all four end-to-end on the real data, then extended well past them.
 
 Two things shaped our take. First, we wanted a finance manager (not an analyst) to get answers,
 catch policy breaches, approve spend, and file reports without touching a spreadsheet. Second,
@@ -40,9 +43,13 @@ On top of the four required features it adds: anomaly & fraud detection, vendor-
 savings, **probabilistic Monte Carlo forecasting** (p10/p50/p90 + budget-overrun probability with
 an interactive what-if slider), per-category/card **volatility** scores, receipt matching (AI
 Vision OCR), per-category budgets, recurring-spend detection, cross-border FX exposure, spend
-profiles, and an AI insights feed - all on an animated bento dashboard. The chat also gives
-**honest disambiguation** when you reference a value that isn't in the data (no fabricated
-confidence). Two things set it apart: a **multi-agent reasoning layer** (a Python LangGraph swarm)
+profiles, and an AI insights feed - all on an animated bento dashboard with a **sphinx.ai-inspired**
+minimal, motion-led aesthetic (scroll-spy navigation, frosted section badges, corner-bracket cards,
+per-character blur-text reveals) rebuilt in Brim's palette. The chat also gives **honest
+disambiguation** when you reference a value that isn't in the data (no fabricated confidence), and
+**remembers across sessions** — a **Supermemory** knowledge-graph stores each finished Q&A and
+semantically recalls the relevant past turns before answering. Two things set it apart: a
+**multi-agent reasoning layer** (a Python LangGraph swarm)
 and **on-chain tamper-proof audit anchoring** (Solana). Critical compliance alerts can even place
 an **interactive phone call** (ElevenLabs + Twilio).
 
@@ -73,6 +80,19 @@ makes the output trustworthy and makes AI failures non-fatal.
   approved record into a devnet Memo transaction (server keypair, server-only), with a Verify
   action that re-hashes the live record to detect tampering.
 - **Voice alerts:** ElevenLabs Conversational AI over Twilio for critical alerts.
+- **Cross-session memory (Supermemory knowledge-graph):** `lib/supermemory.ts` wraps Supermemory's
+  API — after each Ask-AI turn we store the Q&A under a container tag (`POST /v3/documents`), and
+  before the next question we semantically recall the most relevant past turns (`POST /v3/search`)
+  and inject them into the system prompt, so the assistant carries context across sessions. It's
+  the same knowledge-graph idea applied to a finance chat: turns become nodes, recall pulls the
+  related ones. Best-effort and key-gated (`SUPERMEMORY_API_KEY`) — no key → it cleanly no-ops and
+  the chat behaves exactly as before.
+- **Design (sphinx.ai-inspired):** we studied sphinx.ai's product aesthetic and adapted its
+  structure and motion — a scroll-spy accordion, frosted `SectionBadge` pills, `CornerCard`
+  L-bracket frames, per-character `BlurText` reveals, and arrow-clip CTAs — but kept Brim's own
+  teal/cyan/cream palette rather than sphinx's colors (`components/ui/scroll-spy.tsx`,
+  `section-badge.tsx`, `corner-card.tsx`, `arrow-clip.tsx`, `components/blur-text.tsx`). The goal
+  was sphinx's "minimal but alive" feel on dense finance data without losing information density.
 - **Landing:** a cinematic scroll-reveal hero with a Spline 3D scene (`@splinetool/react-spline`,
   `three`), GSAP, and a particle canvas.
 
@@ -142,6 +162,9 @@ ingest; `zod` for validation.
 **Multi-agent sidecar (Python):** FastAPI, Uvicorn, **LangGraph**, `langchain-google-genai`,
 `langchain-openai`, Pydantic, **numpy** (Monte Carlo forecast simulation); `uv` for env/deps; pytest.
 
+**Memory:** **Supermemory** (`api.supermemory.ai/v3`) — knowledge-graph store + semantic recall
+giving the Ask-AI chat cross-session memory.
+
 **Blockchain:** **Solana** `@solana/web3.js` + `@solana/spl-memo` (devnet Memo anchoring, Node
 `crypto` for hashing).
 
@@ -150,6 +173,9 @@ ingest; `zod` for validation.
 **UI:** Tailwind CSS + `tailwindcss-animate`, shadcn / Radix UI (`@radix-ui/*`), `lucide-react`
 icons, **Recharts**, `@tanstack/react-table`, `sonner` (toasts), `next-themes`, `swr`,
 `react-markdown` + `remark-gfm`, `class-variance-authority` + `clsx` + `tailwind-merge`.
+
+**Design inspiration:** **sphinx.ai** (minimal structure + motion: scroll-spy, frosted badges,
+corner-bracket cards, blur-text), adapted to Brim's palette.
 
 **Landing / 3D:** `@splinetool/react-spline` + `@splinetool/runtime`, `three`,
 `@sparkjsdev/spark` (Gaussian-splat sky), **GSAP**.
@@ -163,9 +189,9 @@ icons, **Recharts**, `@tanstack/react-table`, `sonner` (toasts), `next-themes`, 
 | Criterion | Score (self-assessed) | Evidence |
 |---|---|---|
 | **Required features /6** | ~5-6 | All four verified live on real data: chat (function-calling loop + auto-viz + follow-ups), compliance (6 digitized rules, split-charge detection, AI severity, repeat offenders), pre-approval (full context + AI rec + one-click), reports (jurisdiction+month grouping, AI CFO summary, sign-off). |
-| **Optional / creativity / ambition /6** | ~5-6 | 10+ optionals (anomaly, fraud, vendors, forecast, recurring, FX, profiles, receipts via Vision OCR, budgets, insights feed) **plus** two things few will have: a multi-agent LangGraph swarm and on-chain (Solana) tamper-proof audit anchoring; plus voice-call alerts. |
+| **Optional / creativity / ambition /6** | ~5-6 | 10+ optionals (anomaly, fraud, vendors, forecast, recurring, FX, profiles, receipts via Vision OCR, budgets, insights feed) **plus** two things few will have: a multi-agent LangGraph swarm and on-chain (Solana) tamper-proof audit anchoring; plus voice-call alerts, **Monte Carlo** probabilistic forecasting with what-if levers, and a **Supermemory** knowledge-graph giving the chat cross-session memory. |
 | **AI depth /4** | ~4 | Beyond single prompts: a 5-step chat tool-loop, and real agentic graphs (debate, per-suspect fraud investigators, domain reviewers + challenger, multi-lens insights + ranker) with parallel fan-out and joins, all with graceful fallback. |
-| **UI / UX /4** | ~3.5-4 | Icon nav, color-coded severity, one-click actions, auto-rendered charts, animated bento insights, cinematic landing. Built for a non-technical finance manager; visualizations that clarify. |
+| **UI / UX /4** | ~3.5-4 | Icon nav, color-coded severity, one-click actions, auto-rendered charts, animated bento insights, cinematic landing, and a **sphinx.ai-inspired** minimal aesthetic (scroll-spy, frosted badges, blur-text) in Brim's palette. Built for a non-technical finance manager; visualizations that clarify. |
 
 **Known risk:** the brief assumes employees/departments; this dataset has neither (0 such columns,
 9 cards). The app reframes around card/category/jurisdiction and explains it. The demo narration

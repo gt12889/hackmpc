@@ -298,6 +298,7 @@ POST `/api/policies/scan` -> `runScan()` (deterministic rules + split detection)
 | `reports.ts` | Jurisdiction-period grouping, line items, AI CFO summaries |
 | `anomaly.ts` / `fraud.ts` / `vendors.ts` / `forecast.ts` / `recurring.ts` / `fx.ts` / `profiles.ts` | Insights engines (deterministic). `profiles.ts` also computes per-category/card volatility (cv) |
 | `forecast-mc.ts` / `stats.ts` | In-process Monte Carlo fallback + risk factors; shared stats (quantile, percentiles, cv) |
+| `supermemory.ts` | Supermemory knowledge-graph: store/recall Ask-AI turns for cross-session memory (best-effort, key-gated) |
 | `insights-agent.ts` | AI insights feed (batched) |
 | `receipts.ts` / `budgets.ts` | Receipt OCR matching; budget burn-down |
 | `notifications.ts` / `voice-alert.ts` / `settings.ts` | Alert ledger, ElevenLabs/Twilio calls, feature toggles |
