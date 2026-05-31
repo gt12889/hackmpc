@@ -74,6 +74,7 @@ const COLS = {
 
 export type IngestResult = {
   added: number; // rows inserted this call
+  skipped: number; // duplicate rows skipped (append mode)
   count: number; // total transactions in DB after ingest
   cards: number;
   start: string | null;
@@ -81,6 +82,11 @@ export type IngestResult = {
   total: number;
   byCategory: { category: string; n: number; spend: number }[];
 };
+
+// Identity of a charge for dedup: card + date + merchant + amount + direction.
+function dedupKey(rec: any): string {
+  return `${rec.transaction_code}|${rec.txn_date}|${rec.merchant_name}|${rec.amount_cad}|${rec.direction}`;
+}
 
 /**
  * Load raw row objects into the DB.
@@ -120,7 +126,7 @@ export function ingestRows(
   if (!rows.length) {
     const r = db.prepare(`SELECT MIN(txn_date) a, MAX(txn_date) b, COUNT(*) n, ROUND(SUM(amount_cad)) total FROM transactions`).get() as any;
     const c = db.prepare(`SELECT COUNT(*) n FROM cards`).get() as any;
-    return { added: 0, count: r.n ?? 0, cards: c.n ?? 0, start: r.a, end: r.b, total: r.total ?? 0, byCategory: [] };
+    return { added: 0, skipped: 0, count: r.n ?? 0, cards: c.n ?? 0, start: r.a, end: r.b, total: r.total ?? 0, byCategory: [] };
   }
 
   // Cards first (FK target). Append keeps existing cards; replace rebuilds them.
@@ -154,6 +160,19 @@ export function ingestRows(
       @state_province, @conversion_rate, @is_cross_border, @is_round_number
     )`);
 
+  // Dedup (append mode): seed with existing charges, then skip exact repeats —
+  // including duplicates within the uploaded file itself.
+  const seen = new Set<string>();
+  if (append) {
+    for (const e of db
+      .prepare(`SELECT transaction_code, txn_date, merchant_name, amount_cad, direction FROM transactions`)
+      .all() as any[]) {
+      seen.add(dedupKey(e));
+    }
+  }
+
+  let added = 0;
+  let skipped = 0;
   const insertAll = db.transaction((records: any[]) => {
     for (const r of records) {
       const p = buildPicker(r);
@@ -174,7 +193,7 @@ export function ingestRows(
       const td = toISODate(p(COLS.txnDate));
       const pd = toISODate(p(COLS.postDate));
 
-      insTxn.run({
+      const rec = {
         transaction_code: code || "UNKNOWN",
         description: String(p(COLS.desc) ?? "").trim(),
         raw_category: String(p(COLS.rawCat) ?? "").trim(),
@@ -198,7 +217,15 @@ export function ingestRows(
         conversion_rate: isNaN(rate) ? null : rate,
         is_cross_border: country && country !== "CAN" ? 1 : 0,
         is_round_number: amountCad >= 1000 && amountCad % 1000 === 0 ? 1 : 0,
-      });
+      };
+
+      if (append) {
+        const k = dedupKey(rec);
+        if (seen.has(k)) { skipped++; continue; }
+        seen.add(k);
+      }
+      insTxn.run(rec);
+      added++;
     }
   });
   insertAll(rows);
@@ -209,5 +236,5 @@ export function ingestRows(
     .all() as any[];
   const totalCards = (db.prepare(`SELECT COUNT(*) n FROM cards`).get() as any).n ?? 0;
 
-  return { added: rows.length, count: range.n ?? 0, cards: totalCards, start: range.a, end: range.b, total: range.total ?? 0, byCategory };
+  return { added, skipped, count: range.n ?? 0, cards: totalCards, start: range.a, end: range.b, total: range.total ?? 0, byCategory };
 }

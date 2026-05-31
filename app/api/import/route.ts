@@ -29,26 +29,33 @@ export async function POST(req: NextRequest) {
 
     const db = getDb();
     const result = ingestRows(db, rows, { mode: "append" });
-    if (!result.added) {
+    if (!result.added && !result.skipped) {
       return NextResponse.json({ error: "No transactions could be read — check the column headers." }, { status: 400 });
     }
 
-    // Rule-based regeneration (fast, no AI).
-    const scan = runScan();
-    const requests = synthesizeRequests();
-    const reports = generateReports(12);
-
-    // AI enrichment — best effort so a quota limit never fails the upload.
+    // Only re-derive downstream data if something actually changed.
+    let scan = { total: result.added ? 0 : -1 } as { total: number };
+    let requests = 0;
+    let reports = 0;
     const ai = { severity: 0, recommendations: 0, summaries: 0 };
-    try { ai.severity = await adjustSeverityWithAI(); } catch {}
-    try { ai.recommendations = await generateRecommendations(); } catch {}
-    try { ai.summaries = await summarizeReports(); } catch {}
+    if (result.added > 0) {
+      scan = runScan();
+      requests = synthesizeRequests();
+      reports = generateReports(12);
+      // AI enrichment — best effort so a quota limit never fails the upload.
+      try { ai.severity = await adjustSeverityWithAI(); } catch {}
+      try { ai.recommendations = await generateRecommendations(); } catch {}
+      try { ai.summaries = await summarizeReports(); } catch {}
+    }
+
+    // Report the current open-violation count (after any rescan).
+    const violations = (getDb().prepare(`SELECT COUNT(DISTINCT COALESCE(group_key, CAST(id AS TEXT))) n FROM violations WHERE status='open'`).get() as any).n ?? 0;
 
     return NextResponse.json({
       ok: true,
       fileName: file.name,
       ...result,
-      violations: scan.total,
+      violations,
       requests,
       reports,
       ai,

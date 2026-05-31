@@ -29,7 +29,11 @@ export function ImportDialog() {
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || "Upload failed");
       setResult(data);
-      toast.success(`Added ${data.added.toLocaleString()} transactions`);
+      if (data.added > 0) {
+        toast.success(`Added ${data.added.toLocaleString()} transactions${data.skipped ? ` · ${data.skipped} duplicates skipped` : ""}`);
+      } else {
+        toast.info(`No new transactions — all ${data.skipped.toLocaleString()} rows were already in your data`);
+      }
       router.refresh();
     } catch (e: any) {
       toast.error(e.message);
@@ -92,7 +96,10 @@ export function ImportDialog() {
               <div className="mt-5 space-y-4">
                 <div className="flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/10 p-3 text-sm">
                   <CheckCircle2 className="h-5 w-5 text-primary" />
-                  <span>Added <b>{result.added.toLocaleString()}</b> transactions from {result.fileName} — <b>{result.count.toLocaleString()}</b> total</span>
+                  <span>
+                    Added <b>{result.added.toLocaleString()}</b> from {result.fileName} — <b>{result.count.toLocaleString()}</b> total
+                    {result.skipped > 0 && <span className="text-muted-foreground"> · {result.skipped.toLocaleString()} duplicate{result.skipped === 1 ? "" : "s"} skipped</span>}
+                  </span>
                 </div>
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   <Stat label="Total spend" value={formatCAD(result.total, { compact: true })} />
