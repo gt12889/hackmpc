@@ -11,27 +11,48 @@ export function AlertSettings() {
   const [msg, setMsg] = useState<string | null>(null);
 
   async function load() {
-    const res = await fetch("/api/settings/alerts");
-    const d = await res.json();
-    setEnabled(d.enabled); setConfigured(d.configured);
+    try {
+      const res = await fetch("/api/settings/alerts");
+      const d = await res.json();
+      setEnabled(d.enabled);
+      setConfigured(d.configured);
+    } catch {
+      /* leave defaults; controls stay disabled until a successful load */
+    }
   }
   useEffect(() => { load(); }, []);
 
   async function toggle() {
     setBusy(true);
-    const res = await fetch("/api/settings/alerts", {
-      method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ enabled: !enabled }),
-    });
-    const d = await res.json();
-    setEnabled(d.enabled); setBusy(false);
+    setMsg(null);
+    try {
+      const res = await fetch("/api/settings/alerts", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ enabled: !enabled }),
+      });
+      const d = await res.json();
+      if (res.ok) setEnabled(d.enabled);
+      else setMsg("Couldn't update the setting.");
+    } catch {
+      setMsg("Couldn't reach the server.");
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function testCall() {
-    setBusy(true); setMsg(null);
-    const res = await fetch("/api/notifications/test-call", { method: "POST" });
-    const d = await res.json();
-    setMsg(res.ok ? "Test call placed — your phone should ring." : `Test call failed: ${d.error ?? "unknown"}`);
-    setBusy(false);
+    setBusy(true);
+    setMsg(null);
+    try {
+      const res = await fetch("/api/notifications/test-call", { method: "POST" });
+      const d = await res.json();
+      setMsg(res.ok ? "Test call placed — your phone should ring." : `Test call failed: ${d.error ?? "unknown"}`);
+    } catch {
+      setMsg("Test call failed: could not reach the server.");
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
@@ -41,6 +62,8 @@ export function AlertSettings() {
         Phone alerts
       </span>
       <button
+        role="switch"
+        aria-checked={enabled}
         onClick={toggle}
         disabled={busy || !configured}
         className={cn("relative h-5 w-9 rounded-full transition-colors", enabled ? "bg-emerald-500" : "bg-secondary", (busy || !configured) && "opacity-50")}
