@@ -161,6 +161,20 @@ function detectForRule(rule: Rule): any[] {
       );
     }
 
+    case "missing_receipt": {
+      // Material charge over threshold with no matched receipt (policy: receipts required).
+      const t = rule.threshold_amount ?? 1000;
+      const rows = db
+        .prepare(
+          `SELECT id, amount_cad, merchant_name, txn_date FROM transactions
+           WHERE ${NON_OP} AND amount_cad >= ?
+             AND id NOT IN (SELECT transaction_id FROM receipts WHERE transaction_id IS NOT NULL)
+           ORDER BY amount_cad DESC LIMIT 60`
+        )
+        .all(t) as any[];
+      return rows.map((r) => base(r.id, r.amount_cad, r.merchant_name, r.txn_date));
+    }
+
     case "tip_limit":
       // Requires receipt/tip-line data not present in card transactions — informational only.
       return [];

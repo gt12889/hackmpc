@@ -71,6 +71,15 @@ const RULES: Seed[] = [
     severity_base: "medium",
     policy_clause: "Use best efforts to submit receipts within the current month; manage costs against budget.",
   },
+  {
+    name: "Receipt Required (High-Value)",
+    rule_type: "missing_receipt",
+    description: "Material charges with no matching receipt on file — receipts are required before reimbursement.",
+    threshold_amount: 1000,
+    window: "transaction",
+    severity_base: "medium",
+    policy_clause: "All expenses over $50 ... receipts are required before any expense is reimbursed.",
+  },
 ];
 
 function main() {

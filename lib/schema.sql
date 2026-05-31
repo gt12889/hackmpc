@@ -151,3 +151,30 @@ CREATE TABLE IF NOT EXISTS chat_messages (
   created_at TEXT DEFAULT (datetime('now'))
 );
 CREATE INDEX IF NOT EXISTS idx_msg_session ON chat_messages(session_id);
+
+-- ============ RECEIPTS (image upload + AI Vision OCR -> match to a transaction) ============
+CREATE TABLE IF NOT EXISTS receipts (
+  id                 INTEGER PRIMARY KEY,
+  transaction_id     INTEGER REFERENCES transactions(id),  -- matched txn (null = unmatched)
+  source             TEXT DEFAULT 'synthetic',  -- 'synthetic' | 'upload'
+  image_path         TEXT,
+  extracted_merchant TEXT,
+  extracted_date     TEXT,
+  extracted_amount   REAL,
+  extracted_tax      REAL,
+  confidence         REAL,
+  match_status       TEXT DEFAULT 'matched',     -- 'matched' | 'unmatched'
+  created_at         TEXT DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_receipt_txn ON receipts(transaction_id);
+
+-- ============ BUDGETS (per category/card monthly limits) ============
+CREATE TABLE IF NOT EXISTS budgets (
+  id           INTEGER PRIMARY KEY,
+  scope        TEXT NOT NULL DEFAULT 'category',  -- 'category' | 'card'
+  scope_value  TEXT NOT NULL,                     -- e.g. 'Fuel' or '3001'
+  period       TEXT NOT NULL DEFAULT 'month',
+  limit_amount REAL NOT NULL,
+  created_at   TEXT DEFAULT (datetime('now')),
+  UNIQUE(scope, scope_value, period)
+);

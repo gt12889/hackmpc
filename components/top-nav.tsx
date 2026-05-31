@@ -9,6 +9,8 @@ import {
   FileText,
   Sparkles,
   Home,
+  ReceiptText,
+  Wallet,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -21,6 +23,8 @@ const NAV_ITEMS: Item[] = [
   { href: "/compliance", label: "Compliance", icon: ShieldCheck },
   { href: "/approvals", label: "Approvals", icon: CheckSquare },
   { href: "/reports", label: "Reports", icon: FileText },
+  { href: "/receipts", label: "Receipts", icon: ReceiptText },
+  { href: "/budgets", label: "Budgets", icon: Wallet },
   { href: "/insights", label: "Insights", icon: Sparkles },
 ];
 

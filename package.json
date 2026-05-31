@@ -11,9 +11,11 @@
     "type-check": "tsc --noEmit",
     "etl": "tsx scripts/etl.ts",
     "seed:policies": "tsx scripts/seed-policies.ts",
-    "db:reset": "rm -f .data/hackmpc.db .data/hackmpc.db-wal .data/hackmpc.db-shm && tsx scripts/etl.ts && tsx scripts/seed-policies.ts && tsx scripts/seed-approvals.ts && tsx scripts/seed-reports.ts",
+    "db:reset": "rm -f .data/hackmpc.db .data/hackmpc.db-wal .data/hackmpc.db-shm && tsx scripts/etl.ts && tsx scripts/seed-receipts.ts && tsx scripts/seed-budgets.ts && tsx scripts/seed-policies.ts && tsx scripts/seed-approvals.ts && tsx scripts/seed-reports.ts",
     "seed:approvals": "tsx scripts/seed-approvals.ts",
-    "seed:reports": "tsx scripts/seed-reports.ts"
+    "seed:reports": "tsx scripts/seed-reports.ts",
+    "seed:receipts": "tsx scripts/seed-receipts.ts",
+    "seed:budgets": "tsx scripts/seed-budgets.ts"
   },
   "dependencies": {
     "@google/genai": "^2.7.0",
