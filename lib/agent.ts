@@ -160,7 +160,11 @@ export function hasApiKey(): boolean {
   return hasKey();
 }
 
-export async function runAgent(history: ChatTurn[], userMessage: string): Promise<AgentResult> {
+export async function runAgent(
+  history: ChatTurn[],
+  userMessage: string,
+  opts: { recall?: string[] } = {}
+): Promise<AgentResult> {
   const ai = getClient();
   if (!ai) {
     return {
@@ -170,6 +174,12 @@ export async function runAgent(history: ChatTurn[], userMessage: string): Promis
       followUps: [],
     };
   }
+
+  // Cross-session memory recalled from Supermemory (if any) — appended to the
+  // system instruction so the assistant can carry context between sessions.
+  const recallBlock = opts.recall && opts.recall.length
+    ? `\n\nRELEVANT CONTEXT FROM THIS USER'S EARLIER CONVERSATIONS (use only if the user's question relates to it; never treat it as the current dataset):\n- ${opts.recall.join("\n- ")}`
+    : "";
 
   const contents: any[] = history.map((t) => ({ role: t.role, parts: [{ text: t.text }] }));
   contents.push({ role: "user", parts: [{ text: userMessage }] });
@@ -187,7 +197,7 @@ export async function runAgent(history: ChatTurn[], userMessage: string): Promis
       {
         contents,
         config: {
-          systemInstruction: buildSystemInstruction(),
+          systemInstruction: buildSystemInstruction() + recallBlock,
           tools: [{ functionDeclarations: FUNCTION_DECLARATIONS as any }],
           temperature: 0.2,
         },
@@ -226,11 +236,20 @@ export async function runAgent(history: ChatTurn[], userMessage: string): Promis
         if (result.ok) {
           lastViz = { tool: name, suggested_viz: result.suggested_viz, data: result.data, meta: result.meta };
         }
+        const dis = result.meta?.disambiguation as { field: string; requested: string; suggestions: string[] } | undefined;
         responseParts.push({
           functionResponse: {
             name,
             response: result.ok
-              ? { result: result.data, meta: result.meta }
+              ? {
+                  result: result.data,
+                  meta: result.meta,
+                  ...(dis
+                    ? {
+                        note: `No ${dis.field} "${dis.requested}" exists in the data. Tell the user it isn't a real ${dis.field} and ask if they meant one of: ${dis.suggestions.join(", ")}. Do NOT invent figures for the missing value.`,
+                      }
+                    : {}),
+                }
               : { error: result.error },
           },
         });

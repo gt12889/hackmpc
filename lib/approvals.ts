@@ -1,6 +1,7 @@
 import { getDb } from "./db";
 import { getClient, generateWithFallback } from "./gemini";
 import { POLICY_SUMMARY } from "./compliance";
+import { cardVolatility } from "./profiles";
 
 // AI Pre-Approval Workflow. Each pending request shows the approver everything
 // they need - the requesting card's spend history, the category budget status,
@@ -149,10 +150,13 @@ export function buildRequestPayload(db: import("better-sqlite3").Database, r: an
     )
     .all(r.transaction_code, `%${(r.merchant_name || "").slice(0, 12)}%`, r.transaction_id ?? 0) as MerchantHistoryRow[];
   const card = db.prepare(`SELECT label, cardholder_alias FROM cards WHERE transaction_code=?`).get(r.transaction_code) as any;
+  const vol = cardVolatility(r.transaction_code, db);
 
   return {
     id: r.id,
     card: r.transaction_code,
+    card_volatility: vol.volatility,
+    spend_volatility: vol.vsBaseline >= 1.5 ? `${vol.vsBaseline}× baseline (volatile)` : vol.vsBaseline <= 0.6 ? `${vol.vsBaseline}× baseline (steady)` : `${vol.vsBaseline}× baseline`,
     cardholder: card?.cardholder_alias ?? card?.label,
     merchant: r.merchant_name,
     category: r.category,

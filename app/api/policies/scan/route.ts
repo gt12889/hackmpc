@@ -1,5 +1,6 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { runScan, adjustSeverityWithAI } from "@/lib/compliance";
+import { contextById } from "@/lib/compliance-contexts";
 import { reviewViolationsSwarm } from "@/lib/compliance-swarm";
 import { agentsEnabled } from "@/lib/agent-service";
 import { getDb } from "@/lib/db";
@@ -15,9 +16,11 @@ export const dynamic = "force-dynamic";
 const ANCHOR_CAP_PER_SCAN = 5;
 
 // Re-scan all rules, apply AI severity, then sync notifications + place alert calls.
-export async function POST() {
+export async function POST(req: NextRequest) {
   try {
-    const scan = runScan();
+    const body = await req.json().catch(() => ({}));
+    const ctx = contextById(body?.context);
+    const scan = runScan({ multiplier: ctx.multiplier });
     // Multi-agent reviewer swarm (domain reviewers → false-positive challenger)
     // when enabled; reviewViolationsSwarm itself falls back to the single call.
     const adjusted = agentsEnabled() ? await reviewViolationsSwarm() : { reviewed: await adjustSeverityWithAI(), mode: "single" as const };
@@ -39,6 +42,7 @@ export async function POST() {
     return NextResponse.json({
       ok: true,
       scan,
+      context: ctx.id,
       adjusted,
       notifications: { created: created.length },
       calls,

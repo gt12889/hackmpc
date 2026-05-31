@@ -17,6 +17,7 @@ import { Reveal } from "@/components/reveal";
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import { ShowMore, ExpandSection } from "@/components/show-more";
 import { AlertSettings } from "@/components/compliance/alert-settings";
+import { COMPLIANCE_CONTEXTS } from "@/lib/compliance-contexts";
 import { AnchorBadge } from "@/components/solana/anchor-badge";
 
 const fetcher = (u: string) => fetch(u).then((r) => r.json());
@@ -48,6 +49,7 @@ export function SeverityBadge({ severity, ai }: { severity: string; ai?: boolean
 export function ComplianceView({ initial }: { initial: any }) {
   const { data, mutate, isValidating } = useSWR("/api/policies", fetcher, { fallbackData: initial });
   const [busy, setBusy] = useState(false);
+  const [context, setContext] = useState("normal");
 
   /** Accordion open state for violation rows */
   const [openIds, setOpenIds] = useState<Set<number | string>>(new Set());
@@ -70,7 +72,11 @@ export function ComplianceView({ initial }: { initial: any }) {
     setBusy(true);
     toast.loading("Re-scanning with AI review…", { id: "scan" });
     try {
-      const r = await fetch("/api/policies/scan", { method: "POST" }).then((x) => x.json());
+      const r = await fetch("/api/policies/scan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ context }),
+      }).then((x) => x.json());
       await mutate();
       toast.success(`Scan complete - ${r.scan.total} flags, AI reviewed ${r.adjusted}`, { id: "scan" });
     } catch {
@@ -135,10 +141,23 @@ export function ComplianceView({ initial }: { initial: any }) {
           title="Policy Rules"
           description="Digitized from the Brim expense policy"
           action={
+            <div className="flex items-center gap-2">
+            <select
+              value={context}
+              onChange={(e) => setContext(e.target.value)}
+              disabled={busy || isValidating}
+              title="Compliance context — scales rule thresholds before scanning"
+              className="rounded-full border border-border bg-card px-3 py-1.5 text-xs text-muted-foreground hover:border-primary/40 focus:outline-none disabled:opacity-50"
+            >
+              {COMPLIANCE_CONTEXTS.map((c) => (
+                <option key={c.id} value={c.id} title={c.description}>{c.label}</option>
+              ))}
+            </select>
             <button onClick={rescan} disabled={busy || isValidating} className="inline-flex items-center gap-1.5 rounded-full border border-border px-5 py-1.5 text-xs hover:bg-secondary disabled:opacity-50">
               <RefreshCw className={cn("h-3.5 w-3.5", busy && "animate-spin")} />
               Re-scan
             </button>
+            </div>
           }
         >
           <div className="space-y-2.5">

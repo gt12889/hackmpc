@@ -232,3 +232,30 @@ export function getDateBounds(): { min: string; max: string } {
   const db = getDb();
   return db.prepare(`SELECT MIN(txn_date) min, MAX(txn_date) max FROM transactions`).get() as any;
 }
+
+/** The real category / card / state values present in the data - used to detect
+ *  when a chat filter references something that doesn't exist (disambiguation). */
+export function knownValues(): { categories: string[]; cards: string[]; states: string[] } {
+  const db = getDb();
+  const cards = (db.prepare(`SELECT DISTINCT transaction_code c FROM transactions WHERE transaction_code IS NOT NULL ORDER BY c`).all() as any[]).map((r) => r.c);
+  const states = (db.prepare(`SELECT DISTINCT state_province s FROM transactions WHERE state_province IS NOT NULL AND state_province != '' ORDER BY s`).all() as any[]).map((r) => r.s);
+  return { categories: getCategories(), cards, states };
+}
+
+/** Closest real values to a requested one: substring matches first, then token overlap. */
+export function suggestValue(requested: string, known: string[], limit = 3): string[] {
+  const q = String(requested || "").trim().toLowerCase();
+  if (!q) return [];
+  const contains = known.filter((k) => {
+    const kl = k.toLowerCase();
+    return kl.includes(q) || q.includes(kl);
+  });
+  if (contains.length) return contains.slice(0, limit);
+  const qtok = new Set(q.split(/[^a-z0-9]+/).filter(Boolean));
+  return known
+    .map((k) => ({ k, overlap: k.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean).filter((t) => qtok.has(t)).length }))
+    .filter((s) => s.overlap > 0)
+    .sort((a, b) => b.overlap - a.overlap)
+    .slice(0, limit)
+    .map((s) => s.k);
+}

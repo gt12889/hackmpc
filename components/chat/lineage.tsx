@@ -194,6 +194,16 @@ function Step({ t, index }: { t: ToolCallTrace; index: number }) {
           </tbody>
         </table>
       )}
+
+      {t.meta?.disambiguation && (
+        <div className="mt-1.5 flex items-start gap-1 rounded bg-primary/5 px-2 py-1 text-[11px] text-primary">
+          <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" />
+          <span>
+            no {t.meta.disambiguation.field} &ldquo;{t.meta.disambiguation.requested}&rdquo; in the data — did you mean{" "}
+            {t.meta.disambiguation.suggestions.slice(0, 3).join(", ")}?
+          </span>
+        </div>
+      )}
     </li>
   );
 }

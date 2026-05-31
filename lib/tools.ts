@@ -6,6 +6,8 @@ import {
   topMerchants,
   listTransactions,
   compareGroups,
+  knownValues,
+  suggestValue,
   type Filters,
   type GroupDim,
   type Metric,
@@ -166,7 +168,36 @@ function labelFromFilters(f: any): string | null {
 }
 
 /** Validate + execute a tool call. Errors are returned (not thrown) so the model can recover. */
+/** If a filter references a category/state/card that isn't in the data, return a
+ *  disambiguation hint with the closest real values. Honest (no fabricated score). */
+function checkDisambiguation(filters: any): { field: string; requested: string; suggestions: string[] } | null {
+  if (!filters) return null;
+  const kv = knownValues();
+  const checks: [string, any, string[]][] = [
+    ["category", filters.category, kv.categories],
+    ["state", filters.state, kv.states],
+    ["card", filters.card, kv.cards],
+  ];
+  for (const [field, requested, known] of checks) {
+    if (requested && known.length && !known.some((k) => k.toLowerCase() === String(requested).toLowerCase())) {
+      const close = suggestValue(String(requested), known);
+      // Always surface options for an unknown value: closest matches, else a sample.
+      return { field, requested: String(requested), suggestions: close.length ? close : known.slice(0, 6) };
+    }
+  }
+  return null;
+}
+
+/** Validate + execute a tool call, then attach a disambiguation hint when a filter
+ *  value doesn't exist in the data (so the agent can ask the user to confirm). */
 export function runTool(name: string, rawArgs: any): ToolResult {
+  const res = execTool(name, rawArgs);
+  const dis = checkDisambiguation(rawArgs?.filters);
+  if (dis) res.meta = { ...(res.meta || {}), disambiguation: dis };
+  return res;
+}
+
+function execTool(name: string, rawArgs: any): ToolResult {
   try {
     switch (name) {
       case "aggregate_spend": {

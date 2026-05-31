@@ -668,12 +668,47 @@ function VendorTab({ v }: { v: any }) {
 function ForecastTab({ f }: { f: any }) {
   const trendIcon = { rising: ArrowUpRight, falling: ArrowDownRight, flat: Minus };
   const trendTone = { rising: "text-primary", falling: "text-primary", flat: "text-muted-foreground" };
+
+  // Monte Carlo distribution from the sidecar (per category). Falls back to the
+  // deterministic linReg view when the sidecar is unavailable.
+  const [mc, setMc] = useState<Record<string, any>>({});
+  const [available, setAvailable] = useState(false);
+  const [multipliers, setMultipliers] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    let cancelled = false;
+    const t = setTimeout(async () => {
+      try {
+        const d = await fetch("/api/forecast/montecarlo", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ multipliers }),
+        }).then((r) => r.json());
+        if (cancelled) return;
+        if (d.available) {
+          setMc(Object.fromEntries(d.results.map((r: any) => [r.category, r])));
+          setAvailable(true);
+        } else {
+          setAvailable(false);
+        }
+      } catch {
+        if (!cancelled) setAvailable(false);
+      }
+    }, 300); // debounce so dragging a what-if slider doesn't spam the sidecar
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+    };
+  }, [multipliers]);
+
   return (
     <div className="space-y-6">
       <MetricsBar
         metrics={[
           { label: "Categories modeled", value: String(f.summary.categories) },
-          { label: "Overrun risk", value: String(f.summary.atRisk), tone: "text-primary" },
+          { label: available ? "Avg overrun prob." : "Overrun risk", value: available
+            ? `${Math.round((Object.values(mc).reduce((s: number, r: any) => s + r.overrun_probability, 0) / Math.max(1, Object.keys(mc).length)) * 100)}%`
+            : String(f.summary.atRisk), tone: "text-primary" },
           { label: "Projected overrun", value: formatCAD(f.summary.projectedOverrun, { compact: true }), tone: "text-primary" },
           { label: "Rising trends", value: String(f.summary.risingCount), tone: "text-primary" },
         ]}
@@ -682,7 +717,10 @@ function ForecastTab({ f }: { f: any }) {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {f.categories.map((c: any, i: number) => {
           const TI = (trendIcon as any)[c.trend];
-          const projData = [...c.history, { period: c.projectedMonth, spend: c.projected, projected: true }];
+          const m = available ? mc[c.category] : undefined;
+          const mult = multipliers[c.category] ?? 1;
+          const projectedVal = m ? m.projected : c.projected;
+          const projData = [...c.history, { period: c.projectedMonth, spend: projectedVal, projected: true }];
           return (
             <Reveal key={i} delay={i * 70}>
             <SectionCard
@@ -695,16 +733,88 @@ function ForecastTab({ f }: { f: any }) {
               }
             >
               <TrendLine data={projData} series={[{ key: "spend", label: "Monthly" }]} />
-              <div className="mt-2 flex items-center justify-between text-xs">
-                <span className="text-muted-foreground">Projected {c.projectedMonth}: <span className="font-semibold text-foreground">{formatCAD(c.projected)}</span></span>
-                {c.overrunRisk ? (
-                  <span className="inline-flex items-center gap-1 rounded bg-primary/15 px-2 py-0.5 font-medium text-primary">
-                    <AlertTriangle className="h-3 w-3" /> Overrun +{formatCAD(c.overrunBy, { compact: true })}
-                  </span>
-                ) : (
-                  <span className="text-muted-foreground">within budget</span>
-                )}
-              </div>
+
+              {m ? (
+                <>
+                  <div className="mt-2 flex items-center justify-between text-xs">
+                    <span className="text-muted-foreground">
+                      Projected {c.projectedMonth}: <span className="font-semibold text-foreground">{formatCAD(projectedVal)}</span>
+                    </span>
+                    <span className={cn("inline-flex items-center gap-1 rounded px-2 py-0.5 font-medium", m.overrun_probability >= 0.5 ? "bg-primary/15 text-primary" : "bg-secondary text-muted-foreground")}>
+                      {Math.round(m.overrun_probability * 100)}% over budget
+                    </span>
+                  </div>
+                  <div className="mt-1 text-[11px] tabular-nums text-muted-foreground">
+                    p10 {formatCAD(m.p10, { compact: true })} · p50 {formatCAD(m.p50, { compact: true })} · p90 {formatCAD(m.p90, { compact: true })}
+                  </div>
+
+                  {/* Percentile band: p10–p90 range, p50 marker, and the budget line */}
+                  {(() => {
+                    const lo = Math.min(m.p10, c.budget) * 0.92;
+                    const hi = Math.max(m.p90, c.budget) * 1.06;
+                    const span = hi - lo || 1;
+                    const pct = (x: number) => Math.min(100, Math.max(0, ((x - lo) / span) * 100));
+                    return (
+                      <div className="mt-2">
+                        <div className="relative h-2.5 rounded-full bg-secondary">
+                          <div className="absolute inset-y-0 rounded-full bg-primary/35" style={{ left: `${pct(m.p10)}%`, right: `${100 - pct(m.p90)}%` }} />
+                          <div className="absolute inset-y-0 w-0.5 bg-primary" style={{ left: `${pct(m.p50)}%` }} title={`p50 ${formatCAD(m.p50)}`} />
+                          <div className="absolute -inset-y-1 w-0.5 bg-destructive" style={{ left: `${pct(c.budget)}%` }} title={`Budget ${formatCAD(c.budget)}`} />
+                        </div>
+                        <div className="mt-1 flex justify-between text-[10px] text-muted-foreground">
+                          <span>p10–p90 range</span>
+                          <span className="text-destructive">| budget {formatCAD(c.budget, { compact: true })}</span>
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                  {/* Why at risk — explainable variance drivers from the simulation */}
+                  {Array.isArray(m.factors) && m.factors.length > 0 && (
+                    <div className="mt-2 space-y-1">
+                      <div className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Why at risk</div>
+                      {m.factors.slice(0, 2).map((fac: any, fi: number) => (
+                        <div key={fi} className="flex items-start gap-2 text-[11px]">
+                          <span className="mt-1 h-1.5 shrink-0 rounded-full bg-primary" style={{ width: Math.max(8, (fac.impact || 0) * 36) }} aria-hidden />
+                          <span className="text-muted-foreground"><span className="font-medium text-foreground">{fac.factor}</span> — {fac.description}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="mt-2">
+                    <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+                      <span>What-if: {mult === 1 ? "baseline" : `${mult > 1 ? "+" : ""}${Math.round((mult - 1) * 100)}%`}</span>
+                      {mult !== 1 && (
+                        <button
+                          type="button"
+                          onClick={() => setMultipliers((p) => { const n = { ...p }; delete n[c.category]; return n; })}
+                          className="hover:text-foreground"
+                        >
+                          reset
+                        </button>
+                      )}
+                    </div>
+                    <input
+                      type="range" min={50} max={150} step={5} value={Math.round(mult * 100)}
+                      onChange={(e) => setMultipliers((p) => ({ ...p, [c.category]: Number(e.target.value) / 100 }))}
+                      className="mt-1 w-full accent-primary"
+                      aria-label={`What-if spend adjustment for ${c.category}`}
+                    />
+                  </div>
+                </>
+              ) : (
+                <div className="mt-2 flex items-center justify-between text-xs">
+                  <span className="text-muted-foreground">Projected {c.projectedMonth}: <span className="font-semibold text-foreground">{formatCAD(c.projected)}</span></span>
+                  {c.overrunRisk ? (
+                    <span className="inline-flex items-center gap-1 rounded bg-primary/15 px-2 py-0.5 font-medium text-primary">
+                      <AlertTriangle className="h-3 w-3" /> Overrun +{formatCAD(c.overrunBy, { compact: true })}
+                    </span>
+                  ) : (
+                    <span className="text-muted-foreground">within budget</span>
+                  )}
+                </div>
+              )}
             </SectionCard>
             </Reveal>
           );
@@ -866,6 +976,12 @@ function ProfilesTab({ p }: { p: any }) {
                 </div>
                 <span className="w-12 shrink-0 text-right tabular-nums">{c.vsBaseline}×</span>
                 <span className="w-16 shrink-0 text-right text-xs text-muted-foreground">{c.share}%</span>
+                <span
+                  title="Monthly spend volatility (coefficient of variation)"
+                  className={cn("w-20 shrink-0 text-right text-[11px] tabular-nums", (c.volatility ?? 0) >= 0.6 ? "text-primary" : "text-muted-foreground")}
+                >
+                  vol {(c.volatility ?? 0).toFixed(2)}
+                </span>
                 <span className={cn("flex w-16 shrink-0 items-center justify-end gap-0.5 text-xs", trendTone[c.trend])}><TI className="h-3.5 w-3.5" />{c.momPct}%</span>
               </div>
             );
