@@ -119,6 +119,16 @@
   .animate-fade-up { animation: none !important; }
 }
 
+/* Scoped serif display layer — wins over `* { font-weight: 700 !important }` via
+   class specificity (class > universal selector), even though both use !important.
+   Apply to titles only; body, tables, and KPI numbers stay in sans. */
+.display-serif {
+  font-family: var(--font-display) !important;
+  font-weight: 450 !important;        /* beats the global `* { font-weight:700 !important }` via class specificity */
+  letter-spacing: -0.02em;
+  font-optical-sizing: auto;
+}
+
 @layer utilities {
   .no-scrollbar {
     -ms-overflow-style: none;
