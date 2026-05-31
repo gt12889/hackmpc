@@ -144,6 +144,7 @@ export function HeroReveal() {
   const brand = band(p, [0.66, 0.8]);
   const tagline = band(p, [0.72, 0.86]);
   const cue = 1 - clamp(p / 0.08);
+  const introArt = 1 - clamp(p / 0.12); // ASCII title — visible at the very start, fades on scroll
   // Whole composition eases in (zoom) as you scroll for added focus.
   const camScale = 1 + clamp(p) * 0.07;
 
@@ -167,6 +168,17 @@ export function HeroReveal() {
 
         {/* Text stack */}
         <div className="relative z-10 flex h-full flex-col items-center justify-center px-6 text-center">
+          {/* ASCII art title — the opening of the intro */}
+          <pre
+            aria-hidden
+            className="pointer-events-none absolute top-[14%] select-none font-mono text-[7px] leading-[1.05] text-primary/70 sm:text-[10px] md:text-sm"
+            style={{ opacity: introArt, transform: `translateY(${introArt * 0 - (1 - introArt) * 20}px)` }}
+          >{String.raw`  ____  ____  ___ __  __   ___ _____
+ | __ )|  _ \|_ _|  \/  | |_ _|_   _|
+ |  _ \| |_) || || |\/| |  | |  | |
+ | |_) |  _ < | || |  | |  | |  | |
+ |____/|_| \_\___|_|  |_| |___| |_|`}</pre>
+
           <div className="relative flex h-44 items-center justify-center">
             {LINES.map((l, i) => {
               const o = band(p, l.in, l.out);
@@ -202,10 +214,6 @@ export function HeroReveal() {
             </div>
             <ArrowDown className="h-4 w-4 animate-bounce text-primary/70" />
           </div>
-
-          <Link href="/dashboard" className="absolute right-6 top-6 text-xs text-muted-foreground transition-colors hover:text-foreground" style={{ opacity: cue }}>
-            Skip intro →
-          </Link>
         </div>
       </div>
     </section>
