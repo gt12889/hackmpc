@@ -20,7 +20,7 @@ type Msg = {
 const SUGGESTIONS = [
   "Show monthly spend by category",
   "Top fuel vendors - how concentrated is our fuel spend?",
-  "Which merchants have the highest average charge?",
+  "Which categories have the biggest average transaction?",
   "Compare USA vs Canada spend by category",
   "What did we spend on permits by state?",
 ];
