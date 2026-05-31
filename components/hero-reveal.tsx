@@ -193,9 +193,6 @@ export function HeroReveal() {
           </div>
 
           <div className="absolute bottom-12 flex flex-col items-center gap-3" style={{ opacity: cue }}>
-            <span className="rounded-full bg-primary/10 px-4 py-1.5 text-sm text-primary ring-1 ring-primary/25">
-              Scroll to watch your spend come into focus
-            </span>
             {/* animated scroll-mouse */}
             <div className="flex h-10 w-6 items-start justify-center rounded-full border-2 border-primary/50 pt-2">
               <span className="h-2 w-1.5 animate-bounce rounded-full bg-primary" />
