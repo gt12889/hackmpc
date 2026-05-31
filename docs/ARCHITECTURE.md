@@ -195,7 +195,7 @@ Each is bounded in cost (one call), structured (JSON schema), and **degrades gra
 
 ### 6.4 Multi-agent swarms (Python LangGraph sidecar)
 
-A fourth tier upgrades four of the bounded passes into **multi-agent graphs** running in a separate, **stateless** Python service (`agents/`, FastAPI + LangGraph + langchain-google-genai). The TS routes gather context, POST it, receive `{ results, traces }`, and persist results + per-agent traces (`agent_runs`). Each route **degrades gracefully** to its single-call pass above if the sidecar is down or `AGENTS_SWARM_ENABLED=false`.
+A fourth tier upgrades four of the bounded passes into **multi-agent graphs** running in a separate, **stateless** Python service (`agents/`, FastAPI + LangGraph + langchain; LLM is OpenAI `gpt-4o-mini` when `OPENAI_API_KEY` is set, else Gemini). The TS routes gather context, POST it, receive `{ results, traces }`, and persist results + per-agent traces (`agent_runs`). Each route **degrades gracefully** to its single-call pass above if the sidecar is down or `AGENTS_SWARM_ENABLED=false`.
 
 | Swarm | Graph | Replaces |
 |---|---|---|
@@ -309,7 +309,7 @@ POST `/api/policies/scan` -> `runScan()` (deterministic rules + split detection)
 
 **Sidecar** (`agents/`, Python): `app/main.py` (FastAPI endpoints), `app/llm.py` (Gemini fallback chain), `app/graphs/{debate,fraud,compliance,insights}.py` (LangGraph graphs). See [AGENTS.md](AGENTS.md).
 
-**Pages**: `/` (cinematic hero), `/dashboard`, `/overview`, `/chat`, `/compliance`, `/approvals`, `/reports`, `/receipts`, `/budgets`, `/insights`, `/audit`, `/governance`, `/workflow`.
+**Pages**: `/` (cinematic hero) + four nav surfaces with sub-tabs - **`/overview`** (Spending · Budgets), **`/insights`**, **`/governance`** (Violations · Receipts · Audit), **`/workflow`** (Approvals · Reports · Agents) - plus a floating **Ask AI** chat. The earlier per-feature routes (`/dashboard`, `/chat`, `/compliance`, `/approvals`, `/reports`, `/receipts`, `/budgets`, `/audit`) still exist and redirect into the surfaces above.
 
 **API**: `chat`, `import`, `insights` (+`/feed`), `policies` (+`/[id]`, `/scan`), `requests` (+`/[id]`), `reports` (+`/[id]`, `/generate`), `receipts`, `budgets`, `fraud/investigate`, `agents`, `notifications` (+`/[id]`, `/read-all`, `/test-call`), `settings/alerts`, `anchor`, `auth/{login,logout,session}`.
 

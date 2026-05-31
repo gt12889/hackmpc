@@ -22,16 +22,20 @@ npm run dev                       # http://localhost:3000
 | `seed:policies` | Seed policy rules + scan + AI severity |
 | `seed:approvals` | Build approval queue + AI recs |
 | `seed:reports` | Generate reports + AI summaries |
-| `db:reset` | Wipe DB and run etl + all three seeds (full clean state) |
+| `db:reset` | Wipe DB and run etl + all seeds (`seed:policies/approvals/reports/budgets/receipts`); `db:reset:deploy` is the build-time variant |
 | `solana:setup` | Generate + faucet-fund a devnet keypair for on-chain anchoring (writes `.env.local`) |
-| `type-check` | `tsc --noEmit` |
+| `agents` | Run the Python multi-agent sidecar (`uvicorn` on :8200); first run `cd agents && uv sync` |
+| `test` / `type-check` | Vitest suite / `tsc --noEmit` |
 
 ## Environment (`.env.local`)
 ```
 GEMINI_API_KEY=...                 # required for AI
 GEMINI_MODEL=gemini-2.5-flash      # optional primary model (fallback chain handles 429s)
+OPENAI_API_KEY=sk-...              # optional: LLM for the agents sidecar (recommended, see AGENTS.md)
+AGENTS_SWARM_ENABLED=true          # optional: set false to skip the sidecar and use single-call AI
 SOLANA_RPC_URL=https://api.devnet.solana.com   # optional: on-chain audit anchor (see SOLANA.md)
 SOLANA_PAYER_SECRET=[ ... ]                     # optional: set by `npm run solana:setup`
+# Phone-call alerts (optional): ELEVENLABS_API_KEY / ELEVENLABS_AGENT_ID / ELEVENLABS_AGENT_PHONE_NUMBER_ID / ALERT_PHONE_NUMBER
 ```
 The DB path can be overridden with `HACKMPC_DB_DIR` / `HACKMPC_DB_PATH` (used by the deploy volume).
 

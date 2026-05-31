@@ -7,10 +7,11 @@ All AI runs through **Google Gemini** (`@google/genai`). Five integrations, all 
 Google's free tier meters quota **per model**, so a single rate-limited model would otherwise break features. `generateWithFallback(ai, params)` retries the same request down a chain of free models on `429`:
 
 ```
-GEMINI_MODEL (default gemini-2.5-flash) → gemini-2.5-flash-lite → gemini-2.0-flash → gemini-2.0-flash-lite
+GEMINI_MODEL (default gemini-2.5-flash) → gemini-2.5-flash-lite → gemini-2.0-flash
+  → gemini-2.0-flash-lite → gemini-3.5-flash → gemini-3.1-flash-lite → flash-latest → flash-lite-latest
 ```
 
-As long as **any** free model has quota, the request succeeds. `getClient()` returns null if no key, so features degrade gracefully (rule-based data still populates).
+(8 free models spanning the 2.x and 3.x generations, each its own daily quota pool; override with `GEMINI_MODELS`.) As long as **any** free model has quota, the request succeeds. `getClient()` returns null if no key, so features degrade gracefully (rule-based data still populates).
 
 > **Quota tip:** under tight free limits, set `GEMINI_MODEL=gemini-2.5-flash-lite` in `.env.local` so the chain *starts* with a model that has budget instead of wasting a call on a rate-limited one. Enabling billing removes the limits entirely.
 
@@ -38,7 +39,7 @@ All are best-effort: on error (e.g. quota) they return 0 and the rule-based data
 
 ## 5. Multi-agent swarms (optional)
 
-Four of these passes can be upgraded to **multi-agent graphs** run by a separate Python **LangGraph** sidecar — an approval debate (Prosecutor ‖ Defender → Judge), a fraud investigator (one agent per suspect), a compliance reviewer + false-positive challenger, and an insights multi-lens sweep. The sidecar is stateless; the TS routes gather context, call it, and persist results + traces, falling back to the single-call passes above when it isn't running. Full detail in [Brim Agents](AGENTS.md).
+Four of these passes can be upgraded to **multi-agent graphs** run by a separate Python **LangGraph** sidecar (it uses **OpenAI** `gpt-4o-mini` when `OPENAI_API_KEY` is set, else Gemini) — an approval debate (Prosecutor ‖ Defender → Judge), a fraud investigator (one agent per suspect), a compliance reviewer + false-positive challenger, and an insights multi-lens sweep. The sidecar is stateless; the TS routes gather context, call it, and persist results + traces, falling back to the single-call passes above when it isn't running. Full detail in [Brim Agents](AGENTS.md).
 
 ## Configuration
 

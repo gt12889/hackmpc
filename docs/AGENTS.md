@@ -85,7 +85,11 @@ uv sync                              # Python 3.12 venv + deps (one time)
 npm run agents                       # uvicorn on :8200 (--reload)
 ```
 
-- Reads `GEMINI_API_KEY` from the environment (shared with the app).
+- **LLM provider.** `agents/app/llm.py` uses **OpenAI** (`gpt-4o-mini`, override with
+  `OPENAI_MODEL`) when `OPENAI_API_KEY` is set, otherwise **Gemini** (shared
+  `GEMINI_API_KEY`). OpenAI is recommended: a multi-agent run fires many LLM calls at
+  once, which the Gemini free tier (~20/min) cannot feed without timing out into the
+  fallback. Either way the same per-model 429/404 fallback applies.
 - TS reaches it at `AGENT_SERVICE_URL` (default `http://127.0.0.1:8200`) and only
   calls it when `AGENTS_SWARM_ENABLED != false`.
 - The app works without it (fallback), so the sidecar is optional to run.
