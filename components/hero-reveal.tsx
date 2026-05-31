@@ -178,7 +178,9 @@ export function HeroReveal() {
             })}
 
             <div className="absolute flex flex-col items-center" style={{ opacity: brand, transform: `translateY(${(1 - brand) * 32}px) scale(${0.92 + brand * 0.08})` }}>
-              <Link href="/dashboard" aria-label="Enter the dashboard" className="group cursor-pointer transition-transform duration-300 hover:scale-105" style={{ pointerEvents: brand > 0.5 ? "auto" : "none" }}>
+              <Link href="/dashboard" aria-label="Enter the dashboard" className="group relative inline-flex cursor-pointer transition-transform duration-300 hover:scale-105" style={{ pointerEvents: brand > 0.5 ? "auto" : "none" }}>
+                {/* idle breathing glow */}
+                <span aria-hidden className="pointer-events-none absolute inset-0 -z-10 animate-pulse rounded-full bg-primary/25 blur-2xl" />
                 <img
                   src="/brim-it-logo.png"
                   alt="Brim It"
@@ -190,9 +192,6 @@ export function HeroReveal() {
               <p className="mt-5 text-lg text-muted-foreground md:text-2xl" style={{ opacity: tagline }}>
                 AI expense intelligence for every dollar.
               </p>
-              <span className="mt-3 text-xs uppercase tracking-[0.2em] text-primary/70" style={{ opacity: tagline }}>
-                Click the logo to enter →
-              </span>
             </div>
           </div>
 
