@@ -15,7 +15,6 @@ import {
   LayoutGrid,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { ImportDialog } from "@/components/import-dialog";
 
 type Item = { href: string; label: string; icon: any; desc?: string };
 
@@ -66,13 +65,10 @@ export function TopNav() {
           ))}
         </nav>
 
-        {/* Right side: import + badge */}
-        <div className="flex shrink-0 items-center gap-2">
-          <ImportDialog />
-          <div className="hidden items-center gap-2 rounded-full border border-border/60 bg-foreground/[0.03] px-3 py-1.5 xl:flex">
-            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />
-            <span className="text-[11px] text-muted-foreground">Brim × MPC Hacks</span>
-          </div>
+        {/* Right badge */}
+        <div className="hidden shrink-0 items-center gap-2 rounded-full border border-border/60 bg-foreground/[0.03] px-3 py-1.5 lg:flex">
+          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />
+          <span className="text-[11px] text-muted-foreground">Brim × MPC Hacks</span>
         </div>
       </div>
     </header>

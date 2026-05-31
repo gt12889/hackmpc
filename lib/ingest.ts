@@ -73,7 +73,8 @@ const COLS = {
 };
 
 export type IngestResult = {
-  count: number;
+  added: number; // rows inserted this call
+  count: number; // total transactions in DB after ingest
   cards: number;
   start: string | null;
   end: string | null;
@@ -81,20 +82,34 @@ export type IngestResult = {
   byCategory: { category: string; n: number; spend: number }[];
 };
 
-/** Clear + rebuild transactions, cards, and the MCC map from raw row objects. */
-export function ingestRows(db: DatabaseType.Database, rows: any[]): IngestResult {
-  // Clear in FK-safe order: children that reference transactions/cards first.
-  // (policy_rules are preserved — only their violations are cleared.)
-  db.exec(`
-    DELETE FROM violations;
-    DELETE FROM report_line_items;
-    DELETE FROM expense_reports;
-    DELETE FROM requests;
-    DELETE FROM transactions;
-    DELETE FROM cards;
-    DELETE FROM mcc_category_map;
-  `);
+/**
+ * Load raw row objects into the DB.
+ * - mode "replace" (default): clear + rebuild transactions/cards/MCC map.
+ * - mode "append": keep existing data and add the new rows.
+ * Summary figures (count/total/range/byCategory) always reflect the WHOLE table.
+ */
+export function ingestRows(
+  db: DatabaseType.Database,
+  rows: any[],
+  opts: { mode?: "replace" | "append" } = {}
+): IngestResult {
+  const append = opts.mode === "append";
 
+  if (!append) {
+    // Clear in FK-safe order: children that reference transactions/cards first.
+    // (policy_rules are preserved — only their violations are cleared.)
+    db.exec(`
+      DELETE FROM violations;
+      DELETE FROM report_line_items;
+      DELETE FROM expense_reports;
+      DELETE FROM requests;
+      DELETE FROM transactions;
+      DELETE FROM cards;
+      DELETE FROM mcc_category_map;
+    `);
+  }
+
+  // MCC map is reference data — (re)seed idempotently in either mode.
   const insMcc = db.prepare(
     `INSERT OR REPLACE INTO mcc_category_map (mcc, category, subcategory, description, is_restricted) VALUES (?,?,?,?,?)`
   );
@@ -102,22 +117,29 @@ export function ingestRows(db: DatabaseType.Database, rows: any[]): IngestResult
     insMcc.run(mcc, def.category, def.subcategory ?? null, def.description, def.restricted ? 1 : 0);
   }
 
-  if (!rows.length) return { count: 0, cards: 0, start: null, end: null, total: 0, byCategory: [] };
+  if (!rows.length) {
+    const r = db.prepare(`SELECT MIN(txn_date) a, MAX(txn_date) b, COUNT(*) n, ROUND(SUM(amount_cad)) total FROM transactions`).get() as any;
+    const c = db.prepare(`SELECT COUNT(*) n FROM cards`).get() as any;
+    return { added: 0, count: r.n ?? 0, cards: c.n ?? 0, start: r.a, end: r.b, total: r.total ?? 0, byCategory: [] };
+  }
 
-  // Cards first (FK target).
-  const pick0 = buildPicker(rows[0]);
-  void pick0;
+  // Cards first (FK target). Append keeps existing cards; replace rebuilds them.
   const cardSet = new Map<string, number>();
   for (const r of rows) {
     const code = String(buildPicker(r)(COLS.code) ?? "").trim() || "UNKNOWN";
     cardSet.set(code, (cardSet.get(code) ?? 0) + 1);
   }
-  const insCard = db.prepare(`INSERT OR REPLACE INTO cards (transaction_code, label, cardholder_alias) VALUES (?,?,?)`);
-  [...cardSet.entries()].sort((a, b) => b[1] - a[1]).forEach(([code, count], i) => {
-    const label = i === 0 ? `Company Card ${code} (primary)` : `Company Card ${code}`;
-    const alias = i === 0 ? `Primary · ${code}` : `Card ${code}`;
-    insCard.run(code, `${label} — ${count} txns`, alias);
-  });
+  if (append) {
+    const insCard = db.prepare(`INSERT OR IGNORE INTO cards (transaction_code, label, cardholder_alias) VALUES (?,?,?)`);
+    for (const [code] of cardSet) insCard.run(code, `Company Card ${code}`, `Card ${code}`);
+  } else {
+    const insCard = db.prepare(`INSERT OR REPLACE INTO cards (transaction_code, label, cardholder_alias) VALUES (?,?,?)`);
+    [...cardSet.entries()].sort((a, b) => b[1] - a[1]).forEach(([code, count], i) => {
+      const label = i === 0 ? `Company Card ${code} (primary)` : `Company Card ${code}`;
+      const alias = i === 0 ? `Primary · ${code}` : `Card ${code}`;
+      insCard.run(code, `${label} — ${count} txns`, alias);
+    });
+  }
 
   const insTxn = db.prepare(`
     INSERT INTO transactions (
@@ -185,6 +207,7 @@ export function ingestRows(db: DatabaseType.Database, rows: any[]): IngestResult
   const byCategory = db
     .prepare(`SELECT category, COUNT(*) n, ROUND(SUM(amount_cad)) spend FROM transactions GROUP BY category ORDER BY spend DESC`)
     .all() as any[];
+  const totalCards = (db.prepare(`SELECT COUNT(*) n FROM cards`).get() as any).n ?? 0;
 
-  return { count: range.n ?? 0, cards: cardSet.size, start: range.a, end: range.b, total: range.total ?? 0, byCategory };
+  return { added: rows.length, count: range.n ?? 0, cards: totalCards, start: range.a, end: range.b, total: range.total ?? 0, byCategory };
 }

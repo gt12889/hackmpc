@@ -28,8 +28,8 @@ export async function POST(req: NextRequest) {
     if (!rows.length) return NextResponse.json({ error: "The file has no rows." }, { status: 400 });
 
     const db = getDb();
-    const result = ingestRows(db, rows);
-    if (!result.count) {
+    const result = ingestRows(db, rows, { mode: "append" });
+    if (!result.added) {
       return NextResponse.json({ error: "No transactions could be read — check the column headers." }, { status: 400 });
     }
 

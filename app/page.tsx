@@ -3,6 +3,7 @@ import { KpiCard, SectionCard } from "@/components/kpi-card";
 import { PageHeader } from "@/components/page-header";
 import { SpendBar, TrendLine, CategoryPie } from "@/components/charts";
 import { ExpandSection } from "@/components/show-more";
+import { ImportDialog } from "@/components/import-dialog";
 import { formatCAD } from "@/lib/utils";
 import {
   getKpis,
@@ -32,7 +33,9 @@ export default function DashboardPage() {
       <PageHeader
         title="Spend Overview"
         description={`${kpis.dateStart} → ${kpis.dateEnd} · ${kpis.txnCount.toLocaleString()} card transactions`}
-      />
+      >
+        <ImportDialog />
+      </PageHeader>
 
       <div className="space-y-6 p-8">
         {/* KPIs */}
