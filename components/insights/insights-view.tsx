@@ -89,7 +89,7 @@ function MetricsBar({
       <dl className={cn("grid divide-border/60", gridClass)}>
         {metrics.map((m) => (
           <div key={m.label} className="px-4 py-3">
-            <dt className="text-[12px] font-medium uppercase tracking-wide text-neutral-500">{m.label}</dt>
+            <dt className="text-[13px] font-medium uppercase tracking-wide text-neutral-500">{m.label}</dt>
             <dd className={cn("mt-0.5 text-base font-semibold tabular-nums", m.tone ?? "text-neutral-900")}>{m.value}</dd>
           </div>
         ))}
@@ -141,7 +141,7 @@ function AnomalyTab({ a }: { a: any }) {
                     <TableCell className="text-neutral-600">{d.transaction_code}</TableCell>
                     <TableCell className="text-neutral-600">{d.dates}</TableCell>
                     <TableCell className="text-right">
-                      <span className="rounded bg-warning/15 px-1.5 py-0.5 text-[11px] font-medium text-warning">{d.occurrences}×</span>
+                      <span className="rounded bg-warning/15 px-1.5 py-0.5 text-[12px] font-medium text-warning">{d.occurrences}×</span>
                     </TableCell>
                     <TableCell className="text-right tabular-nums text-neutral-900">{formatCAD(d.amount_cad)}</TableCell>
                   </TableRow>
@@ -347,7 +347,7 @@ function RecurringTab({ r }: { r: any }) {
                   <TableCell className="max-w-[200px] truncate font-medium text-neutral-900">{c.merchant}</TableCell>
                   <TableCell className="text-neutral-600">{c.category}</TableCell>
                   <TableCell>
-                    <span className="rounded bg-secondary px-1.5 py-0.5 text-[11px] uppercase text-muted-foreground">{c.cadence}</span>
+                    <span className="rounded bg-secondary px-1.5 py-0.5 text-[12px] uppercase text-muted-foreground">{c.cadence}</span>
                   </TableCell>
                   <TableCell className="text-right text-neutral-600">{c.occurrences}×</TableCell>
                   <TableCell className="text-right tabular-nums text-neutral-600">{formatCAD(c.avg_amount)}</TableCell>

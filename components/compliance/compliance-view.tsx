@@ -26,7 +26,7 @@ const SEV_STYLE: Record<string, string> = {
 
 export function SeverityBadge({ severity, ai }: { severity: string; ai?: boolean }) {
   return (
-    <span className={cn("inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[12px] font-medium uppercase tracking-wide ring-1", SEV_STYLE[severity] || SEV_STYLE.low)}>
+    <span className={cn("inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[13px] font-medium uppercase tracking-wide ring-1", SEV_STYLE[severity] || SEV_STYLE.low)}>
       {ai && <Sparkles className="h-3 w-3" />}
       {severity}
     </span>
@@ -87,7 +87,7 @@ export function ComplianceView({ initial }: { initial: any }) {
         <dl className="grid grid-cols-2 divide-x divide-y divide-border/60 sm:grid-cols-4 sm:divide-y-0">
           {metrics.map((m) => (
             <div key={m.label} className="px-4 py-3">
-              <dt className="text-[12px] font-medium uppercase tracking-wide text-neutral-500">{m.label}</dt>
+              <dt className="text-[13px] font-medium uppercase tracking-wide text-neutral-500">{m.label}</dt>
               <dd className={cn("mt-0.5 text-base font-semibold tabular-nums", m.tone)}>{m.value}</dd>
             </div>
           ))}
@@ -119,9 +119,9 @@ export function ComplianceView({ initial }: { initial: any }) {
                       <span className="truncate text-sm font-medium">{r.name}</span>
                       <SeverityBadge severity={r.severity_base} />
                     </div>
-                    <p className="mt-0.5 line-clamp-2 text-[12px] text-muted-foreground">{r.description}</p>
+                    <p className="mt-0.5 line-clamp-2 text-[13px] text-muted-foreground">{r.description}</p>
                     {r.threshold_amount != null && (
-                      <span className="mt-1 inline-block text-[12px] text-muted-foreground">Threshold: {formatCAD(r.threshold_amount, { compact: true })}{r.window && r.window !== "transaction" ? ` / ${r.window}` : ""}</span>
+                      <span className="mt-1 inline-block text-[13px] text-muted-foreground">Threshold: {formatCAD(r.threshold_amount, { compact: true })}{r.window && r.window !== "transaction" ? ` / ${r.window}` : ""}</span>
                     )}
                   </div>
                   <button onClick={() => toggleRule(r.id, r.enabled)} disabled={busy} title={r.enabled ? "Disable" : "Enable"} className={cn("rounded-md p-1.5", r.enabled ? "text-primary hover:bg-primary/10" : "text-muted-foreground hover:bg-secondary")}>
@@ -129,7 +129,7 @@ export function ComplianceView({ initial }: { initial: any }) {
                   </button>
                 </div>
                 {r.policy_clause && (
-                  <p className="mt-2 border-l-2 border-border pl-2 text-[11px] italic text-muted-foreground/70">“{r.policy_clause}”</p>
+                  <p className="mt-2 border-l-2 border-border pl-2 text-[12px] italic text-muted-foreground/70">“{r.policy_clause}”</p>
                 )}
               </div>
             ))}
@@ -150,14 +150,14 @@ export function ComplianceView({ initial }: { initial: any }) {
                       <SeverityBadge severity={v.severity} ai={!!v.ai_severity} />
                       <span className="truncate text-sm font-medium">{v.merchant_name}</span>
                       {v.group_size > 1 && (
-                        <span className="inline-flex items-center gap-1 rounded bg-secondary px-1.5 py-0.5 text-[11px] text-muted-foreground">
+                        <span className="inline-flex items-center gap-1 rounded bg-secondary px-1.5 py-0.5 text-[12px] text-muted-foreground">
                           <Layers className="h-3 w-3" /> {v.group_size}× split
                         </span>
                       )}
                     </div>
                     <span className="shrink-0 text-sm font-semibold tabular-nums">{formatCAD(v.amount_involved)}</span>
                   </div>
-                  <div className="mt-1 flex items-center gap-2 text-[12px] text-muted-foreground">
+                  <div className="mt-1 flex items-center gap-2 text-[13px] text-muted-foreground">
                     <span>{v.rule_name}</span>
                     <span>·</span>
                     <span>{v.txn_date}</span>
@@ -165,7 +165,7 @@ export function ComplianceView({ initial }: { initial: any }) {
                     {v.transaction_code && <><span>·</span><span>card {v.transaction_code}</span></>}
                   </div>
                   {v.ai_reasoning && (
-                    <p className="mt-2 flex gap-1.5 rounded-md bg-secondary/40 p-2 text-[12px] text-muted-foreground">
+                    <p className="mt-2 flex gap-1.5 rounded-md bg-secondary/40 p-2 text-[13px] text-muted-foreground">
                       <Sparkles className="mt-0.5 h-3 w-3 shrink-0 text-primary" />
                       {v.ai_reasoning}
                     </p>

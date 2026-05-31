@@ -102,7 +102,7 @@ function Token({ children, tone }: { children: React.ReactNode; tone?: "filter" 
   return (
     <span
       className={cn(
-        "rounded px-1.5 py-0.5 text-[11px] leading-tight",
+        "rounded px-1.5 py-0.5 text-[12px] leading-tight",
         tone === "frame"
           ? "bg-primary/10 text-primary ring-1 ring-primary/20"
           : "bg-secondary/70 text-muted-foreground"
@@ -132,7 +132,7 @@ function Step({ t, index }: { t: ToolCallTrace; index: number }) {
       </span>
       <div className="flex flex-wrap items-center gap-1.5">
         <span className="text-xs font-medium text-foreground">{label}</span>
-        <code className="rounded bg-background/60 px-1 py-0.5 text-[11px] text-muted-foreground">{t.name}</code>
+        <code className="rounded bg-background/60 px-1 py-0.5 text-[12px] text-muted-foreground">{t.name}</code>
         {frame.map((f, i) => (
           <Token key={`fr-${i}`} tone="frame">
             {f}
@@ -146,7 +146,7 @@ function Step({ t, index }: { t: ToolCallTrace; index: number }) {
           return (
             <div key={si} className="flex flex-wrap items-center gap-1.5">
               {set.label && (
-                <span className="text-[11px] font-medium text-muted-foreground/80">{set.label}:</span>
+                <span className="text-[12px] font-medium text-muted-foreground/80">{set.label}:</span>
               )}
               {tokens.map((tok, i) => (
                 <Token key={i}>{tok}</Token>
@@ -156,7 +156,7 @@ function Step({ t, index }: { t: ToolCallTrace; index: number }) {
         })}
       </div>
 
-      <div className="mt-1 flex items-center gap-1.5 text-[11px] text-muted-foreground">
+      <div className="mt-1 flex items-center gap-1.5 text-[12px] text-muted-foreground">
         <Database className="h-3 w-3" />
         {t.ok ? (
           <span>
@@ -173,7 +173,7 @@ function Step({ t, index }: { t: ToolCallTrace; index: number }) {
       </div>
 
       {t.ok && t.sample && t.sample.length > 0 && (
-        <table className="mt-1.5 w-full max-w-md border-separate border-spacing-0 text-[11px]">
+        <table className="mt-1.5 w-full max-w-md border-separate border-spacing-0 text-[12px]">
           <tbody>
             {t.sample.map((row, i) => {
               const { label, value } = describeRow(row, t);
@@ -206,7 +206,7 @@ export function Lineage({ tools }: { tools: ToolCallTrace[] }) {
     <div className="w-full rounded-lg border border-border/70 bg-card/50">
       <button
         onClick={() => setOpen((o) => !o)}
-        className="flex w-full items-center gap-1.5 px-3 py-2 text-left text-[12px] font-medium text-muted-foreground transition-colors hover:text-foreground"
+        className="flex w-full items-center gap-1.5 px-3 py-2 text-left text-[13px] font-medium text-muted-foreground transition-colors hover:text-foreground"
       >
         <ChevronRight className={cn("h-3.5 w-3.5 transition-transform", open && "rotate-90")} />
         <GitBranch className="h-3.5 w-3.5 text-primary" />
@@ -220,7 +220,7 @@ export function Lineage({ tools }: { tools: ToolCallTrace[] }) {
           {tools.map((t, i) => (
             <Step key={i} t={t} index={i} />
           ))}
-          <li className="pl-5 text-[11px] italic text-muted-foreground/70">
+          <li className="pl-5 text-[12px] italic text-muted-foreground/70">
             Every number above came from these parameterized, read-only queries — the model never wrote SQL or
             invented figures.
           </li>

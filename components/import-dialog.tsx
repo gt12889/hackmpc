@@ -50,7 +50,7 @@ export function ImportDialog({ variant = "default" }: { variant?: "default" | "p
           "flex shrink-0 items-center transition-all",
           variant === "prominent"
             ? "gap-3 rounded-2xl bg-amber-500 px-10 py-4 text-base font-semibold text-white shadow-lg shadow-amber-500/30 hover:scale-[1.02] hover:bg-amber-600 hover:shadow-xl hover:shadow-amber-500/35 active:scale-[0.98]"
-            : "gap-2 rounded-lg border border-border/60 bg-foreground/[0.03] px-3 py-2 text-[14px] text-muted-foreground hover:border-primary/30 hover:text-foreground"
+            : "gap-2 rounded-lg border border-border/60 bg-foreground/[0.03] px-3 py-2 text-[15px] text-muted-foreground hover:border-primary/30 hover:text-foreground"
         )}
       >
         <Upload className={cn(variant === "prominent" ? "h-6 w-6" : "h-4 w-4")} />
@@ -94,7 +94,7 @@ export function ImportDialog({ variant = "default" }: { variant?: "default" | "p
                       <FileSpreadsheet className="h-6 w-6 text-primary" />
                     </div>
                     <div className="text-sm">Drag a file here, or <span className="text-primary">browse</span></div>
-                    <div className="text-[12px] text-muted-foreground">CSV or Excel · columns like Date, Merchant, Amount, MCC, Card</div>
+                    <div className="text-[13px] text-muted-foreground">CSV or Excel · columns like Date, Merchant, Amount, MCC, Card</div>
                   </>
                 )}
                 <input ref={inputRef} type="file" accept=".csv,.xlsx,.xls" className="hidden" onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])} />
@@ -114,7 +114,7 @@ export function ImportDialog({ variant = "default" }: { variant?: "default" | "p
                   <Stat label="Cards" value={String(result.cards)} />
                   <Stat label="Policy flags" value={String(result.violations)} />
                 </div>
-                <div className="text-[12px] text-muted-foreground">
+                <div className="text-[13px] text-muted-foreground">
                   Regenerated: {result.requests} approval requests, {result.reports} expense reports
                   {result.ai && (result.ai.severity || result.ai.recommendations || result.ai.summaries)
                     ? " · AI enrichment applied"
@@ -136,7 +136,7 @@ export function ImportDialog({ variant = "default" }: { variant?: "default" | "p
 function Stat({ label, value, small }: { label: string; value: string; small?: boolean }) {
   return (
     <div className="rounded-lg border border-border/60 bg-foreground/[0.02] p-3">
-      <div className="text-[12px] uppercase tracking-wide text-muted-foreground">{label}</div>
+      <div className="text-[13px] uppercase tracking-wide text-muted-foreground">{label}</div>
       <div className={cn("mt-0.5 tabular-nums", small ? "text-xs" : "text-base")}>{value}</div>
     </div>
   );

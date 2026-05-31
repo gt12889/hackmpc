@@ -85,7 +85,7 @@ export function NotificationBell() {
       >
         <Bell className="h-5 w-5" />
         {unread > 0 && (
-          <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-red-500 px-1 text-[11px] font-semibold text-white">
+          <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-red-500 px-1 text-[12px] font-semibold text-white">
             {unread > 9 ? "9+" : unread}
           </span>
         )}
@@ -112,14 +112,14 @@ export function NotificationBell() {
                   <span className={cn("h-2 w-2 shrink-0 rounded-full", SEV_DOT[n.severity] ?? "bg-slate-400")} />
                   <span className="truncate text-xs font-medium text-foreground">{n.title}</span>
                 </div>
-                {n.body && <p className="mt-0.5 pl-4 text-[12px] text-muted-foreground">{n.body}</p>}
+                {n.body && <p className="mt-0.5 pl-4 text-[13px] text-muted-foreground">{n.body}</p>}
                 {n.call_status === "called" && (
-                  <p className="mt-0.5 flex items-center gap-1 pl-4 text-[11px] text-emerald-600">
+                  <p className="mt-0.5 flex items-center gap-1 pl-4 text-[12px] text-emerald-600">
                     <Phone className="h-3 w-3" /> Called you{n.called_at ? ` at ${new Date(n.called_at).toLocaleTimeString()}` : ""}
                   </p>
                 )}
-                {n.call_status === "skipped" && <p className="mt-0.5 pl-4 text-[11px] text-muted-foreground">In-app only (call cap reached)</p>}
-                {n.call_status === "failed" && <p className="mt-0.5 pl-4 text-[11px] text-red-500">Call failed</p>}
+                {n.call_status === "skipped" && <p className="mt-0.5 pl-4 text-[12px] text-muted-foreground">In-app only (call cap reached)</p>}
+                {n.call_status === "failed" && <p className="mt-0.5 pl-4 text-[12px] text-red-500">Call failed</p>}
               </a>
             ))}
           </div>

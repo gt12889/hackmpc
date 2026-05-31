@@ -39,7 +39,7 @@ export const CHART_COLORS = [
   "#B0E0E6", // Powder Blue
 ] as const;
 
-const AXIS = { fontSize: 12, fill: "hsl(var(--muted-foreground))" };
+const AXIS = { fontSize: 13, fill: "hsl(var(--muted-foreground))" };
 
 function MoneyTooltip({ active, payload, label, money = true }: any) {
   if (!active || !payload?.length) return null;
@@ -163,7 +163,7 @@ export function TrendLine({
           width={60}
         />
         <Tooltip content={<MoneyTooltip money={money} />} />
-        {series.length > 1 && <Legend wrapperStyle={{ fontSize: 12, paddingTop: 8 }} iconType="circle" iconSize={8} />}
+        {series.length > 1 && <Legend wrapperStyle={{ fontSize: 13, paddingTop: 8 }} iconType="circle" iconSize={8} />}
         {series.map((s, i) => (
           <Area
             key={s.key}
@@ -187,10 +187,10 @@ function PieCenterLabel({ viewBox, total, money }: { viewBox?: { cx?: number; cy
   const cy = viewBox?.cy ?? 0;
   return (
     <text x={cx} y={cy} textAnchor="middle" dominantBaseline="central">
-      <tspan x={cx} dy="-0.6em" fontSize={12} fill="hsl(var(--muted-foreground))">
+      <tspan x={cx} dy="-0.6em" fontSize={13} fill="hsl(var(--muted-foreground))">
         Total
       </tspan>
-      <tspan x={cx} dy="1.5em" fontSize={16} fontWeight={600} fill="hsl(var(--foreground))">
+      <tspan x={cx} dy="1.5em" fontSize={17} fontWeight={600} fill="hsl(var(--foreground))">
         {money ? formatCAD(total, { compact: true }) : total.toLocaleString()}
       </tspan>
     </text>
@@ -240,7 +240,7 @@ export function CategoryPie({
         </Pie>
         <Tooltip content={<MoneyTooltip money={money} />} />
         <Legend
-          wrapperStyle={{ fontSize: 12, paddingTop: 4 }}
+          wrapperStyle={{ fontSize: 13, paddingTop: 4 }}
           iconType="circle"
           iconSize={8}
           layout="horizontal"

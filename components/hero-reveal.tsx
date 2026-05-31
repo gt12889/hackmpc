@@ -197,7 +197,7 @@ export function HeroReveal() {
                   alt="Brim It"
                   width={435}
                   height={87}
-                  className="h-20 w-auto max-w-none drop-shadow-[0_0_40px_hsl(199_85%_55%/0.45)] transition-[filter] duration-300 group-hover:drop-shadow-[0_0_60px_hsl(199_85%_55%/0.7)] md:h-28"
+                  className="h-[85px] w-auto max-w-none drop-shadow-[0_0_40px_hsl(199_85%_55%/0.45)] transition-[filter] duration-300 group-hover:drop-shadow-[0_0_60px_hsl(199_85%_55%/0.7)] md:h-[119px]"
                 />
               </Link>
               <p className="mt-5 text-lg text-muted-foreground md:text-2xl" style={{ opacity: tagline }}>
