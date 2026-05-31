@@ -15,6 +15,7 @@ type Msg = {
   text: string;
   viz?: VizPayload | null;
   tools?: ToolCallTrace[];
+  followUps?: string[];
 };
 
 const SUGGESTIONS = [
@@ -50,7 +51,7 @@ export function ChatPanel({ compact = false }: { compact?: boolean }) {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || "Request failed");
-      setMessages((m) => [...m, { role: "model", text: data.text, viz: data.viz, tools: data.toolCalls }]);
+      setMessages((m) => [...m, { role: "model", text: data.text, viz: data.viz, tools: data.toolCalls, followUps: data.followUps }]);
     } catch (e: any) {
       setMessages((m) => [...m, { role: "model", text: `⚠️ ${e.message}` }]);
     } finally {
@@ -85,7 +86,7 @@ export function ChatPanel({ compact = false }: { compact?: boolean }) {
         )}
 
         {messages.map((m, i) => (
-          <Message key={i} msg={m} />
+          <Message key={i} msg={m} onAsk={send} showFollowUps={i === messages.length - 1 && !loading} />
         ))}
 
         {loading && <ThinkingPreview />}
@@ -118,7 +119,7 @@ export function ChatPanel({ compact = false }: { compact?: boolean }) {
   );
 }
 
-function Message({ msg }: { msg: Msg }) {
+function Message({ msg, onAsk, showFollowUps }: { msg: Msg; onAsk: (q: string) => void; showFollowUps: boolean }) {
   const isUser = msg.role === "user";
   return (
     <div className={cn("mx-auto flex max-w-3xl gap-3", isUser && "flex-row-reverse")}>
@@ -145,6 +146,23 @@ function Message({ msg }: { msg: Msg }) {
         {msg.viz && (
           <div className="w-full rounded-xl border border-border bg-card p-4">
             <ChartRenderer viz={msg.viz} />
+          </div>
+        )}
+
+        {!isUser && showFollowUps && msg.followUps && msg.followUps.length > 0 && (
+          <div className="w-full">
+            <div className="mb-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">Explore next</div>
+            <div className="flex flex-wrap gap-2">
+              {msg.followUps.map((q) => (
+                <button
+                  key={q}
+                  onClick={() => onAsk(q)}
+                  className="rounded-full border border-primary/30 bg-primary/5 px-3 py-1.5 text-xs text-primary transition-colors hover:border-primary/60 hover:bg-primary/10"
+                >
+                  {q}
+                </button>
+              ))}
+            </div>
           </div>
         )}
       </div>

@@ -36,7 +36,64 @@ export type AgentResult = {
   text: string;
   viz: VizPayload | null;
   toolCalls: ToolCallTrace[];
+  /** Contextual "where to go next" questions, derived from the tool just used and
+   *  its top result - a decision-tree of related drill-downs the user can click. */
+  followUps: string[];
 };
+
+/** Build related follow-up questions from the last successful tool call + its top
+ *  row, so each answer branches into sensible next questions (a decision tree). */
+function suggestFollowUps(toolCalls: ToolCallTrace[]): string[] {
+  const last = [...toolCalls].reverse().find((t) => t.ok);
+  if (!last) return [];
+  const top = String(last.sample?.[0]?.key ?? "").trim();
+  const m = last.meta || {};
+  const fu: string[] = [];
+
+  switch (last.name) {
+    case "aggregate_spend": {
+      switch (m.group_by) {
+        case "category":
+          if (top) fu.push(`Which merchants drive ${top} spending?`, `Break ${top} down by state`);
+          fu.push("Show monthly spending by category");
+          break;
+        case "state_province":
+          if (top) fu.push(`Top categories in ${top}`, `Top merchants in ${top}`);
+          fu.push("Compare USA vs Canada by category");
+          break;
+        case "merchant_norm":
+          if (top) fu.push(`Show ${top} spending over time`, `What category is ${top}?`);
+          fu.push("Where can we consolidate vendors?");
+          break;
+        case "transaction_code":
+          if (top) fu.push(`What did card ${top} spend on?`);
+          fu.push("Show spending by category", "Monthly spending trend");
+          break;
+        case "month":
+          fu.push("Break this down by category", "Top merchants overall");
+          break;
+        default:
+          fu.push("Show the monthly spending trend", "Spending by category");
+      }
+      break;
+    }
+    case "time_series":
+      fu.push("Break this down by category", "Which month had the highest spending?", "Compare USA vs Canada over time");
+      break;
+    case "top_merchants":
+      if (top) fu.push(`Show ${top} spending over time`, `What category is ${top}?`);
+      fu.push("Where can we consolidate vendors?");
+      break;
+    case "compare_periods":
+      if (m.label_a) fu.push(`Show the ${m.label_a} spending trend`);
+      fu.push("Which category has the biggest gap?", "Top merchants for each side");
+      break;
+    case "list_transactions":
+      fu.push("Summarize these by category", "Show the monthly trend", "Which merchant appears most?");
+      break;
+  }
+  return [...new Set(fu)].slice(0, 3);
+}
 
 /** Reality primer + live schema facts. Identical each turn (cache-friendly). */
 function buildSystemInstruction(): string {
@@ -75,6 +132,7 @@ export async function runAgent(history: ChatTurn[], userMessage: string): Promis
       text: "⚠️ No Gemini API key configured. Add `GEMINI_API_KEY=...` to `.env.local` and restart the dev server to enable conversational analytics.",
       viz: null,
       toolCalls: [],
+      followUps: [],
     };
   }
 
@@ -147,12 +205,13 @@ export async function runAgent(history: ChatTurn[], userMessage: string): Promis
     }
 
     // No tool calls → final answer.
-    return { text: resp.text?.trim() || "I couldn't produce an answer for that.", viz: lastViz, toolCalls };
+    return { text: resp.text?.trim() || "I couldn't produce an answer for that.", viz: lastViz, toolCalls, followUps: suggestFollowUps(toolCalls) };
   }
 
   return {
     text: "I reached the tool-call limit while working on that. Try narrowing the question.",
     viz: lastViz,
+    followUps: suggestFollowUps(toolCalls),
     toolCalls,
   };
 }
