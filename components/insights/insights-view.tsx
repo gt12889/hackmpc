@@ -13,6 +13,7 @@ import {
   Globe,
   BarChart3,
   RefreshCw,
+  ShieldCheck,
 } from "lucide-react";
 import { cn, formatCAD } from "@/lib/utils";
 import { SectionCard } from "@/components/kpi-card";
@@ -44,6 +45,13 @@ export function InsightsView({ data }: { data: any }) {
       tag: "FRAUD SIGNALS",
       body: "Duplicate charges, round-number transactions, and settlement payments flagged for review.",
       panel: <AnomalyTab a={data.anomaly} />,
+    },
+    {
+      id: "fraud",
+      title: "Fraud Watch",
+      tag: "RISK SCORING",
+      body: "Transactions ranked by an explainable fraud-risk score.",
+      panel: <FraudTab f={data.fraud} />,
     },
     {
       id: "vendors",
@@ -198,6 +206,80 @@ function AnomalyTab({ a }: { a: any }) {
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+/* ---------- Fraud Watch ---------- */
+function FraudTab({ f }: { f: any }) {
+  const { summary, suspects } = f;
+
+  const metrics = [
+    { label: "Flagged", value: String(summary.flagged), tone: "text-destructive" },
+    { label: "Exposure", value: formatCAD(summary.exposure, { compact: true }), tone: "text-warning" },
+    { label: "High-risk", value: String(summary.byTier.high), tone: "text-destructive" },
+    { label: "Top signal", value: summary.topReason ?? "—", tone: "text-neutral-600" },
+  ] as const;
+
+  function tierBadgeClass(score: number) {
+    if (score >= 60) return "bg-destructive/15 text-destructive";
+    if (score >= 40) return "bg-warning/15 text-warning";
+    return "bg-secondary text-muted-foreground";
+  }
+
+  return (
+    <div className="space-y-6">
+      <MetricsBar metrics={metrics} />
+
+      {suspects.length === 0 ? (
+        <div className="flex flex-col items-center gap-2 py-10 text-center">
+          <ShieldCheck className="h-8 w-8 text-primary" />
+          <p className="text-sm font-medium text-neutral-900">No high-risk transactions detected</p>
+          <p className="text-xs text-muted-foreground">All transactions passed the fraud-risk threshold.</p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          <div>
+            <h3 className="text-sm text-neutral-900">Ranked Suspects</h3>
+            <p className="mt-0.5 text-xs text-neutral-600">Scored by independent signals — duplicate charges, outlier amounts, round numbers, pre-auth patterns, and same-day repeats.</p>
+          </div>
+          <div className="divide-y divide-border/60 rounded-lg border border-border/60">
+            {suspects.map((s: any, i: number) => (
+              <div key={s.id} className="flex flex-col gap-1.5 px-4 py-3 sm:flex-row sm:items-start sm:gap-3">
+                {/* Score badge */}
+                <span className={`inline-flex h-8 w-10 shrink-0 items-center justify-center rounded text-sm font-semibold tabular-nums ${tierBadgeClass(s.score)}`}>
+                  {s.score}
+                </span>
+
+                {/* Main info */}
+                <div className="min-w-0 flex-1 space-y-1">
+                  <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                    <span className="max-w-[220px] truncate font-medium text-neutral-900">{s.merchant_name}</span>
+                    <span className="text-xs text-muted-foreground">{s.category}</span>
+                    <span className="text-xs text-muted-foreground">·</span>
+                    <span className="text-xs text-muted-foreground">{s.txn_date}</span>
+                    <span className="text-xs text-muted-foreground">·</span>
+                    <span className="text-xs text-muted-foreground">{s.transaction_code}</span>
+                  </div>
+                  {/* Reason chips */}
+                  <div className="flex flex-wrap gap-1">
+                    {s.reasons.map((reason: string, j: number) => (
+                      <span key={j} className="rounded bg-secondary px-1.5 py-0.5 text-[10px] text-muted-foreground">
+                        {reason}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Amount */}
+                <span className="shrink-0 self-start text-sm font-semibold tabular-nums text-neutral-900 sm:self-center">
+                  {formatCAD(s.amount_cad)}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
