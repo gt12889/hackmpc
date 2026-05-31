@@ -27,6 +27,16 @@ function latestMonth(): string {
   return (getDb().prepare(`SELECT MAX(substr(txn_date,1,7)) m FROM transactions`).get() as any).m;
 }
 
+export function spendCategories() {
+  return getDb()
+    .prepare(
+      `SELECT category, ROUND(SUM(amount_cad),2) total
+       FROM transactions WHERE ${NON_OP}
+       GROUP BY category ORDER BY total DESC`
+    )
+    .all() as { category: string; total: number }[];
+}
+
 export function getBudgetStatus() {
   const db = getDb();
   const month = latestMonth();
@@ -64,5 +74,5 @@ export function getBudgetStatus() {
     atRisk: rows.filter((r) => !r.overrun && r.projectedOverrun).length,
     month,
   };
-  return { summary, budgets: rows };
+  return { summary, budgets: rows, categories: spendCategories() };
 }

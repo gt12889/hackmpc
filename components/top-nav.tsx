@@ -8,7 +8,6 @@ import {
   CheckSquare,
   FileText,
   Sparkles,
-
   ReceiptText,
   Wallet,
   type LucideIcon,
@@ -29,7 +28,6 @@ const NAV_ITEMS: Item[] = [
 ];
 
 function isActive(pathname: string, href: string) {
-  if (href === "/") return pathname === "/";
   return pathname.startsWith(href);
 }
 

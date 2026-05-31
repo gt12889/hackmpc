@@ -4,7 +4,6 @@ import { useState } from "react";
 import useSWR from "swr";
 import { toast } from "sonner";
 import {
-  AlertTriangle,
   ShieldCheck,
   Sparkles,
   RefreshCw,
@@ -73,17 +72,29 @@ export function ComplianceView({ initial }: { initial: any }) {
     }
   }
 
+  const metrics = [
+    { label: "At risk", value: formatCAD(summary.amount, { compact: true }), tone: "text-destructive" },
+    { label: "Critical", value: String(summary.counts.critical), tone: "text-destructive" },
+    { label: "High", value: String(summary.counts.high), tone: "text-warning" },
+    { label: "Medium / low", value: `${summary.counts.medium} / ${summary.counts.low}`, tone: "text-neutral-600" },
+  ] as const;
+
   return (
     <div className="space-y-6 p-8">
-      {/* Phone-alert toggle */}
       <AlertSettings />
 
-      {/* Summary */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <SummaryStat label="At Risk" value={formatCAD(summary.amount, { compact: true })} icon={AlertTriangle} tone="destructive" sub={`${summary.total} open flags`} />
-        <SummaryStat label="Critical" value={String(summary.counts.critical)} tone="destructive" />
-        <SummaryStat label="High" value={String(summary.counts.high)} tone="warning" />
-        <SummaryStat label="Medium / Low" value={`${summary.counts.medium} / ${summary.counts.low}`} tone="muted" />
+      <div className="overflow-hidden rounded-lg border border-border/60">
+        <dl className="grid grid-cols-2 divide-x divide-y divide-border/60 sm:grid-cols-4 sm:divide-y-0">
+          {metrics.map((m) => (
+            <div key={m.label} className="px-4 py-3">
+              <dt className="text-[11px] font-medium uppercase tracking-wide text-neutral-500">{m.label}</dt>
+              <dd className={cn("mt-0.5 text-base font-semibold tabular-nums", m.tone)}>{m.value}</dd>
+            </div>
+          ))}
+        </dl>
+        <p className="border-t border-border/60 px-4 py-2.5 text-sm text-neutral-600">
+          {summary.total} open policy flags
+        </p>
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -174,20 +185,6 @@ export function ComplianceView({ initial }: { initial: any }) {
           <OffenderTable rows={offenders.by_card} keyField="transaction_code" prefix="Card " />
         </SectionCard>
       </div>
-    </div>
-  );
-}
-
-function SummaryStat({ label, value, sub, icon: Icon, tone }: any) {
-  const t = { destructive: "text-destructive", warning: "text-warning", muted: "text-muted-foreground", primary: "text-primary" }[tone as string] || "text-primary";
-  return (
-    <div className="rounded-xl border border-border bg-card p-5">
-      <div className="flex items-center justify-between">
-        <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</span>
-        {Icon && <Icon className={cn("h-4 w-4", t)} />}
-      </div>
-      <div className={cn("mt-2 text-2xl font-semibold tabular-nums", t)}>{value}</div>
-      {sub && <div className="mt-1 text-xs text-muted-foreground">{sub}</div>}
     </div>
   );
 }

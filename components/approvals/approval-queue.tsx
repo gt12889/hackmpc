@@ -70,16 +70,27 @@ export function ApprovalQueue({ initial }: { initial: any }) {
     }
   }
 
+  const metrics = [
+    { label: "Pending", value: String(summary.pending), tone: "text-warning" },
+    { label: "Pending value", value: formatCAD(summary.pendingAmount || 0, { compact: true }), tone: "text-primary" },
+    { label: "Approved", value: String(summary.approved), tone: "text-primary" },
+    { label: "Denied", value: String(summary.denied), tone: "text-destructive" },
+  ] as const;
+
   return (
     <div className="space-y-6 p-8">
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <Stat label="Pending" value={String(summary.pending)} tone="warning" />
-        <Stat label="Pending Value" value={formatCAD(summary.pendingAmount || 0, { compact: true })} tone="primary" />
-        <Stat label="Approved" value={String(summary.approved)} tone="primary" />
-        <Stat label="Denied" value={String(summary.denied)} tone="destructive" />
+      <div className="overflow-hidden rounded-lg border border-border/60">
+        <dl className="grid grid-cols-2 divide-x divide-y divide-border/60 sm:grid-cols-4 sm:divide-y-0">
+          {metrics.map((m) => (
+            <div key={m.label} className="px-4 py-3">
+              <dt className="text-[11px] font-medium uppercase tracking-wide text-neutral-500">{m.label}</dt>
+              <dd className={cn("mt-0.5 text-base font-semibold tabular-nums", m.tone)}>{m.value}</dd>
+            </div>
+          ))}
+        </dl>
       </div>
 
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3">
         <div>
           <h2 className="text-sm font-semibold">{pending.length ? `Reviewing 1 of ${pending.length}` : "All caught up"}</h2>
           <p className="text-xs text-muted-foreground">
@@ -215,16 +226,6 @@ function Ctx({ icon: Icon, label, value, tone }: any) {
         <Icon className="h-3 w-3" /> {label}
       </div>
       <div className={cn("mt-0.5 text-sm font-semibold tabular-nums", tone === "destructive" && "text-destructive", tone === "primary" && "text-primary")}>{value}</div>
-    </div>
-  );
-}
-
-function Stat({ label, value, tone }: any) {
-  const t = { destructive: "text-destructive", warning: "text-warning", muted: "text-muted-foreground", primary: "text-primary" }[tone as string] || "text-foreground";
-  return (
-    <div className="rounded-xl border border-border bg-card p-5">
-      <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</span>
-      <div className={cn("mt-2 text-2xl font-semibold tabular-nums", t)}>{value}</div>
     </div>
   );
 }

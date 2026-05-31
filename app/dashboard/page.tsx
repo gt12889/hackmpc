@@ -25,8 +25,9 @@ export default function DashboardPage() {
 
   return (
     <div>
-      <div className="flex justify-center px-8 pt-7 pb-2">
+      <div className="flex flex-col items-center gap-2 px-8 pt-8 pb-3">
         <ImportDialog variant="prominent" />
+        <p className="text-xs text-neutral-500">Drop a card export (.csv or .xlsx) to refresh your spend data</p>
       </div>
 
       <PageHeader
@@ -46,10 +47,10 @@ export default function DashboardPage() {
         {/* Category + Trend */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
           <SectionCard title="Spend by Category" description="Operational spend, settlements excluded" className="lg:col-span-2">
-            <CategoryPie data={byCategory} />
+            <CategoryPie data={byCategory} height={320} showTotal />
           </SectionCard>
           <SectionCard title="Monthly Spend Trend" description="Total operational spend per month" className="lg:col-span-3">
-            <TrendLine data={monthData} series={[{ key: "spend", label: "Spend" }]} />
+            <TrendLine data={monthData} series={[{ key: "spend", label: "Spend" }]} height={320} />
           </SectionCard>
         </div>
 
@@ -58,14 +59,18 @@ export default function DashboardPage() {
           <div className="space-y-6">
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
               <SectionCard title="Spend by State / Province" description="Top 10 regions by spend">
-                <SpendBar data={byState} horizontal />
+                <SpendBar data={byState} horizontal height={Math.max(280, byState.length * 36)} />
               </SectionCard>
               <SectionCard title="Spend by Card (Cost Center)" description="Primary company card carries most volume">
-                <SpendBar data={byCard} horizontal />
+                <SpendBar data={byCard} horizontal height={Math.max(280, byCard.length * 36)} />
               </SectionCard>
             </div>
             <SectionCard title="Top Merchants" description="Where the money goes">
-              <SpendBar data={merchants.map((m) => ({ key: m.merchant, value: m.spend, count: m.count }))} horizontal />
+              <SpendBar
+                data={merchants.map((m) => ({ key: m.merchant, value: m.spend, count: m.count }))}
+                horizontal
+                height={Math.max(320, merchants.length * 36)}
+              />
             </SectionCard>
           </div>
         </ExpandSection>

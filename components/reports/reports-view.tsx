@@ -4,14 +4,12 @@ import { useState } from "react";
 import useSWR from "swr";
 import { toast } from "sonner";
 import {
-  FileText,
   MapPin,
   AlertTriangle,
   Sparkles,
   Check,
   ChevronDown,
   RefreshCw,
-  CircleDollarSign,
 } from "lucide-react";
 import { cn, formatCAD } from "@/lib/utils";
 import { CHART_COLORS } from "@/components/charts";
@@ -49,16 +47,27 @@ export function ReportsView({ initial }: { initial: any }) {
     toast.success("Report approved by CFO");
   }
 
+  const metrics = [
+    { label: "Reports", value: String(summary.count), tone: "text-neutral-900" },
+    { label: "Total value", value: formatCAD(summary.total || 0, { compact: true }), tone: "text-primary" },
+    { label: "Policy flags", value: String(summary.flags), tone: "text-warning" },
+    { label: "Approved", value: `${summary.approved} / ${summary.count}`, tone: "text-primary" },
+  ] as const;
+
   return (
     <div className="space-y-6 p-8">
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <Stat label="Reports" value={String(summary.count)} icon={FileText} />
-        <Stat label="Total Value" value={formatCAD(summary.total || 0, { compact: true })} icon={CircleDollarSign} tone="primary" />
-        <Stat label="Policy Flags" value={String(summary.flags)} icon={AlertTriangle} tone="warning" />
-        <Stat label="Approved" value={`${summary.approved} / ${summary.count}`} icon={Check} tone="primary" />
+      <div className="overflow-hidden rounded-lg border border-border/60">
+        <dl className="grid grid-cols-2 divide-x divide-y divide-border/60 sm:grid-cols-4 sm:divide-y-0">
+          {metrics.map((m) => (
+            <div key={m.label} className="px-4 py-3">
+              <dt className="text-[11px] font-medium uppercase tracking-wide text-neutral-500">{m.label}</dt>
+              <dd className={cn("mt-0.5 text-base font-semibold tabular-nums", m.tone)}>{m.value}</dd>
+            </div>
+          ))}
+        </dl>
       </div>
 
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3">
         <p className="text-sm text-muted-foreground">
           Grouped by location &amp; month — a clear view of where and when company spend happened, ready for review.
         </p>
@@ -162,19 +171,6 @@ function ReportCard({ report, open, onToggle, onApprove }: any) {
           )}
         </div>
       )}
-    </div>
-  );
-}
-
-function Stat({ label, value, icon: Icon, tone }: any) {
-  const t = { warning: "text-warning", primary: "text-primary", muted: "text-muted-foreground" }[tone as string] || "text-foreground";
-  return (
-    <div className="rounded-xl border border-border bg-card p-5">
-      <div className="flex items-center justify-between">
-        <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</span>
-        {Icon && <Icon className={cn("h-4 w-4", t)} />}
-      </div>
-      <div className={cn("mt-2 text-2xl font-semibold tabular-nums", t)}>{value}</div>
     </div>
   );
 }

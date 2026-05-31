@@ -47,14 +47,16 @@ export function ImportDialog({ variant = "default" }: { variant?: "default" | "p
       <button
         onClick={() => setOpen(true)}
         className={cn(
-          "flex shrink-0 items-center gap-2 transition-colors",
+          "flex shrink-0 items-center transition-all",
           variant === "prominent"
-            ? "rounded-full bg-amber-500 px-6 py-2.5 text-sm text-white shadow-md shadow-amber-500/25 hover:bg-amber-600"
-            : "rounded-lg border border-border/60 bg-foreground/[0.03] px-3 py-2 text-[13px] text-muted-foreground hover:border-primary/30 hover:text-foreground"
+            ? "gap-3 rounded-2xl bg-amber-500 px-10 py-4 text-base font-semibold text-white shadow-lg shadow-amber-500/30 hover:scale-[1.02] hover:bg-amber-600 hover:shadow-xl hover:shadow-amber-500/35 active:scale-[0.98]"
+            : "gap-2 rounded-lg border border-border/60 bg-foreground/[0.03] px-3 py-2 text-[13px] text-muted-foreground hover:border-primary/30 hover:text-foreground"
         )}
       >
-        <Upload className="h-4 w-4" />
-        <span className={variant === "prominent" ? "inline" : "hidden sm:inline"}>Upload</span>
+        <Upload className={cn(variant === "prominent" ? "h-6 w-6" : "h-4 w-4")} />
+        <span className={variant === "prominent" ? "inline" : "hidden sm:inline"}>
+          {variant === "prominent" ? "Upload transactions" : "Upload"}
+        </span>
       </button>
 
       {open && (
