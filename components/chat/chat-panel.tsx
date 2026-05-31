@@ -1,10 +1,11 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
-import { Send, Sparkles, User, Loader2 } from "lucide-react";
+import { Send, Sparkles, User } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { ChartRenderer } from "./chart-renderer";
+import { ThinkingPreview } from "./thinking-preview";
 import { Lineage } from "./lineage";
 import type { VizPayload, ToolCallTrace } from "@/lib/agent";
 import { cn } from "@/lib/utils";
@@ -87,12 +88,7 @@ export function ChatPanel({ compact = false }: { compact?: boolean }) {
           <Message key={i} msg={m} />
         ))}
 
-        {loading && (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Loader2 className="h-4 w-4 animate-spin text-primary" />
-            Analyzing the ledger…
-          </div>
-        )}
+        {loading && <ThinkingPreview />}
       </div>
 
       <div className={cn("border-t border-border bg-background/80 py-4 backdrop-blur", compact ? "px-4" : "px-8")}>

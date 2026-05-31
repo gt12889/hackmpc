@@ -67,13 +67,13 @@ describe("placeAlertCall", () => {
 });
 
 describe("dispatchAlertCalls", () => {
-  it("calls at most 3 high/critical alerts sequentially and skips the rest", async () => {
+  it("calls at most 3 critical alerts sequentially and skips the rest (high never calls)", async () => {
     const db = makeTestDb();
     seedTransaction(db, { id: 1, transaction_code: "3001" });
     const created = [
-      notif({ id: 1, severity: "critical" }), notif({ id: 2, severity: "high" }),
-      notif({ id: 3, severity: "high" }), notif({ id: 4, severity: "critical" }),
-      notif({ id: 5, severity: "medium" }),
+      notif({ id: 1, severity: "critical" }), notif({ id: 2, severity: "critical" }),
+      notif({ id: 3, severity: "critical" }), notif({ id: 4, severity: "critical" }),
+      notif({ id: 5, severity: "high" }), notif({ id: 6, severity: "medium" }),
     ];
     for (const c of created) db.prepare("INSERT INTO notifications (id, alert_key, severity, title) VALUES (?,?,?,?)").run(c.id, c.alert_key + c.id, c.severity, c.title);
     const fetchImpl = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({ conversation_id: "c" }) });
@@ -83,7 +83,7 @@ describe("dispatchAlertCalls", () => {
     expect(fetchImpl).toHaveBeenCalledTimes(3);
   });
 
-  it("marks all high/critical disabled when calling is off", async () => {
+  it("marks all critical disabled when calling is off", async () => {
     const db = makeTestDb();
     const created = [notif({ id: 1, severity: "critical" })];
     db.prepare("INSERT INTO notifications (id, alert_key, severity, title) VALUES (?,?,?,?)").run(1, "k1", "critical", "t");
@@ -107,7 +107,7 @@ describe("dispatchAlertCalls", () => {
     expect(row.call_status).toBe("failed");
   });
 
-  it("marks high/critical unconfigured when credentials are missing", async () => {
+  it("marks critical unconfigured when credentials are missing", async () => {
     const db = makeTestDb();
     const created = [notif({ id: 1, severity: "critical" })];
     db.prepare("INSERT INTO notifications (id, alert_key, severity, title) VALUES (?,?,?,?)").run(1, "ku", "critical", "t");

@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { cn, formatCAD } from "@/lib/utils";
 import { SectionCard } from "@/components/kpi-card";
+import { Reveal } from "@/components/reveal";
 import { TrendLine, CategoryPie, CHART_COLORS } from "@/components/charts";
 import {
   Table,
@@ -25,47 +26,66 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
-const TABS = [
-  { key: "feed", label: "AI Summary", icon: Sparkles },
-  { key: "anomaly", label: "Anomaly", icon: AlertTriangle },
-  { key: "vendors", label: "Vendors", icon: Store },
-  { key: "forecast", label: "Forecast", icon: TrendingUp },
-  { key: "recurring", label: "Recurring", icon: Repeat },
-  { key: "fx", label: "Cross-Border", icon: Globe },
-  { key: "profiles", label: "Profiles", icon: BarChart3 },
-] as const;
+import { ScrollSpyAccordion, type ScrollSpyItem } from "@/components/ui/scroll-spy";
+import { SectionBadge } from "@/components/ui/section-badge";
 
 export function InsightsView({ data }: { data: any }) {
-  const [tab, setTab] = useState<(typeof TABS)[number]["key"]>("feed");
+  const items: ScrollSpyItem[] = [
+    {
+      id: "feed",
+      title: "AI Summary",
+      tag: "DAILY DIGEST",
+      body: "Most important highlights and key takeaways from your recently uploaded spend file.",
+      panel: <FeedTab initial={data.feed} />,
+    },
+    {
+      id: "anomaly",
+      title: "Anomaly",
+      tag: "FRAUD SIGNALS",
+      body: "Duplicate charges, round-number transactions, and settlement payments flagged for review.",
+      panel: <AnomalyTab a={data.anomaly} />,
+    },
+    {
+      id: "vendors",
+      title: "Vendors",
+      tag: "SAVINGS",
+      body: "Fragmented vendor spend across categories — consolidation opportunities and estimated annual savings.",
+      panel: <VendorTab v={data.vendors} />,
+    },
+    {
+      id: "forecast",
+      title: "Forecast",
+      tag: "PROJECTION",
+      body: "Category-level spend projections for the next period with budget overrun risk signals.",
+      panel: <ForecastTab f={data.forecast} />,
+    },
+    {
+      id: "recurring",
+      title: "Recurring",
+      tag: "COMMITMENTS",
+      body: "Subscriptions and recurring charges on autopilot — your fixed monthly committed spend.",
+      panel: <RecurringTab r={data.recurring} />,
+    },
+    {
+      id: "fx",
+      title: "Cross-Border",
+      tag: "CURRENCY",
+      body: "USD vs CAD spend split, estimated FX cost, and cross-border trends by month.",
+      panel: <FxTab x={data.fx} />,
+    },
+    {
+      id: "profiles",
+      title: "Profiles",
+      tag: "BASELINE",
+      body: "Category spend profiles benchmarked against the company average transaction size with trend direction.",
+      panel: <ProfilesTab p={data.profiles} />,
+    },
+  ];
 
   return (
     <div className="space-y-6 p-8">
-      <div className="no-scrollbar flex w-full items-stretch justify-evenly gap-1 overflow-x-auto rounded-lg border border-border bg-card p-1">
-        {TABS.map((t) => {
-          const Icon = t.icon;
-          return (
-            <button
-              key={t.key}
-              onClick={() => setTab(t.key)}
-              className={cn(
-                "flex min-w-[5.5rem] flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-md px-2 py-2 text-sm font-medium transition-colors sm:px-3",
-                tab === t.key ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              <Icon className="h-4 w-4" /> {t.label}
-            </button>
-          );
-        })}
-      </div>
-
-      {tab === "feed" && <FeedTab initial={data.feed} />}
-      {tab === "anomaly" && <AnomalyTab a={data.anomaly} />}
-      {tab === "vendors" && <VendorTab v={data.vendors} />}
-      {tab === "forecast" && <ForecastTab f={data.forecast} />}
-      {tab === "recurring" && <RecurringTab r={data.recurring} />}
-      {tab === "fx" && <FxTab x={data.fx} />}
-      {tab === "profiles" && <ProfilesTab p={data.profiles} />}
+      <SectionBadge>Insights</SectionBadge>
+      <ScrollSpyAccordion items={items} />
     </div>
   );
 }
@@ -196,8 +216,8 @@ function VendorTab({ v }: { v: any }) {
 
       <div className="space-y-4">
         {v.opportunities.slice(0, 6).map((o: any, i: number) => (
+          <Reveal key={i} delay={i * 70}>
           <SectionCard
-            key={i}
             title={`${o.category} — ${o.vendors} vendors`}
             description={`${formatCAD(o.spend)} across ${o.txns} transactions · top vendor only ${o.topVendorShare}% of spend`}
             action={
@@ -219,6 +239,7 @@ function VendorTab({ v }: { v: any }) {
               ))}
             </div>
           </SectionCard>
+          </Reveal>
         ))}
       </div>
     </div>
@@ -244,8 +265,8 @@ function ForecastTab({ f }: { f: any }) {
           const TI = (trendIcon as any)[c.trend];
           const projData = [...c.history, { period: c.projectedMonth, spend: c.projected, projected: true }];
           return (
+            <Reveal key={i} delay={i * 70}>
             <SectionCard
-              key={i}
               title={c.category}
               description={`Avg ${formatCAD(c.avgMonthly, { compact: true })}/mo · budget ${formatCAD(c.budget, { compact: true })}`}
               action={
@@ -266,6 +287,7 @@ function ForecastTab({ f }: { f: any }) {
                 )}
               </div>
             </SectionCard>
+            </Reveal>
           );
         })}
       </div>
@@ -288,7 +310,7 @@ function FeedTab({ initial }: { initial: any[] }) {
     <div className="space-y-4">
       <div className="relative flex min-h-7 items-center justify-center">
         <p className="text-center text-sm text-muted-foreground">Most important highlights based on recently uploaded file.</p>
-        <button onClick={regen} disabled={busy} className="absolute right-0 inline-flex shrink-0 items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs hover:bg-secondary disabled:opacity-50">
+        <button onClick={regen} disabled={busy} className="absolute right-0 inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border px-5 py-1.5 text-xs hover:bg-secondary disabled:opacity-50">
           <RefreshCw className={cn("h-3.5 w-3.5", busy && "animate-spin")} /> Regenerate
         </button>
       </div>
@@ -412,6 +434,7 @@ function ProfilesTab({ p }: { p: any }) {
           { label: "Top share", value: p.summary.topShare || "—", tone: "text-primary" },
         ]}
       />
+      <Reveal>
       <SectionCard title="Category Profiles vs Company Baseline" description="Average-transaction size relative to the company average (1.0×) — and month-over-month trend">
         <div className="space-y-2.5">
           {p.categories.map((c: any, i: number) => {
@@ -430,6 +453,7 @@ function ProfilesTab({ p }: { p: any }) {
           })}
         </div>
       </SectionCard>
+      </Reveal>
     </div>
   );
 }

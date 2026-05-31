@@ -106,7 +106,7 @@ export function AlertSettings() {
       </div>
 
       <p className="max-w-lg text-xs text-muted-foreground">
-        Call on high or critical violations after a scan.
+        Call on critical violations after a scan. High, medium, and low alerts stay in the bell.
       </p>
 
       {!configured && (

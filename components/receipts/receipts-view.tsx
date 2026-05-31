@@ -5,6 +5,7 @@ import useSWR from "swr";
 import { toast } from "sonner";
 import { Loader2, CheckCircle2, AlertTriangle, ScanLine, Link2, Link2Off } from "lucide-react";
 import { cn, formatCAD } from "@/lib/utils";
+import { Reveal } from "@/components/reveal";
 import {
   Table,
   TableBody,
@@ -13,6 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { SectionBadge } from "@/components/ui/section-badge";
 
 const fetcher = (u: string) => fetch(u).then((r) => r.json());
 
@@ -22,6 +24,8 @@ export function ReceiptsView({ initial }: { initial: any }) {
   const [drag, setDrag] = useState(false);
   const [result, setResult] = useState<any>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [visibleRows, setVisibleRows] = useState(10);
+  const ROW_BATCH = 10;
 
   const s = data?.summary ?? initial.summary;
   const unmatched = data?.unmatched ?? [];
@@ -67,7 +71,9 @@ export function ReceiptsView({ initial }: { initial: any }) {
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <Reveal delay={0}>
       <div className="rounded-lg border border-border/60 p-4">
+        <SectionBadge className="mb-2">Scan a Receipt</SectionBadge>
         <h3 className="text-sm font-medium text-neutral-900">Scan a receipt</h3>
         <p className="mt-0.5 text-xs text-neutral-600">Upload a photo — AI Vision reads it and matches it to a transaction</p>
         <div
@@ -114,8 +120,11 @@ export function ReceiptsView({ initial }: { initial: any }) {
           </div>
         )}
       </div>
+      </Reveal>
 
+      <Reveal delay={70}>
       <div className="rounded-lg border border-border/60 p-4">
+        <SectionBadge className="mb-2">Receipt Compliance</SectionBadge>
         <h3 className="text-sm font-medium text-neutral-900">Receipt compliance</h3>
         <p className="mt-0.5 text-xs text-neutral-600">Policy: receipts are required before reimbursement</p>
         <div className="mt-3">
@@ -132,9 +141,14 @@ export function ReceiptsView({ initial }: { initial: any }) {
           <span><b>{s.missing}</b> charges totaling <b>{formatCAD(s.missingValue)}</b> have no receipt on file. High-value gaps are flagged in Compliance.</span>
         </div>
       </div>
+      </Reveal>
       </div>
 
+      <Reveal>
       <div>
+        <div className="mb-3">
+          <SectionBadge>Charges Missing a Receipt</SectionBadge>
+        </div>
         <h3 className="text-sm text-neutral-900">Charges missing a receipt</h3>
         <p className="mt-0.5 text-xs text-neutral-600">Highest-value operational charges over $50 with no receipt</p>
         <div className="mt-3 rounded-lg border border-border/60">
@@ -143,29 +157,42 @@ export function ReceiptsView({ initial }: { initial: any }) {
               <CheckCircle2 className="h-5 w-5 text-primary" /> Every charge over $50 has a receipt.
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Merchant</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead className="text-right">Amount</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {unmatched.map((t: any) => (
-                  <TableRow key={t.id}>
-                    <TableCell className="max-w-[240px] truncate font-medium text-neutral-900">{t.merchant_name}</TableCell>
-                    <TableCell className="text-neutral-600">{t.category}</TableCell>
-                    <TableCell className="text-neutral-600">{t.txn_date}</TableCell>
-                    <TableCell className="text-right tabular-nums font-medium text-neutral-900">{formatCAD(t.amount_cad)}</TableCell>
+            <>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Merchant</TableHead>
+                    <TableHead>Category</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead className="text-right">Amount</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {unmatched.slice(0, visibleRows).map((t: any) => (
+                    <TableRow key={t.id}>
+                      <TableCell className="max-w-[240px] truncate font-medium text-neutral-900">{t.merchant_name}</TableCell>
+                      <TableCell className="text-neutral-600">{t.category}</TableCell>
+                      <TableCell className="text-neutral-600">{t.txn_date}</TableCell>
+                      <TableCell className="text-right tabular-nums font-medium text-neutral-900">{formatCAD(t.amount_cad)}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              {visibleRows < unmatched.length && (
+                <div className="border-t border-border/60 px-4 py-2">
+                  <button
+                    onClick={() => setVisibleRows((r) => Math.min(r + ROW_BATCH, unmatched.length))}
+                    className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-border/60 bg-foreground/[0.02] py-2 text-xs text-muted-foreground transition-colors hover:border-primary/30 hover:text-primary"
+                  >
+                    Load {Math.min(ROW_BATCH, unmatched.length - visibleRows)} more rows
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
+      </Reveal>
     </div>
   );
 }

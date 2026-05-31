@@ -68,7 +68,7 @@ Deeper dives in [`docs/`](docs/).
 
 ## Phone-call alerts (optional)
 
-High/critical compliance alerts can call your phone via an ElevenLabs Conversational AI agent over Twilio.
+**Critical** compliance alerts call your phone via an ElevenLabs Conversational AI agent over Twilio (high/medium/low stay in the in-app bell only). The same agent has no persona — it announces itself as the automated Brim compliance line — and can also answer inbound questions about compliance.
 
 1. Create a Conversational AI agent in ElevenLabs; copy its **Agent ID**.
 2. Import your Twilio number into ElevenLabs; copy the **phone number ID**.
@@ -79,7 +79,7 @@ Alerts always appear in the in-app notification bell regardless of phone config.
 
 **Notes & limitations:**
 - Turn **Phone alerts** on *before* running a scan. Alerts already in the feed from an earlier scan are not re-called when you toggle calling on later — use the **Test call** button to place a live call at any time.
-- An alert's severity is recorded when it's first seen. If a later AI re-rating escalates an existing alert into high/critical, that change won't trigger a new call (it's still visible in the bell).
+- An alert's severity is recorded when it's first seen. If a later AI re-rating escalates an existing alert into critical, that change won't trigger a new call (it's still visible in the bell).
 
 ## Deploy
 

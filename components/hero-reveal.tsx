@@ -172,7 +172,7 @@ export function HeroReveal() {
           {/* Animated BRIM ASCII rain — full-width, flows in/out at the screen borders, fades on scroll */}
           <div
             aria-hidden
-            className="pointer-events-none absolute inset-x-0 top-1/2 h-[46vh] -translate-y-1/2"
+            className="pointer-events-none absolute inset-0"
             style={{ opacity: introArt }}
           >
             <BrimRain className="h-full w-full" />
@@ -206,12 +206,13 @@ export function HeroReveal() {
             </div>
           </div>
 
-          <div className="absolute bottom-12 flex flex-col items-center gap-3" style={{ opacity: cue }}>
-            {/* animated scroll-mouse */}
-            <div className="flex h-10 w-6 items-start justify-center rounded-full border-2 border-primary/50 pt-2">
-              <span className="h-2 w-1.5 animate-bounce rounded-full bg-primary" />
+          <div className="absolute bottom-28 flex flex-col items-center gap-2 md:bottom-32" style={{ opacity: cue }}>
+            {/* scroll-mouse */}
+            <div className="flex h-9 w-5 items-start justify-center rounded-full border-2 border-primary/60 pt-1.5">
+              <span className="h-2 w-1 animate-bounce rounded-full bg-primary" />
             </div>
-            <ArrowDown className="h-4 w-4 animate-bounce text-primary/70" />
+            {/* down-pointing arrow with an idle up/down bob */}
+            <ArrowDown className="h-7 w-7 animate-bounce text-primary drop-shadow-[0_0_8px_hsl(199_85%_55%/0.6)]" />
           </div>
         </div>
       </div>
