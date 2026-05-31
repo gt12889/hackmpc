@@ -24,6 +24,7 @@ import {
 import { cn, formatCAD } from "@/lib/utils";
 import { SectionCard } from "@/components/kpi-card";
 import { AnchorBadge } from "@/components/solana/anchor-badge";
+import { MagicSection, MagicCard } from "@/components/magic-bento/magic-fx";
 
 const fetcher = (u: string) => fetch(u).then((r) => r.json());
 
@@ -91,7 +92,7 @@ export function ApprovalQueue({ initial }: { initial: any }) {
   ] as const;
 
   return (
-    <div className="space-y-6 p-8">
+    <MagicSection className="space-y-6 p-8" glowColor="0, 193, 213" spotlightRadius={320}>
       <div className="overflow-hidden rounded-lg border border-border/60">
         <dl className="grid grid-cols-2 divide-x divide-y divide-border/60 sm:grid-cols-4 sm:divide-y-0">
           {metrics.map((m) => (
@@ -134,7 +135,9 @@ export function ApprovalQueue({ initial }: { initial: any }) {
               opacity: exit && exit.id === pending[0].id ? 0 : 1,
             }}
           >
-            <ApprovalCard req={pending[0]} busy={busy === pending[0].id} onDecide={decide} />
+            <MagicCard className="block rounded-xl" glowColor="0, 193, 213" enableTilt={false}>
+              <ApprovalCard req={pending[0]} busy={busy === pending[0].id} onDecide={decide} />
+            </MagicCard>
           </div>
         </div>
       ) : (
@@ -167,7 +170,7 @@ export function ApprovalQueue({ initial }: { initial: any }) {
           </div>
         </SectionCard>
       )}
-    </div>
+    </MagicSection>
   );
 }
 
