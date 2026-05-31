@@ -16,8 +16,10 @@ Canonical figures after a clean load: **~$1.5M operational spend** (Fuel, Permit
 
 - **Reference:** `mcc_category_map`, `cards`
 - **Fact:** `transactions` (normalized: ISO dates, `amount_cad`, `signed_amount`, `category`, `merchant_norm`, `is_cross_border`, `is_round_number`, …)
-- **Engines (writable):** `policy_rules`, `violations`, `requests`, `expense_reports`, `report_line_items`
+- **Engines (writable):** `policy_rules`, `violations`, `requests`, `expense_reports`, `report_line_items`, `receipts`, `budgets`
 - **Chat:** `chat_sessions`, `chat_messages`
+- **Alerts / settings:** `notifications` (bell feed + call-dedup ledger), `app_settings`
+- **Agents / audit:** `agent_runs` (per-agent swarm traces), `fraud_cases` (investigator case files), `anchors` (Solana audit records)
 
 ## Ingest pipeline (`lib/ingest.ts`)
 
