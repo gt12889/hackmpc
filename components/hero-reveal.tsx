@@ -181,7 +181,9 @@ export function HeroReveal() {
               <img
                 src="/brim-it-logo.png"
                 alt="Brim It"
-                className="h-20 w-auto drop-shadow-[0_0_40px_hsl(199_85%_55%/0.45)] md:h-32"
+                width={435}
+                height={87}
+                className="h-20 w-auto max-w-none drop-shadow-[0_0_40px_hsl(199_85%_55%/0.45)] md:h-28"
               />
               <p className="mt-4 text-lg text-muted-foreground md:text-2xl" style={{ opacity: tagline }}>
                 AI expense intelligence for every dollar.

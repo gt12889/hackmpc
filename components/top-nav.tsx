@@ -41,7 +41,7 @@ export function TopNav() {
       {/* Logo bar */}
       <div className="flex h-14 items-center justify-center border-b border-border/40 bg-white px-5 shadow-sm">
         <Link href="/" className="flex items-center transition-opacity hover:opacity-80">
-          <img src="/brim-it-logo.png" alt="Brim It" className="h-6 w-auto md:h-7" />
+          <img src="/brim-it-logo.png" alt="Brim It" width={435} height={87} className="h-6 w-auto max-w-none md:h-7" />
         </Link>
       </div>
 
