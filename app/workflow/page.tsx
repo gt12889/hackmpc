@@ -1,8 +1,9 @@
-import { CheckSquare, FileText } from "lucide-react";
+import { CheckSquare, FileText, Bot } from "lucide-react";
 import { SubTabs } from "@/components/ui/sub-tabs";
 import { PageHeader } from "@/components/page-header";
 import { ApprovalQueue } from "@/components/approvals/approval-queue";
 import { ReportsView } from "@/components/reports/reports-view";
+import { AgentActivity } from "@/components/agents/agent-activity";
 import { getRequests, getApprovalSummary } from "@/lib/approvals";
 import { getReports, getReportsSummary } from "@/lib/reports";
 
@@ -35,6 +36,17 @@ export default function WorkflowPage() {
             <div>
               <PageHeader title="Expense Reports" description="Auto-grouped transactions with category breakdowns, policy checks, and AI summaries - CFO-ready" />
               <ReportsView initial={reports} />
+            </div>
+          ),
+        },
+        {
+          value: "agents",
+          label: "Agents",
+          icon: <Bot className="h-3.5 w-3.5" />,
+          content: (
+            <div>
+              <PageHeader title="Agent Activity" description="The Brim Agents swarm at work - every role-agent run across debate, fraud investigation, compliance review, and insights" />
+              <AgentActivity />
             </div>
           ),
         },
