@@ -1,5 +1,5 @@
 import { getDb } from "./db";
-import { GoogleGenAI } from "@google/genai";
+import { getClient, generateWithFallback } from "./gemini";
 
 // Policy Compliance Engine. Scans transactions against configurable rules seeded
 // from the REAL Brim expense policy (decoded from the PDF), flags violations,
@@ -234,8 +234,8 @@ export function getRepeatOffenders(): { by_merchant: any[]; by_card: any[] } {
  * severity using the real policy + business context. Bounded to one API call.
  */
 export async function adjustSeverityWithAI(limit = 18): Promise<number> {
-  const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
-  if (!apiKey) return 0;
+  const ai = getClient();
+  if (!ai) return 0;
   const db = getDb();
   const candidates = getViolations().slice(0, limit);
   if (!candidates.length) return 0;
@@ -253,7 +253,6 @@ export async function adjustSeverityWithAI(limit = 18): Promise<number> {
     base_severity: v.severity,
   }));
 
-  const ai = new GoogleGenAI({ apiKey });
   const prompt = `${POLICY_SUMMARY}
 
 You are a finance compliance reviewer for a small/medium business. Below are flagged transactions. For each, decide the TRUE severity (critical|high|medium|low) using CONTEXT, and give a one-sentence reason. Key judgments:
@@ -269,8 +268,7 @@ ${JSON.stringify(payload, null, 1)}`;
 
   let text = "";
   try {
-    const resp = await ai.models.generateContent({
-      model: process.env.GEMINI_MODEL || "gemini-2.5-flash",
+    const { resp } = await generateWithFallback(ai, {
       contents: [{ role: "user", parts: [{ text: prompt }] }],
       config: { temperature: 0.1, responseMimeType: "application/json" },
     });

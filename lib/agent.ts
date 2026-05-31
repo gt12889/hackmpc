@@ -1,8 +1,7 @@
-import { GoogleGenAI } from "@google/genai";
+import { getClient, generateWithFallback, hasApiKey as hasKey } from "./gemini";
 import { FUNCTION_DECLARATIONS, runTool, type ToolResult } from "./tools";
 import { getCategories, getDateBounds, aggregate } from "./queries";
 
-const MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
 const MAX_ITERS = 5;
 
 export type ChatTurn = { role: "user" | "model"; text: string };
@@ -48,20 +47,18 @@ HOW TO ANSWER:
 }
 
 export function hasApiKey(): boolean {
-  return !!(process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY);
+  return hasKey();
 }
 
 export async function runAgent(history: ChatTurn[], userMessage: string): Promise<AgentResult> {
-  const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
-  if (!apiKey) {
+  const ai = getClient();
+  if (!ai) {
     return {
       text: "⚠️ No Gemini API key configured. Add `GEMINI_API_KEY=...` to `.env.local` and restart the dev server to enable conversational analytics.",
       viz: null,
       toolCalls: [],
     };
   }
-
-  const ai = new GoogleGenAI({ apiKey });
 
   const contents: any[] = history.map((t) => ({ role: t.role, parts: [{ text: t.text }] }));
   contents.push({ role: "user", parts: [{ text: userMessage }] });
@@ -70,8 +67,7 @@ export async function runAgent(history: ChatTurn[], userMessage: string): Promis
   let lastViz: VizPayload | null = null;
 
   for (let iter = 0; iter < MAX_ITERS; iter++) {
-    const resp = await ai.models.generateContent({
-      model: MODEL,
+    const { resp } = await generateWithFallback(ai, {
       contents,
       config: {
         systemInstruction: buildSystemInstruction(),

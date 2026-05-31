@@ -1,5 +1,5 @@
 import { getDb } from "./db";
-import { GoogleGenAI } from "@google/genai";
+import { getClient, generateWithFallback } from "./gemini";
 
 // Automated Expense Report Generation. The card data is shared company spend
 // across many locations, so reports are grouped by LOCATION (state/province) +
@@ -78,8 +78,8 @@ export function generateReports(limit = 12): number {
 
 /** One Gemini call → a CFO-ready summary for each report. */
 export async function summarizeReports(): Promise<number> {
-  const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
-  if (!apiKey) return 0;
+  const ai = getClient();
+  if (!ai) return 0;
   const db = getDb();
   const reports = db.prepare(`SELECT * FROM expense_reports WHERE ai_summary IS NULL`).all() as any[];
   if (!reports.length) return 0;
@@ -94,7 +94,6 @@ export async function summarizeReports(): Promise<number> {
     category_breakdown: JSON.parse(r.category_breakdown || "{}"),
   }));
 
-  const ai = new GoogleGenAI({ apiKey });
   const prompt = `You write concise CFO-facing expense-report summaries for a small/medium business. Each report bundles one US state / Canadian province for one month. For each, write a 1-2 sentence summary naming the dominant spend categories and their drivers, and noting any policy flags. Be specific with the dominant CAD figures.
 
 Return ONLY a JSON array: [{"id": <number>, "summary": "<text>"}].
@@ -104,8 +103,7 @@ ${JSON.stringify(payload, null, 1)}`;
 
   let text = "";
   try {
-    const resp = await ai.models.generateContent({
-      model: process.env.GEMINI_MODEL || "gemini-2.5-flash",
+    const { resp } = await generateWithFallback(ai, {
       contents: [{ role: "user", parts: [{ text: prompt }] }],
       config: { temperature: 0.3, responseMimeType: "application/json" },
     });

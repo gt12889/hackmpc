@@ -1,5 +1,5 @@
 import { getDb } from "./db";
-import { GoogleGenAI } from "@google/genai";
+import { getClient, generateWithFallback } from "./gemini";
 import { POLICY_SUMMARY } from "./compliance";
 
 // AI Pre-Approval Workflow. Each pending request shows the approver everything
@@ -94,8 +94,8 @@ export function synthesizeRequests(): number {
 
 /** One Gemini call → approve/deny/review recommendation + reasoning for all pending requests. */
 export async function generateRecommendations(): Promise<number> {
-  const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
-  if (!apiKey) return 0;
+  const ai = getClient();
+  if (!ai) return 0;
   const db = getDb();
   const pending = db.prepare(`SELECT * FROM requests WHERE status='pending'`).all() as any[];
   if (!pending.length) return 0;
@@ -118,7 +118,6 @@ export async function generateRecommendations(): Promise<number> {
     };
   });
 
-  const ai = new GoogleGenAI({ apiKey });
   const prompt = `${POLICY_SUMMARY}
 
 You are the finance approver for a small/medium business. For each pre-approval request below, decide a recommendation: "approve", "deny", or "review" (needs more info). Weigh: policy compliance, whether the amount fits the card's history and the category budget, and whether the merchant is an established/legitimate vendor. Established vendors with consistent history and budget headroom → approve. Over-budget or unusual merchant/amount → review or deny.
@@ -130,8 +129,7 @@ ${JSON.stringify(payload, null, 1)}`;
 
   let text = "";
   try {
-    const resp = await ai.models.generateContent({
-      model: process.env.GEMINI_MODEL || "gemini-2.5-flash",
+    const { resp } = await generateWithFallback(ai, {
       contents: [{ role: "user", parts: [{ text: prompt }] }],
       config: { temperature: 0.2, responseMimeType: "application/json" },
     });
