@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Arimo, Fraunces } from "next/font/google";
 import "./globals.css";
 import { TopNav } from "@/components/top-nav";
-import { FloatingChat } from "@/components/chat/floating-chat";
+import { ChatDock } from "@/components/chat/chat-dock";
 import { Toaster } from "@/components/ui/sonner";
 
 // Arimo — a free, metric-compatible Helvetica substitute. Renders true Helvetica
@@ -30,7 +30,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <main className="flex-1">{children}</main>
         </div>
         <Toaster richColors position="top-right" />
-        <FloatingChat />
+        <ChatDock />
       </body>
     </html>
   );
