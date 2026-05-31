@@ -1,0 +1,3 @@
+{
+  "buildCommand": "npm run db:reset:deploy && npm run build"
+}

@@ -12,6 +12,11 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  // Bundle the demo SQLite DB + schema into serverless traces (built in vercel.json).
+  outputFileTracingIncludes: {
+    "/*": ["./data/hackmpc.db", "./lib/schema.sql"],
+    "/api/**": ["./data/hackmpc.db", "./lib/schema.sql"],
+  },
 };
 
 export default nextConfig;

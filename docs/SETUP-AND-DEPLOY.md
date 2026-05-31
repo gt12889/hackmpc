@@ -46,7 +46,7 @@ The DB path can be overridden with `HACKMPC_DB_DIR` / `HACKMPC_DB_PATH` (used by
 
 **Railway / Fly** - same idea: a volume + the `Dockerfile`.
 
-**Vercel (serverless)** - the local filesystem is ephemeral; swap the client in `lib/db.ts` to **Turso/libSQL** (SQLite-compatible). Only that file changes.
+**Vercel (serverless)** - `vercel.json` runs `npm run db:reset:deploy` before `next build`, which writes `data/hackmpc.db` from the bundled xlsx. At runtime, `lib/db.ts` copies that seed into `/tmp` (writable per invocation). Set `GEMINI_API_KEY` in the Vercel project env. For heavy write workloads or persistence across deploys, use Render/Docker instead.
 
 ## Troubleshooting
 

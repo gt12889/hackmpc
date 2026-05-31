@@ -13,6 +13,9 @@ next-env.d.ts
 
 # local database (built by ETL) + sqlite WAL sidecars
 /.data
+/data/hackmpc.db
+/data/hackmpc.db-wal
+/data/hackmpc.db-shm
 
 # env
 .env
