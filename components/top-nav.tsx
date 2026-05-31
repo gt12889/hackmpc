@@ -52,9 +52,10 @@ export function TopNav() {
           ))}
         </nav>
 
-        {/* Center title */}
-        <Link href="/" className="justify-self-center text-[17px] tracking-tight text-foreground transition-opacity hover:opacity-80">
-          Brim It
+        {/* Center brand */}
+        <Link href="/" className="flex items-center gap-1.5 justify-self-center transition-opacity hover:opacity-80">
+          <img src="/brim-logo.png" alt="Brim" className="h-5 w-auto" />
+          <span className="text-[17px] tracking-tight text-foreground">It</span>
         </Link>
 
         {/* Right badge */}
