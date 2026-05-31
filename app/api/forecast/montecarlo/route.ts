@@ -1,27 +1,29 @@
 import { NextRequest, NextResponse } from "next/server";
 import { forecastInputs, applyMultipliers } from "@/lib/forecast";
 import { callAgentService } from "@/lib/agent-service";
+import { monteCarloLocal, analyzeSpendFactors, type MCResult } from "@/lib/forecast-mc";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-type MCResult = {
-  category: string;
-  p10: number; p25: number; p50: number; p75: number; p90: number;
-  mean: number; volatility: number; overrun_probability: number; projected: number;
-};
 type MCResponse = { results: MCResult[] };
 
-// Probabilistic forecast via the Monte Carlo sidecar. Optional body:
+// Probabilistic forecast. Optional body:
 //   { multipliers?: Record<category, number> }  ← what-if levers (1.0 = baseline)
-// Degrades gracefully: if the sidecar is unreachable we return { available: false }
-// and the UI falls back to the deterministic categoryForecasts() view.
+// Primary path = the numpy Monte Carlo sidecar (20k iterations). If it's
+// unreachable (e.g. on Vercel, where Python can't run), we fall back to an
+// in-process TypeScript Monte Carlo that returns the SAME shape — so the
+// probabilistic forecast works everywhere. Each result is enriched with the
+// top "why is this at risk?" factors (deterministic, no LLM).
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => ({}));
   const multipliers = (body?.multipliers ?? {}) as Record<string, number>;
   const categories = applyMultipliers(forecastInputs(8), multipliers);
 
   const res = await callAgentService<MCResponse>("/forecast/montecarlo", { categories, iterations: 20000, seed: 42 });
-  if (!res.ok) return NextResponse.json({ available: false });
-  return NextResponse.json({ available: true, results: res.data.results });
+  const results = res.ok ? res.data.results : monteCarloLocal(categories, 10000);
+  const source = res.ok ? "sidecar" : "local";
+
+  const enriched = results.map((r) => ({ ...r, factors: analyzeSpendFactors(r.category).slice(0, 3) }));
+  return NextResponse.json({ available: true, source, results: enriched });
 }
