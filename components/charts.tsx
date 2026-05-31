@@ -273,7 +273,7 @@ export function CategoryPie({
           paddingAngle={3}
           stroke="hsl(var(--background))"
           strokeWidth={2}
-          label={showTotal ? undefined : ({ name, percent }) => (percent > 0.06 ? name : "")}
+          label={showTotal ? undefined : ({ name, percent }) => ((percent ?? 0) > 0.06 ? name : "")}
           labelLine={false}
         >
           {data.map((_, i) => (
