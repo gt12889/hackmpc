@@ -203,3 +203,21 @@ CREATE TABLE IF NOT EXISTS app_settings (
   key TEXT PRIMARY KEY,
   value TEXT
 );
+
+-- On-chain audit anchors: SHA-256 of a record's canonical snapshot, notarized in a Solana
+-- Memo transaction (devnet). One row per anchored record; re-anchoring overwrites the row.
+CREATE TABLE IF NOT EXISTS anchors (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  record_type TEXT NOT NULL,          -- 'report' | 'request' | 'alert'
+  record_id   TEXT NOT NULL,          -- entity id (report/request) or alert_key
+  hash        TEXT NOT NULL,          -- sha256 hex of canonical snapshot
+  payload     TEXT NOT NULL,          -- the canonical JSON that was hashed
+  signature   TEXT,                   -- solana tx signature
+  cluster     TEXT,                   -- 'devnet'
+  slot        INTEGER,
+  status      TEXT,                   -- 'confirmed' | 'failed'
+  error       TEXT,
+  created_at  TEXT DEFAULT (datetime('now')),
+  UNIQUE(record_type, record_id)
+);
+CREATE INDEX IF NOT EXISTS idx_anchors_created ON anchors(created_at DESC);
