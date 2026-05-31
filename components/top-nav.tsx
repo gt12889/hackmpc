@@ -63,7 +63,7 @@ export function TopNav() {
                 )}
               >
                 <Icon className="h-5 w-5 shrink-0" strokeWidth={active ? 2.25 : 1.75} />
-                <span className="whitespace-nowrap text-[10px] uppercase tracking-wide sm:text-[11px]">{label}</span>
+                <span className="whitespace-nowrap text-[11px] uppercase tracking-wide sm:text-[12px]">{label}</span>
               </Link>
             );
           })}

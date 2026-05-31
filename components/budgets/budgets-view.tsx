@@ -92,7 +92,7 @@ export function BudgetsView({ initial }: { initial: any }) {
         <dl className="grid grid-cols-2 divide-x divide-y divide-border/60 sm:grid-cols-4 sm:divide-y-0">
           {metrics.map((m) => (
             <div key={m.label} className="px-4 py-3">
-              <dt className="text-[11px] font-medium uppercase tracking-wide text-neutral-500">{m.label}</dt>
+              <dt className="text-[12px] font-medium uppercase tracking-wide text-neutral-500">{m.label}</dt>
               <dd className={cn("mt-0.5 text-base font-semibold tabular-nums", m.tone)}>{m.value}</dd>
             </div>
           ))}
@@ -107,7 +107,7 @@ export function BudgetsView({ initial }: { initial: any }) {
         <p className="mt-0.5 text-xs text-neutral-600">Monthly limit per spend category</p>
         <form onSubmit={addBudget} className="mt-3 flex flex-wrap items-end gap-3">
           <label className="min-w-[12rem] flex-1 space-y-1">
-            <span className="text-[11px] font-medium uppercase tracking-wide text-neutral-500">Category</span>
+            <span className="text-[12px] font-medium uppercase tracking-wide text-neutral-500">Category</span>
             <select
               value={newCategory}
               onChange={(e) => {
@@ -128,7 +128,7 @@ export function BudgetsView({ initial }: { initial: any }) {
             </select>
           </label>
           <label className="w-40 space-y-1">
-            <span className="text-[11px] font-medium uppercase tracking-wide text-neutral-500">Monthly limit</span>
+            <span className="text-[12px] font-medium uppercase tracking-wide text-neutral-500">Monthly limit</span>
             <input
               type="number"
               min={1}

@@ -56,7 +56,7 @@ export function ReceiptsView({ initial }: { initial: any }) {
         <dl className="grid grid-cols-2 divide-x divide-y divide-border/60 sm:grid-cols-4 sm:divide-y-0">
           {metrics.map((m) => (
             <div key={m.label} className="px-4 py-3">
-              <dt className="text-[11px] font-medium uppercase tracking-wide text-neutral-500">{m.label}</dt>
+              <dt className="text-[12px] font-medium uppercase tracking-wide text-neutral-500">{m.label}</dt>
               <dd className={cn("mt-0.5 text-base font-semibold tabular-nums", m.tone)}>{m.value}</dd>
             </div>
           ))}
@@ -89,7 +89,7 @@ export function ReceiptsView({ initial }: { initial: any }) {
             <>
               <ScanLine className="h-8 w-8 text-primary" />
               <div className="text-sm text-neutral-800">Drag a receipt image, or <span className="text-primary">browse</span></div>
-              <div className="text-[11px] text-neutral-500">JPG / PNG · merchant, date, amount extracted automatically</div>
+              <div className="text-[12px] text-neutral-500">JPG / PNG · merchant, date, amount extracted automatically</div>
             </>
           )}
           <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])} />
@@ -97,7 +97,7 @@ export function ReceiptsView({ initial }: { initial: any }) {
 
         {result && (
           <div className="mt-4 rounded-lg border border-border/60 bg-foreground/[0.02] p-3 text-sm">
-            <div className="mb-2 flex items-center gap-2 text-[11px] uppercase tracking-wide text-neutral-500">
+            <div className="mb-2 flex items-center gap-2 text-[12px] uppercase tracking-wide text-neutral-500">
               <ScanLine className="h-3.5 w-3.5" /> Extracted
             </div>
             <div className="grid grid-cols-3 gap-2 text-neutral-800">
@@ -173,7 +173,7 @@ export function ReceiptsView({ initial }: { initial: any }) {
 function Field({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <div className="text-[10px] uppercase tracking-wide text-neutral-500">{label}</div>
+      <div className="text-[11px] uppercase tracking-wide text-neutral-500">{label}</div>
       <div className="truncate text-sm">{value}</div>
     </div>
   );

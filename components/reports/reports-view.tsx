@@ -60,7 +60,7 @@ export function ReportsView({ initial }: { initial: any }) {
         <dl className="grid grid-cols-2 divide-x divide-y divide-border/60 sm:grid-cols-4 sm:divide-y-0">
           {metrics.map((m) => (
             <div key={m.label} className="px-4 py-3">
-              <dt className="text-[11px] font-medium uppercase tracking-wide text-neutral-500">{m.label}</dt>
+              <dt className="text-[12px] font-medium uppercase tracking-wide text-neutral-500">{m.label}</dt>
               <dd className={cn("mt-0.5 text-base font-semibold tabular-nums", m.tone)}>{m.value}</dd>
             </div>
           ))}
@@ -102,9 +102,9 @@ function ReportCard({ report, open, onToggle, onApprove }: any) {
           <div className="flex items-center gap-2">
             <MapPin className="h-4 w-4 text-primary" />
             <span className="font-semibold">{report.title}</span>
-            {approved && <span className="rounded bg-primary/15 px-1.5 py-0.5 text-[10px] font-medium uppercase text-primary">Approved</span>}
+            {approved && <span className="rounded bg-primary/15 px-1.5 py-0.5 text-[11px] font-medium uppercase text-primary">Approved</span>}
             {report.policy_flag_count > 0 && (
-              <span className="inline-flex items-center gap-1 rounded bg-warning/15 px-1.5 py-0.5 text-[10px] font-medium text-warning">
+              <span className="inline-flex items-center gap-1 rounded bg-warning/15 px-1.5 py-0.5 text-[11px] font-medium text-warning">
                 <AlertTriangle className="h-3 w-3" /> {report.policy_flag_count}
               </span>
             )}

@@ -83,6 +83,9 @@
   * {
     @apply border-border;
   }
+  html {
+    font-size: 106.25%;
+  }
   /* All type: Helvetica, bold, across the whole app (per design direction). */
   html,
   body,

@@ -83,7 +83,7 @@ export function ApprovalQueue({ initial }: { initial: any }) {
         <dl className="grid grid-cols-2 divide-x divide-y divide-border/60 sm:grid-cols-4 sm:divide-y-0">
           {metrics.map((m) => (
             <div key={m.label} className="px-4 py-3">
-              <dt className="text-[11px] font-medium uppercase tracking-wide text-neutral-500">{m.label}</dt>
+              <dt className="text-[12px] font-medium uppercase tracking-wide text-neutral-500">{m.label}</dt>
               <dd className={cn("mt-0.5 text-base font-semibold tabular-nums", m.tone)}>{m.value}</dd>
             </div>
           ))}
@@ -167,13 +167,13 @@ function ApprovalCard({ req, busy, onDecide }: { req: any; busy: boolean; onDeci
         <div>
           <div className="flex items-center gap-2">
             <span className="text-base font-semibold">{req.merchant_name}</span>
-            <span className="rounded-md bg-secondary px-2 py-0.5 text-[11px] text-muted-foreground">{req.category}</span>
+            <span className="rounded-md bg-secondary px-2 py-0.5 text-[12px] text-muted-foreground">{req.category}</span>
           </div>
           <p className="mt-0.5 text-sm text-muted-foreground">{req.reason}</p>
         </div>
         <div className="text-right">
           <div className="text-2xl font-semibold tabular-nums">{formatCAD(req.amount_cad)}</div>
-          <div className="text-[11px] text-muted-foreground">Card {req.transaction_code} · {ctx.month}</div>
+          <div className="text-[12px] text-muted-foreground">Card {req.transaction_code} · {ctx.month}</div>
         </div>
       </div>
 
@@ -200,7 +200,7 @@ function ApprovalCard({ req, busy, onDecide }: { req: any; busy: boolean; onDeci
             <Sparkles className="h-3.5 w-3.5 text-primary" />
             <span className="text-xs font-semibold uppercase tracking-wide">AI Recommendation:</span>
             <span className={cn("text-xs font-bold uppercase", rec.cls)}>{rec.label}</span>
-            {req.ai_confidence != null && <span className="text-[11px] text-muted-foreground">({Math.round(req.ai_confidence * 100)}% confidence)</span>}
+            {req.ai_confidence != null && <span className="text-[12px] text-muted-foreground">({Math.round(req.ai_confidence * 100)}% confidence)</span>}
           </div>
           <p className="mt-1 text-sm text-muted-foreground">{req.ai_reasoning}</p>
         </div>
@@ -222,7 +222,7 @@ function ApprovalCard({ req, busy, onDecide }: { req: any; busy: boolean; onDeci
 function Ctx({ icon: Icon, label, value, tone }: any) {
   return (
     <div className="rounded-lg border border-border bg-background/50 p-2.5">
-      <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+      <div className="flex items-center gap-1.5 text-[12px] text-muted-foreground">
         <Icon className="h-3 w-3" /> {label}
       </div>
       <div className={cn("mt-0.5 text-sm font-semibold tabular-nums", tone === "destructive" && "text-destructive", tone === "primary" && "text-primary")}>{value}</div>
