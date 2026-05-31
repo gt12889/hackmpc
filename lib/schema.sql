@@ -221,3 +221,18 @@ CREATE TABLE IF NOT EXISTS anchors (
   UNIQUE(record_type, record_id)
 );
 CREATE INDEX IF NOT EXISTS idx_anchors_created ON anchors(created_at DESC);
+
+-- Audit trail of multi-agent orchestration runs (the "swarm at work" feed). Each row
+-- is one role-agent's contribution to a feature (debate / investigation / review / sweep).
+CREATE TABLE IF NOT EXISTS agent_runs (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  feature     TEXT NOT NULL,          -- 'approval-debate' | 'fraud-investigator' | 'compliance-swarm' | 'insights-swarm'
+  role        TEXT NOT NULL,          -- 'Prosecutor' | 'Defender' | 'Judge' | 'Investigator' | ...
+  subject_key TEXT,                   -- request id / suspect txn id / violation key / 'feed'
+  ok          INTEGER NOT NULL DEFAULT 0,
+  model       TEXT,                   -- which Gemini model served it
+  summary     TEXT,                   -- one-line human-readable result
+  payload     TEXT,                   -- JSON of the agent's structured output
+  created_at  TEXT DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_agent_runs_feature ON agent_runs(feature, created_at);
