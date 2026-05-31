@@ -15,7 +15,7 @@ from langgraph.graph import END, START, StateGraph
 from ..llm import make_llm
 from ..policy import POLICY_SUMMARY
 from ..schemas import AgentTrace, Argument, DebateResult, JudgeVerdict
-from .common import run_agent
+from .common import run_agent, safe_int
 
 FEATURE = "approval-debate"
 
@@ -90,21 +90,30 @@ def run_debate(
     results: list[DebateResult] = []
     traces: list[AgentTrace] = []
     for req in requests:
-        payload = dict(req)
-        subject_key = str(payload.get("id"))
-        out = graph.invoke({"payload": payload, "subject_key": subject_key, "traces": []})
-        traces.extend(out.get("traces", []))
-        verdict = out.get("verdict") or {}
-        rec = verdict.get("recommendation")
-        if rec in ("approve", "deny", "review"):
-            results.append(
-                DebateResult(
-                    id=int(payload.get("id")),
-                    recommendation=rec,
-                    confidence=float(verdict.get("confidence") or 0.0),
-                    reasoning=verdict.get("reasoning", ""),
-                    prosecutor_case=out.get("prosecutor", ""),
-                    defender_case=out.get("defender", ""),
+        # Contain per-request failures so one bad request can't abort the debate batch.
+        try:
+            payload = dict(req)
+            subject_key = str(payload.get("id"))
+            out = graph.invoke({"payload": payload, "subject_key": subject_key, "traces": []})
+            traces.extend(out.get("traces", []))
+            verdict = out.get("verdict") or {}
+            rec = verdict.get("recommendation")
+            rid = safe_int(payload.get("id"))
+            if rid is not None and rec in ("approve", "deny", "review"):
+                try:
+                    confidence = float(verdict.get("confidence") or 0.0)
+                except (TypeError, ValueError):
+                    confidence = 0.0
+                results.append(
+                    DebateResult(
+                        id=rid,
+                        recommendation=rec,
+                        confidence=confidence,
+                        reasoning=verdict.get("reasoning", ""),
+                        prosecutor_case=out.get("prosecutor", ""),
+                        defender_case=out.get("defender", ""),
+                    )
                 )
-            )
+        except Exception as e:  # noqa: BLE001 - one request must not abort the batch
+            traces.append(AgentTrace(feature=FEATURE, role="Judge", subject_key=None, ok=False, summary=str(e)[:160]))
     return results, traces

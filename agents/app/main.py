@@ -5,7 +5,10 @@ TypeScript Next.js routes gather context, POST it here, and persist the results
 + per-agent traces themselves. Every endpoint returns {results|insights, traces}.
 """
 
-from fastapi import FastAPI
+import logging
+
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 
 from .graphs.compliance import run_review
 from .graphs.debate import run_debate
@@ -22,7 +25,18 @@ from .schemas import (
     InsightsResponse,
 )
 
+logger = logging.getLogger("brim-agents")
+
 app = FastAPI(title="Brim Agents", version="0.1.0")
+
+
+@app.exception_handler(Exception)
+async def unhandled_error(request: Request, exc: Exception) -> JSONResponse:
+    """Last-resort safety net: log the failure and return a clean 503 (not a raw
+    500 stack). The TS callAgentService treats any non-2xx as `{ ok: false }` and
+    falls back to the single-call AI path, so the app never breaks on a sidecar error."""
+    logger.exception("sidecar error on %s", request.url.path)
+    return JSONResponse(status_code=503, content={"error": str(exc)[:200], "service": "brim-agents"})
 
 
 @app.get("/health")

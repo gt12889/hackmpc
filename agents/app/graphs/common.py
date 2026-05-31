@@ -15,6 +15,15 @@ from ..llm import invoke_structured, make_llm
 from ..schemas import AgentTrace
 
 
+def safe_int(v: Any) -> int | None:
+    """Tolerant int parse: returns None instead of raising on None/garbage,
+    so one record with a missing id can be skipped without failing the batch."""
+    try:
+        return int(v)
+    except (TypeError, ValueError):
+        return None
+
+
 def _summarize(result: BaseModel) -> str:
     d = result.model_dump()
     # pick the most human-meaningful field for the one-line summary

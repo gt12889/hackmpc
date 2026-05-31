@@ -15,7 +15,7 @@ from typing_extensions import TypedDict
 
 from ..llm import make_llm
 from ..schemas import AgentTrace, FraudCase, FraudVerdict
-from .common import run_agent
+from .common import run_agent, safe_int
 
 FEATURE = "fraud-investigator"
 
@@ -58,20 +58,33 @@ def run_investigation(
     results: list[FraudCase] = []
     traces: list[AgentTrace] = []
     for s in suspects:
-        out = graph.invoke({"suspect": s})
-        tr = out.get("trace")
-        if tr:
-            traces.append(tr)
-        case = out.get("case") or {}
-        verdict = case.get("verdict")
-        if verdict in ("likely_fraud", "suspicious", "benign"):
-            results.append(
-                FraudCase(
-                    transaction_id=int(s.get("transaction_id")),
-                    verdict=verdict,
-                    confidence=float(case.get("confidence") or 0.0),
-                    narrative=case.get("narrative", ""),
-                    recommended_action=case.get("recommended_action", ""),
+        # Contain per-suspect failures: a bad record or invoke error becomes a
+        # failed trace, not a crashed batch.
+        try:
+            out = graph.invoke({"suspect": s})
+            tr = out.get("trace")
+            if tr:
+                traces.append(tr)
+            case = out.get("case") or {}
+            verdict = case.get("verdict")
+            tid = safe_int(s.get("transaction_id"))
+            if tid is not None and verdict in ("likely_fraud", "suspicious", "benign"):
+                results.append(
+                    FraudCase(
+                        transaction_id=tid,
+                        verdict=verdict,
+                        confidence=_safe_float(case.get("confidence")),
+                        narrative=case.get("narrative", ""),
+                        recommended_action=case.get("recommended_action", ""),
+                    )
                 )
-            )
+        except Exception as e:  # noqa: BLE001 - one suspect must not abort the swarm
+            traces.append(AgentTrace(feature=FEATURE, role="Investigator", subject_key=None, ok=False, summary=str(e)[:160]))
     return results, traces
+
+
+def _safe_float(v: Any) -> float:
+    try:
+        return float(v)
+    except (TypeError, ValueError):
+        return 0.0
