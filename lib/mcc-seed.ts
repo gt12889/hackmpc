@@ -151,7 +151,6 @@ export const MCC_MAP: Record<string, CategoryDef> = {
   "5599": { category: "Maintenance & Repair", subcategory: "Auto Dealers NEC", description: "Automotive Dealers (NEC)" },
   "5817": { category: "Office & Admin", subcategory: "Software/SaaS", description: "Digital Goods - Applications/Software" },
   "5818": { category: "Office & Admin", subcategory: "Software/SaaS", description: "Digital Goods - Large Merchant" },
-  "5045": { category: "Office & Admin", subcategory: "Computers", description: "Computers, Peripherals, Software" },
   "5968": { category: "Office & Admin", subcategory: "Subscription", description: "Direct Marketing - Subscriptions" },
   "7392": { category: "Office & Admin", subcategory: "Consulting", description: "Management, Consulting, PR Services" },
   "7299": { category: "Office & Admin", subcategory: "Services", description: "Miscellaneous Personal Services" },

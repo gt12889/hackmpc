@@ -1,4 +1,4 @@
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, type GenerateContentParameters } from "@google/genai";
 
 // Shared Gemini client + automatic model fallback. Google's free tier meters
 // quota PER MODEL, so if the primary model is rate-limited (429), we transparently
@@ -7,16 +7,24 @@ import { GoogleGenAI } from "@google/genai";
 
 const PRIMARY = process.env.GEMINI_MODEL || "gemini-2.5-flash";
 
-// Order: primary → lighter/cheaper flash variants (each has its own free quota).
-export const MODEL_CHAIN: string[] = [
-  ...new Set([
-    PRIMARY,
-    "gemini-2.5-flash-lite",
-    "gemini-2.0-flash",
-    "gemini-2.0-flash-lite",
-    "gemini-2.5-flash",
-  ]),
-];
+// Google's free tier meters quota PER MODEL PER DAY, so each entry is an
+// independent quota pool — the more (real, tool-capable) models we list, the
+// longer the app keeps working once any one model is daily-exhausted. We span
+// model generations (2.x + 3.x flash) because newer generations get their own
+// fresh quota buckets. Override the whole chain with GEMINI_MODELS (comma-sep).
+export const MODEL_CHAIN: string[] = (process.env.GEMINI_MODELS
+  ? process.env.GEMINI_MODELS.split(",").map((m) => m.trim()).filter(Boolean)
+  : [
+      PRIMARY,
+      "gemini-2.5-flash-lite",
+      "gemini-2.0-flash",
+      "gemini-2.0-flash-lite",
+      "gemini-3.5-flash",
+      "gemini-3.1-flash-lite",
+      "gemini-flash-latest",
+      "gemini-flash-lite-latest",
+    ]
+).filter((m, i, arr) => arr.indexOf(m) === i); // de-dupe, preserve order
 
 export function hasApiKey(): boolean {
   return !!(process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY);
@@ -27,9 +35,22 @@ export function getClient(): GoogleGenAI | null {
   return apiKey ? new GoogleGenAI({ apiKey }) : null;
 }
 
-function isQuotaError(e: any): boolean {
+/** True when the error means "this model can't serve right now — try another":
+ *  quota exhaustion (429) OR the model being unavailable/retired for this key
+ *  (404 NOT_FOUND). Anything else is a real bug and should surface immediately. */
+function shouldTryNextModel(e: any): boolean {
   const msg = `${e?.message ?? e}`;
-  return msg.includes("RESOURCE_EXHAUSTED") || msg.includes('"code":429') || msg.includes("429");
+  const code = e?.status ?? e?.code;
+  return (
+    code === 429 ||
+    code === 404 ||
+    msg.includes("RESOURCE_EXHAUSTED") ||
+    msg.includes('"code":429') ||
+    msg.includes("429") ||
+    msg.includes("NOT_FOUND") ||
+    msg.includes("is not found") ||
+    msg.includes("not supported for generateContent")
+  );
 }
 
 /**
@@ -39,7 +60,7 @@ function isQuotaError(e: any): boolean {
  */
 export async function generateWithFallback(
   ai: GoogleGenAI,
-  params: Record<string, any>
+  params: Omit<GenerateContentParameters, "model">
 ): Promise<{ resp: any; model: string }> {
   let lastErr: any;
   for (const model of MODEL_CHAIN) {
@@ -47,11 +68,11 @@ export async function generateWithFallback(
       const resp = await ai.models.generateContent({ ...params, model });
       return { resp, model };
     } catch (e) {
-      if (isQuotaError(e)) {
+      if (shouldTryNextModel(e)) {
         lastErr = e;
-        continue; // try the next free model
+        continue; // quota'd or unavailable — try the next free model
       }
-      throw e; // non-quota error — surface immediately
+      throw e; // genuine error (bad request, etc.) — surface immediately
     }
   }
   throw lastErr ?? new Error("All Gemini models exhausted");

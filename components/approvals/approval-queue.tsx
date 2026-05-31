@@ -17,7 +17,6 @@ import {
 } from "lucide-react";
 import { cn, formatCAD } from "@/lib/utils";
 import { SectionCard } from "@/components/kpi-card";
-import { ShowMore } from "@/components/show-more";
 
 const fetcher = (u: string) => fetch(u).then((r) => r.json());
 
@@ -30,6 +29,7 @@ const REC_STYLE: Record<string, { cls: string; icon: any; label: string }> = {
 export function ApprovalQueue({ initial }: { initial: any }) {
   const { data, mutate } = useSWR("/api/requests", fetcher, { fallbackData: initial });
   const [busy, setBusy] = useState<number | "all" | null>(null);
+  const [exit, setExit] = useState<{ id: number; dir: "left" | "right" } | null>(null);
 
   const requests = data?.requests ?? [];
   const summary = data?.summary ?? initial.summary;
@@ -37,7 +37,11 @@ export function ApprovalQueue({ initial }: { initial: any }) {
   const decided = requests.filter((r: any) => r.status !== "pending");
 
   async function decide(id: number, decision: "approved" | "denied") {
+    if (busy) return;
     setBusy(id);
+    setExit({ id, dir: decision === "approved" ? "right" : "left" });
+    // let the card slide out before the queue advances
+    await new Promise((r) => setTimeout(r, 320));
     try {
       await fetch(`/api/requests/${id}`, {
         method: "PATCH",
@@ -45,10 +49,11 @@ export function ApprovalQueue({ initial }: { initial: any }) {
         body: JSON.stringify({ decision }),
       });
       await mutate();
-      toast.success(`Request ${decision}`);
+      toast.success(decision === "approved" ? "Approved" : "Denied");
     } catch {
       toast.error("Failed to record decision");
     } finally {
+      setExit(null);
       setBusy(null);
     }
   }
@@ -75,26 +80,46 @@ export function ApprovalQueue({ initial }: { initial: any }) {
       </div>
 
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-muted-foreground">{pending.length} requests awaiting your decision</h2>
+        <div>
+          <h2 className="text-sm font-semibold">{pending.length ? `Reviewing 1 of ${pending.length}` : "All caught up"}</h2>
+          <p className="text-xs text-muted-foreground">
+            {(summary.approved || 0) + (summary.denied || 0)} of {(summary.approved || 0) + (summary.denied || 0) + pending.length} decided
+          </p>
+        </div>
         <button onClick={regenerate} disabled={busy === "all"} className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs hover:bg-secondary disabled:opacity-50">
           <RefreshCw className={cn("h-3.5 w-3.5", busy === "all" && "animate-spin")} /> Rebuild queue
         </button>
       </div>
 
-      <div className="space-y-4">
-        <ShowMore
-          items={pending}
-          initial={3}
-          noun="requests"
-          className="space-y-4"
-          render={(r: any) => <ApprovalCard key={r.id} req={r} busy={busy === r.id} onDecide={decide} />}
-        />
-        {pending.length === 0 && (
-          <div className="rounded-xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">
-            Queue is clear — every request has been decided.
+      {pending.length > 0 ? (
+        <div className="relative mx-auto max-w-2xl pb-6">
+          {/* deck behind, implying more in the queue */}
+          {pending.length > 2 && (
+            <div className="absolute inset-x-8 top-0 -z-20 h-full translate-y-6 scale-[0.92] rounded-2xl border border-border/50 bg-card/40" />
+          )}
+          {pending.length > 1 && (
+            <div className="absolute inset-x-4 top-0 -z-10 h-full translate-y-3 scale-[0.96] rounded-2xl border border-border/60 bg-card/60" />
+          )}
+          {/* active card slides out on decision, next slides up */}
+          <div
+            key={pending[0].id}
+            className="relative transition-all duration-300 ease-out"
+            style={{
+              transform:
+                exit && exit.id === pending[0].id
+                  ? `translateX(${exit.dir === "right" ? "130%" : "-130%"}) rotate(${exit.dir === "right" ? 6 : -6}deg)`
+                  : "none",
+              opacity: exit && exit.id === pending[0].id ? 0 : 1,
+            }}
+          >
+            <ApprovalCard req={pending[0]} busy={busy === pending[0].id} onDecide={decide} />
           </div>
-        )}
-      </div>
+        </div>
+      ) : (
+        <div className="rounded-xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">
+          Queue is clear — every request has been decided.
+        </div>
+      )}
 
       {decided.length > 0 && (
         <SectionCard title="Recent Decisions" description="Audit trail">
