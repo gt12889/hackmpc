@@ -10,12 +10,14 @@ import {
   Check,
   ChevronDown,
   RefreshCw,
+  FileDown,
 } from "lucide-react";
 import { cn, formatCAD } from "@/lib/utils";
 import { Reveal } from "@/components/reveal";
 import { AnchorBadge } from "@/components/solana/anchor-badge";
 import { CHART_COLORS } from "@/components/charts";
 import { SectionBadge } from "@/components/ui/section-badge";
+import { printReports } from "@/lib/report-print";
 
 const fetcher = (u: string) => fetch(u).then((r) => r.json());
 
@@ -75,9 +77,19 @@ export function ReportsView({ initial }: { initial: any }) {
         <p className="text-sm text-muted-foreground">
           Grouped by location &amp; month - a clear view of where and when company spend happened, ready for review.
         </p>
-        <button onClick={regenerate} disabled={busy} className="inline-flex items-center gap-1.5 rounded-full border border-border px-5 py-1.5 text-xs hover:bg-secondary disabled:opacity-50">
-          <RefreshCw className={cn("h-3.5 w-3.5", busy && "animate-spin")} /> Regenerate
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => printReports(reports)}
+            disabled={reports.length === 0}
+            title="Open a print-ready PDF of every report"
+            className="inline-flex items-center gap-1.5 rounded-full border border-border px-5 py-1.5 text-xs hover:bg-secondary disabled:opacity-50"
+          >
+            <FileDown className="h-3.5 w-3.5" /> Export all (PDF)
+          </button>
+          <button onClick={regenerate} disabled={busy} className="inline-flex items-center gap-1.5 rounded-full border border-border px-5 py-1.5 text-xs hover:bg-secondary disabled:opacity-50">
+            <RefreshCw className={cn("h-3.5 w-3.5", busy && "animate-spin")} /> Regenerate
+          </button>
+        </div>
       </div>
 
       <Reveal>
@@ -141,6 +153,15 @@ function ReportCard({ report, open, onToggle, onApprove }: any) {
             <span className="w-20 shrink-0 text-right tabular-nums">{formatCAD(amt, { compact: true })}</span>
           </div>
         ))}
+        <div className="flex justify-end pt-1">
+          <button
+            onClick={() => printReports([report])}
+            title="Open a print-ready PDF of this report"
+            className="inline-flex items-center gap-1.5 rounded-full border border-border/70 px-3 py-1 text-[11px] text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
+          >
+            <FileDown className="h-3 w-3" /> PDF
+          </button>
+        </div>
       </div>
 
       {report.ai_summary && (
