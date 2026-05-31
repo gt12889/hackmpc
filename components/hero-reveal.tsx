@@ -27,6 +27,7 @@ export function HeroReveal() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const progRef = useRef(0);
+  const pointerRef = useRef<{ x: number; y: number } | null>(null);
   const [p, setP] = useState(0);
 
   useEffect(() => {
@@ -75,6 +76,15 @@ export function HeroReveal() {
     const onResize = () => { dpr = Math.min(2, window.devicePixelRatio || 1); build(); };
     window.addEventListener("resize", onResize);
 
+    // Cursor interactivity: particles part around the pointer (strongest before scroll).
+    const onMove = (ev: MouseEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      pointerRef.current = { x: ((ev.clientX - rect.left) / rect.width) * w, y: ((ev.clientY - rect.top) / rect.height) * h };
+    };
+    const onLeave = () => { pointerRef.current = null; };
+    window.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseleave", onLeave);
+
     const loop = () => {
       const sec = sectionRef.current;
       if (sec) {
@@ -102,6 +112,16 @@ export function HeroReveal() {
           let y = pt.cy + (pt.ty - pt.cy) * e + Math.cos(t * 0.5 + pt.ph) * drift;
           x = ccx + (x - ccx) * zoom;
           y = ccy + (y - ccy) * zoom;
+          // Cursor repulsion — fades out as the chart organizes.
+          const ptr = pointerRef.current;
+          if (ptr) {
+            const dx = x - ptr.x, dy = y - ptr.y, d2 = dx * dx + dy * dy, R = 130;
+            if (d2 < R * R) {
+              const d = Math.sqrt(d2) || 1;
+              const force = (1 - d / R) * 48 * (1 - e * 0.7);
+              x += (dx / d) * force; y += (dy / d) * force;
+            }
+          }
           const alpha = 0.28 + 0.55 * e + 0.1 * Math.sin(t + pt.ph);
           ctx.beginPath();
           ctx.fillStyle = pt.teal ? `hsla(199,76%,46%,${clamp(alpha)})` : `hsla(197,65%,68%,${clamp(alpha)})`;
@@ -113,7 +133,12 @@ export function HeroReveal() {
       raf = requestAnimationFrame(loop);
     };
     raf = requestAnimationFrame(loop);
-    return () => { cancelAnimationFrame(raf); window.removeEventListener("resize", onResize); };
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("resize", onResize);
+      window.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseleave", onLeave);
+    };
   }, []);
 
   const brand = band(p, [0.66, 0.8]);
@@ -167,9 +192,15 @@ export function HeroReveal() {
             </div>
           </div>
 
-          <div className="absolute bottom-10 flex flex-col items-center gap-2 text-muted-foreground" style={{ opacity: cue }}>
-            <span className="text-xs uppercase tracking-[0.25em]">Scroll</span>
-            <ArrowDown className="h-4 w-4 animate-bounce" />
+          <div className="absolute bottom-12 flex flex-col items-center gap-3" style={{ opacity: cue }}>
+            <span className="rounded-full bg-primary/10 px-4 py-1.5 text-sm text-primary ring-1 ring-primary/25">
+              Scroll to watch your spend come into focus
+            </span>
+            {/* animated scroll-mouse */}
+            <div className="flex h-10 w-6 items-start justify-center rounded-full border-2 border-primary/50 pt-2">
+              <span className="h-2 w-1.5 animate-bounce rounded-full bg-primary" />
+            </div>
+            <ArrowDown className="h-4 w-4 animate-bounce text-primary/70" />
           </div>
 
           <Link href="/dashboard" className="absolute right-6 top-6 text-xs text-muted-foreground transition-colors hover:text-foreground" style={{ opacity: cue }}>
