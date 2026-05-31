@@ -4,6 +4,19 @@
 
 A non-technical finance manager can chat with their company's spend in plain English, manage a digitized expense policy and triage violations, run an AI pre-approval queue, and generate review-ready expense reports — all grounded in real numbers.
 
+> **Pages:** `/` is a cinematic scroll-reveal brand overview; the working dashboard lives at **`/dashboard`**. A minimal top-nav (Dashboard · Ask AI · Menu ▾) with progressive disclosure keeps every screen lean.
+
+## Documentation
+
+Full docs live in [`docs/`](docs/):
+
+- [Architecture](docs/ARCHITECTURE.md) — stack, data flow, module map, patterns
+- [Features](docs/FEATURES.md) — the 4 required + 3 optional + import, with file references
+- [Data & Ingest](docs/DATA-AND-INGEST.md) — dataset, schema, the shared ingest pipeline, dedup
+- [AI Layer](docs/AI.md) — agentic chat, batched passes, model fallback, configuration
+- [Setup & Deploy](docs/SETUP-AND-DEPLOY.md) — scripts, env, hosting, troubleshooting
+- [Design Decisions](docs/DECISIONS.md) — the non-obvious calls and why
+
 ## Working with the real data
 
 The dataset is **4,235 anonymized company-card transactions** (Aug 2025–Mar 2026, CAD). A few things shaped the build:
@@ -43,13 +56,16 @@ npm run dev                        # http://localhost:3000
 
 `npm run db:reset` rebuilds the SQLite DB from `data/transactions.xlsx`: normalizes dates, CAD amounts, and MCC→category mapping (`scripts/etl.ts`), then seeds policy rules, the approval queue, and expense reports. Without a Gemini key the app still runs — the rule-based engines populate; only the AI reasoning/summaries are skipped.
 
-**Upload your own data:** the **Import** button (top bar) accepts a `.csv` or `.xlsx` card export. It runs the same ingest pipeline (`lib/ingest.ts`, shared with the ETL script) — tolerant of common column-name variants (Date/Merchant/Amount/MCC/Card…) and of either Excel-serial or real date strings — then re-scans compliance, rebuilds the approval queue, and regenerates reports.
+**Upload your own data:** the **Import** button on the Dashboard accepts a `.csv` or `.xlsx` card export. It runs the same ingest pipeline (`lib/ingest.ts`, shared with the ETL script) — tolerant of common column-name variants (Date/Merchant/Amount/MCC/Card…) and of either Excel-serial or real date strings. New rows are **appended** (existing data kept) and **de-duplicated** against existing charges, then compliance re-scans and approvals/reports regenerate. See [Data & Ingest](docs/DATA-AND-INGEST.md).
 
 ## Architecture notes
 
 - **No raw SQL from the model.** The agent calls parameterized, whitelisted, zod-validated query tools (`lib/tools.ts` → `lib/queries.ts`). The same query layer backs the dashboard.
-- **AI is bounded**: each AI feature is one batched Gemini call (severity triage, approval recs, report summaries) with `responseMimeType: application/json`.
+- **AI is bounded**: each non-chat AI feature is one batched Gemini call (severity triage, approval recs, report summaries) with `responseMimeType: application/json`.
+- **Per-model fallback**: `lib/gemini.ts` retries `429`s down a chain of free Gemini models, so any available model serves the request. See [AI Layer](docs/AI.md).
+
+Deeper dives in [`docs/`](docs/).
 
 ## Deploy
 
-`better-sqlite3` needs a persistent filesystem. Deploy to a host with a volume (Railway / Render / Fly) and run `npm run db:reset` on first boot — see `Dockerfile` and `render.yaml`. For a serverless target (Vercel), swap the client in `lib/db.ts` to Turso/libSQL (SQLite-compatible).
+`better-sqlite3` needs a persistent filesystem. Deploy to a host with a volume (Render / Railway / Fly) and run `npm run db:reset` on first boot — see `Dockerfile` and `render.yaml`. For a serverless target (Vercel), swap the client in `lib/db.ts` to Turso/libSQL (SQLite-compatible). Full instructions in [Setup & Deploy](docs/SETUP-AND-DEPLOY.md).
