@@ -27,3 +27,8 @@ yarn-debug.log*
 yarn-error.log*
 /coverage
 *.tsbuildinfo
+
+# Python agent sidecar
+/agents/.venv
+__pycache__/
+.pytest_cache/

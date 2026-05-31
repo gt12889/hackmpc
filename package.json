@@ -17,7 +17,8 @@
     "seed:reports": "tsx scripts/seed-reports.ts",
     "seed:receipts": "tsx scripts/seed-receipts.ts",
     "seed:budgets": "tsx scripts/seed-budgets.ts",
-    "solana:setup": "node scripts/solana-setup.mjs"
+    "solana:setup": "node scripts/solana-setup.mjs",
+    "agents": "cd agents && uv run uvicorn app.main:app --port 8200 --reload"
   },
   "dependencies": {
     "@google/genai": "^2.7.0",
