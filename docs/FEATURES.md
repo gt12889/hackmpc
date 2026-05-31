@@ -11,8 +11,9 @@ Conversational analytics over company-card spend.
 
 ### 2. Policy Compliance Engine - `/compliance`
 Digitized policy + automatic violation scanning.
-- **Files:** `lib/compliance.ts`, `scripts/seed-policies.ts`, `app/api/policies/*`, `components/compliance/*`
+- **Files:** `lib/compliance.ts`, `lib/compliance-contexts.ts`, `scripts/seed-policies.ts`, `app/api/policies/*`, `components/compliance/*`
 - **How:** Six rules seeded from the **real Brim expense policy** (>$50 pre-auth, no traffic/parking tickets, alcohol restriction, tips, cross-border review, category budget). The scanner flags violations, detects **split-charge evasion** (same card+merchant+day crossing a threshold while each charge stays under it), and rolls up **repeat offenders**. A bounded Gemini pass adjusts **severity by context** (e.g. legitimate same-day permit batching → LOW; a large established-vendor charge → HIGH for visibility). Rules can be toggled/added live; re-scan re-runs the engine.
+- **Context presets** (`lib/compliance-contexts.ts`): a dropdown beside Re-scan picks a named situation — **Normal** (1×), **Quarter-end close** (0.7× thresholds, stricter), **Audit mode** (0.5×), **High-travel season** (1.4×, relaxed). The chosen multiplier scales every rule's stored threshold inside `runScan({ multiplier })` → `detectForRule`, so one engine adapts to the situation without editing individual rules (e.g. Normal=69 flags → Audit=335 on the demo data). The AI severity pass runs on the resulting violations unchanged.
 
 ### 3. AI Pre-Approval Workflow - `/approvals`
 Decide once, with full context.

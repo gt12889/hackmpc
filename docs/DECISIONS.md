@@ -44,5 +44,11 @@ A multi-agent run fires many LLM calls at once, which the Gemini **free tier (~2
 ### One universal error modal ("API credits ran out")
 Any genuine failure across the site (a 5xx response, a network error, or an unhandled rejection) pops a single themed modal with a fixed message, instead of a broken screen or a raw stack. It is installed once in `components/api-error-modal.tsx` by wrapping `window.fetch` + an `unhandledrejection` listener, ignores expected 4xx (auth/validation) and intentional aborts, and is throttled so background polling can't spam it. Chosen for demo resilience: an exhausted key never looks like a crash.
 
+### Compliance context presets are a single threshold multiplier
+Rather than per-rule per-context overrides (a table + join), a "context" is one named multiplier on every rule's threshold (`lib/compliance-contexts.ts`), threaded through `runScan({ multiplier })` → `detectForRule`. Lower = stricter (Quarter-end 0.7×, Audit 0.5×); higher = relaxed (High-travel 1.4×). It's the smallest change that makes the engine situation-aware, leaves the AI severity pass untouched, and needs no schema.
+
+### Probabilistic forecast runs synchronously, with an in-process TS fallback
+The numpy sidecar Monte Carlo is the primary path, but 10k quantile samples finish in ~10ms, so there's no need for a job queue / progress polling / worker fan-out — the route returns synchronously. When the sidecar is unreachable (notably on Vercel, where Python can't run) an in-process **TypeScript** Monte Carlo (`lib/forecast-mc.ts` + `lib/stats.ts`) returns the identical shape, so the feature works everywhere. The "why is this at risk?" factor ranking is deterministic (computed from the ledger), not an LLM call. Chart hover-polish uses zero-dep CSS rather than adding framer-motion.
+
 ### Self-assessed scorecard
 See [SUBMISSION.md](SUBMISSION.md) for the writeup and the rubric mapping (required /6, optional /6, AI depth /4, UI/UX /4) with evidence.

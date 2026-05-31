@@ -28,7 +28,8 @@ A finance manager can:
 2. **Digitize and enforce policy** - six rules from the real Brim policy auto-scan every
    transaction, catch **split-charge evasion** (two sub-threshold charges that sum over the limit),
    roll up **repeat offenders**, and apply **contextual AI severity** (a legit same-day permit
-   batch is LOW; genuine threshold-ducking is HIGH).
+   batch is LOW; genuine threshold-ducking is HIGH). **Context presets** (Quarter-end / Audit /
+   High-travel) scale every rule's threshold before scanning, so the engine adapts to the situation.
 3. **Run an AI pre-approval queue** - each request shows the card's history, category budget
    headroom, and policy flags, plus an AI **approve/deny/review** recommendation with reasoning.
    One click decides it.
