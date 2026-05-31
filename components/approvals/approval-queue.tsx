@@ -147,13 +147,13 @@ export function ApprovalQueue({ initial }: { initial: any }) {
             {decided.map((r: any) => (
               <div key={r.id} className="flex items-center justify-between border-b border-border/50 py-2 text-sm last:border-0">
                 <div className="flex items-center gap-2">
-                  {r.status === "approved" ? <Check className="h-4 w-4 text-primary" /> : <X className="h-4 w-4 text-destructive" />}
+                  {r.status === "approved" ? <Check className="h-4 w-4 text-success" /> : <X className="h-4 w-4 text-destructive" />}
                   <span>{r.merchant_name}</span>
                   <span className="text-xs text-muted-foreground">· card {r.transaction_code}</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="tabular-nums">{formatCAD(r.amount_cad)}</span>
-                  <span className={cn("text-xs font-medium uppercase", r.status === "approved" ? "text-primary" : "text-destructive")}>{r.status}</span>
+                  <span className={cn("text-xs font-medium uppercase", r.status === "approved" ? "text-success" : "text-destructive")}>{r.status}</span>
                 </div>
               </div>
             ))}
