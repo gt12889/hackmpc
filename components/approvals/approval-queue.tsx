@@ -255,12 +255,12 @@ function ApprovalCard({ req, busy, onDecide }: { req: any; busy: boolean; onDeci
           className="flex items-center gap-1.5 text-[13px] font-medium uppercase tracking-wide text-neutral-500 transition-colors hover:text-foreground"
         >
           <ChevronRight className={cn("h-3.5 w-3.5 transition-transform", showCtx && "rotate-90")} />
-          Spend context{history.length > 0 ? ` & vendor history (${history.length})` : ""}
+          Spending context{history.length > 0 ? ` & vendor history (${history.length})` : ""}
         </button>
         <div className={cn("grid transition-all duration-200", showCtx ? "mt-3 grid-rows-[1fr]" : "grid-rows-[0fr]")}>
           <div className="overflow-hidden">
             <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-              <Ctx icon={CreditCard} label="Card total spend" value={formatCAD(ctx.cardTotalSpend || 0, { compact: true })} sub={`${ctx.cardTxnCount ?? 0} transactions`} />
+              <Ctx icon={CreditCard} label="Card total spending" value={formatCAD(ctx.cardTotalSpend || 0, { compact: true })} sub={`${ctx.cardTxnCount ?? 0} transactions`} />
               <Ctx icon={History} label={`Prior ${req.category} (card)`} value={formatCAD(ctx.cardCategorySpend || 0, { compact: true })} />
               <Ctx icon={History} label="Prior txns w/ vendor" value={String(ctx.cardMerchantCount ?? 0)} sub={ctx.cardMerchantCount > 0 ? "Established vendor" : "First-time vendor"} />
               <Ctx

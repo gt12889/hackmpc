@@ -29,7 +29,7 @@ export function FloatingChat() {
           <div className="flex items-center justify-between border-b border-border/60 px-4 py-3">
             <div>
               <h2 className="text-sm">Ask AI</h2>
-              <p className="text-[13px] text-muted-foreground">Talk to your spend data</p>
+              <p className="text-[13px] text-muted-foreground">Talk to your spending data</p>
             </div>
             <button
               type="button"

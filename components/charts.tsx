@@ -117,7 +117,7 @@ export function SpendBar({
           </>
         )}
         <Tooltip content={<MoneyTooltip money={money} />} cursor={{ fill: "hsl(var(--accent))", opacity: 0.25 }} />
-        <Bar dataKey="value" name={money ? "Spend" : "Count"} radius={horizontal ? [0, 6, 6, 0] : [6, 6, 0, 0]} maxBarSize={horizontal ? 22 : 48}>
+        <Bar dataKey="value" name={money ? "Spending" : "Count"} radius={horizontal ? [0, 6, 6, 0] : [6, 6, 0, 0]} maxBarSize={horizontal ? 22 : 48}>
           {data.map((d, i) => (
             <Cell
               key={i}

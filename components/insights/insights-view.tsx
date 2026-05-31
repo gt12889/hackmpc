@@ -36,7 +36,7 @@ export function InsightsView({ data }: { data: any }) {
       id: "feed",
       title: "AI Summary",
       tag: "DAILY DIGEST",
-      body: "Most important highlights and key takeaways from your recently uploaded spend file.",
+      body: "Most important highlights and key takeaways from your recently uploaded spending file.",
       panel: <FeedTab initial={data.feed} />,
     },
     {
@@ -57,35 +57,35 @@ export function InsightsView({ data }: { data: any }) {
       id: "vendors",
       title: "Vendors",
       tag: "SAVINGS",
-      body: "Fragmented vendor spend across categories - consolidation opportunities and estimated annual savings.",
+      body: "Fragmented vendor spending across categories - consolidation opportunities and estimated annual savings.",
       panel: <VendorTab v={data.vendors} />,
     },
     {
       id: "forecast",
       title: "Forecast",
       tag: "PROJECTION",
-      body: "Category-level spend projections for the next period with budget overrun risk signals.",
+      body: "Category-level spending projections for the next period with budget overrun risk signals.",
       panel: <ForecastTab f={data.forecast} />,
     },
     {
       id: "recurring",
       title: "Recurring",
       tag: "COMMITMENTS",
-      body: "Subscriptions and recurring charges on autopilot - your fixed monthly committed spend.",
+      body: "Subscriptions and recurring charges on autopilot - your fixed monthly committed spending.",
       panel: <RecurringTab r={data.recurring} />,
     },
     {
       id: "fx",
       title: "Cross-Border",
       tag: "CURRENCY",
-      body: "USD vs CAD spend split, estimated FX cost, and cross-border trends by month.",
+      body: "USD vs CAD spending split, estimated FX cost, and cross-border trends by month.",
       panel: <FxTab x={data.fx} />,
     },
     {
       id: "profiles",
       title: "Profiles",
       tag: "BASELINE",
-      body: "Category spend profiles benchmarked against the company average transaction size with trend direction.",
+      body: "Category spending profiles benchmarked against the company average transaction size with trend direction.",
       panel: <ProfilesTab p={data.profiles} />,
     },
   ];
@@ -132,7 +132,7 @@ function AnomalyTab({ a }: { a: any }) {
     { label: "Duplicate groups", value: String(a.summary.duplicateGroups), tone: "text-warning" },
     { label: "Duplicate exposure", value: formatCAD(a.summary.duplicateExposure, { compact: true }), tone: "text-destructive" },
     { label: "Round-number charges", value: String(a.summary.roundNumberCount), tone: "text-warning" },
-    { label: "Settlements (not spend)", value: formatCAD(a.summary.settlements.total, { compact: true }), tone: "text-neutral-600" },
+    { label: "Settlements (not spending)", value: formatCAD(a.summary.settlements.total, { compact: true }), tone: "text-neutral-600" },
   ] as const;
 
   return (
@@ -142,7 +142,7 @@ function AnomalyTab({ a }: { a: any }) {
         footer={
           <p className="border-t border-border/60 px-4 py-2.5 text-sm text-neutral-600">
             <span className="font-medium text-warning">Context:</span>{" "}
-            The single largest line in the data is a {formatCAD(a.summary.settlements.largest)} card-balance payment - correctly classified as a settlement, not operational spend or fraud. {a.summary.settlements.count} such payments total {formatCAD(a.summary.settlements.total)}.
+            The single largest line in the data is a {formatCAD(a.summary.settlements.largest)} card-balance payment - correctly classified as a settlement, not operational spending or fraud. {a.summary.settlements.count} such payments total {formatCAD(a.summary.settlements.total)}.
           </p>
         }
       />
@@ -301,7 +301,7 @@ function VendorTab({ v }: { v: any }) {
           <Reveal key={i} delay={i * 70}>
           <SectionCard
             title={`${o.category} - ${o.vendors} vendors`}
-            description={`${formatCAD(o.spend)} across ${o.txns} transactions · top vendor only ${o.topVendorShare}% of spend`}
+            description={`${formatCAD(o.spend)} across ${o.txns} transactions · top vendor only ${o.topVendorShare}% of spending`}
             action={
               <div className="text-right">
                 <div className="text-xs text-muted-foreground">Est. savings @ {Math.round(o.savingsRate * 100)}%</div>
@@ -431,8 +431,8 @@ function RecurringTab({ r }: { r: any }) {
         ]}
       />
       <div>
-        <h3 className="text-sm text-neutral-900">Detected Subscriptions & Recurring Spend</h3>
-        <p className="mt-0.5 text-xs text-neutral-600">Consistent amounts on a regular cadence - committed spend you may not realize is on autopilot</p>
+        <h3 className="text-sm text-neutral-900">Detected Subscriptions & Recurring Spending</h3>
+        <p className="mt-0.5 text-xs text-neutral-600">Consistent amounts on a regular cadence - committed spending you may not realize is on autopilot</p>
         <div className="mt-3 rounded-lg border border-border/60">
           <Table>
             <TableHeader>
@@ -476,21 +476,21 @@ function FxTab({ x }: { x: any }) {
       <MetricsBar
         metrics={[
           { label: "Cross-border share", value: `${x.summary.usdShare}%`, tone: "text-warning" },
-          { label: "USD spend", value: formatCAD(x.summary.usdValue, { compact: true }), tone: "text-primary" },
+          { label: "USD spending", value: formatCAD(x.summary.usdValue, { compact: true }), tone: "text-primary" },
           { label: "Est. FX cost", value: formatCAD(x.summary.estFxCost, { compact: true }), tone: "text-destructive" },
           { label: "Avg FX rate", value: String(x.summary.avgRate), tone: "text-neutral-600" },
         ]}
       />
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <div>
-          <h3 className="text-sm text-neutral-900">USD vs CAD Spend</h3>
-          <p className="mt-0.5 text-xs text-neutral-600">{x.summary.usdShare}% of spend crosses the border</p>
+          <h3 className="text-sm text-neutral-900">USD vs CAD Spending</h3>
+          <p className="mt-0.5 text-xs text-neutral-600">{x.summary.usdShare}% of spending crosses the border</p>
           <div className="mt-2 rounded-lg border border-border/60 p-2">
             <CategoryPie data={pie} height={180} />
           </div>
         </div>
         <div className="lg:col-span-2">
-          <h3 className="text-sm text-neutral-900">Cross-Border Spend by Month</h3>
+          <h3 className="text-sm text-neutral-900">Cross-Border Spending by Month</h3>
           <p className="mt-0.5 text-xs text-neutral-600">USD vs CAD origin</p>
           <div className="mt-2 rounded-lg border border-border/60 p-2">
             <TrendLine data={monthData} series={[{ key: "USD", label: "USD" }, { key: "CAD", label: "CAD" }]} height={180} />

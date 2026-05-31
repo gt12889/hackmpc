@@ -14,14 +14,23 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 // functions can't be passed from a Server Component to this Client Component.
 export type SubTabItem = { value: string; label: string; icon?: React.ReactNode; content: React.ReactNode };
 
-function SubTabsInner({ items, paramKey = "tab" }: { items: SubTabItem[]; paramKey?: string }) {
+function SubTabsInner({
+  items,
+  paramKey = "tab",
+  actions,
+}: {
+  items: SubTabItem[];
+  paramKey?: string;
+  actions?: React.ReactNode;
+}) {
   const sp = useSearchParams();
   const want = sp.get(paramKey);
   const initial = items.some((i) => i.value === want) ? (want as string) : items[0]?.value;
 
   return (
     <Tabs defaultValue={initial} className="w-full">
-      <div className="flex justify-center px-6 pt-4">
+      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4 px-6 pt-4">
+        <div aria-hidden />
         <TabsList>
           {items.map(({ value, label, icon }) => (
             <TabsTrigger key={value} value={value} className="gap-1.5">
@@ -30,6 +39,7 @@ function SubTabsInner({ items, paramKey = "tab" }: { items: SubTabItem[]; paramK
             </TabsTrigger>
           ))}
         </TabsList>
+        <div className="flex justify-end">{actions}</div>
       </div>
       {items.map(({ value, content }) => (
         <TabsContent key={value} value={value} className="mt-0 focus-visible:outline-none">
@@ -40,7 +50,7 @@ function SubTabsInner({ items, paramKey = "tab" }: { items: SubTabItem[]; paramK
   );
 }
 
-export function SubTabs(props: { items: SubTabItem[]; paramKey?: string }) {
+export function SubTabs(props: { items: SubTabItem[]; paramKey?: string; actions?: React.ReactNode }) {
   // useSearchParams must sit under a Suspense boundary.
   return (
     <Suspense fallback={null}>

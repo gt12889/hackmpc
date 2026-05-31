@@ -65,7 +65,7 @@ export const FUNCTION_DECLARATIONS = [
   {
     name: "aggregate_spend",
     description:
-      "Group total/average spend or transaction counts by a dimension. Use for 'how much by X', rankings, breakdowns. Returns rows sorted by value.",
+      "Group total/average spending or transaction counts by a dimension. Use for 'how much by X', rankings, breakdowns. Returns rows sorted by value.",
     parameters: {
       type: Type.OBJECT,
       properties: {
@@ -80,7 +80,7 @@ export const FUNCTION_DECLARATIONS = [
   {
     name: "time_series",
     description:
-      "Spend over time by day/week/month. Use for trends, 'over time', 'monthly'. Set group_by_category to split lines per category.",
+      "Spending over time by day/week/month. Use for trends, 'over time', 'monthly'. Set group_by_category to split lines per category.",
     parameters: {
       type: Type.OBJECT,
       properties: {
@@ -93,7 +93,7 @@ export const FUNCTION_DECLARATIONS = [
   },
   {
     name: "top_merchants",
-    description: "Ranked merchants by spend or transaction count. Use for 'top vendors', 'who are we paying'.",
+    description: "Ranked merchants by spending or transaction count. Use for 'top vendors', 'who are we paying'.",
     parameters: {
       type: Type.OBJECT,
       properties: {

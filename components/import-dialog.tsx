@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { Upload, FileSpreadsheet, Loader2, CheckCircle2, X } from "lucide-react";
 import { cn, formatCAD } from "@/lib/utils";
 
-export function ImportDialog({ variant = "default" }: { variant?: "default" | "prominent" }) {
+export function ImportDialog({ variant = "default" }: { variant?: "default" | "prominent" | "toolbar" }) {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [drag, setDrag] = useState(false);
@@ -48,13 +48,16 @@ export function ImportDialog({ variant = "default" }: { variant?: "default" | "p
         onClick={() => setOpen(true)}
         className={cn(
           "flex shrink-0 items-center transition-all",
-          variant === "prominent"
-            ? "gap-3 rounded-2xl bg-amber-500 px-10 py-4 text-base font-semibold text-white shadow-lg shadow-amber-500/30 hover:scale-[1.02] hover:bg-amber-600 hover:shadow-xl hover:shadow-amber-500/35 active:scale-[0.98]"
-            : "gap-2 rounded-lg border border-border/60 bg-foreground/[0.03] px-3 py-2 text-[15px] text-muted-foreground hover:border-primary/30 hover:text-foreground"
+          variant === "prominent" &&
+            "gap-3 rounded-2xl bg-[#FFC000] px-10 py-4 text-base font-semibold text-neutral-900 shadow-lg shadow-[#FFC000]/40 hover:scale-[1.02] hover:bg-[#E6AD00] hover:shadow-xl hover:shadow-[#FFC000]/50 active:scale-[0.98]",
+          variant === "toolbar" &&
+            "gap-2 rounded-xl bg-[#FFC000] px-5 py-2 text-sm font-semibold text-neutral-900 shadow-md shadow-[#FFC000]/35 hover:bg-[#E6AD00] hover:shadow-lg hover:shadow-[#FFC000]/45 active:scale-[0.98]",
+          variant === "default" &&
+            "gap-2 rounded-lg border border-border/60 bg-foreground/[0.03] px-3 py-2 text-[15px] text-muted-foreground hover:border-primary/30 hover:text-foreground"
         )}
       >
         <Upload className={cn(variant === "prominent" ? "h-6 w-6" : "h-4 w-4")} />
-        <span className={variant === "prominent" ? "inline" : "hidden sm:inline"}>
+        <span className={variant === "default" ? "hidden sm:inline" : "inline"}>
           {variant === "prominent" ? "Upload transactions" : "Upload"}
         </span>
       </button>
@@ -109,7 +112,7 @@ export function ImportDialog({ variant = "default" }: { variant?: "default" | "p
                   </span>
                 </div>
                 <div className="grid grid-cols-2 gap-3 text-sm">
-                  <Stat label="Total spend" value={formatCAD(result.total, { compact: true })} />
+                  <Stat label="Total spending" value={formatCAD(result.total, { compact: true })} />
                   <Stat label="Date range" value={`${result.start} → ${result.end}`} small />
                   <Stat label="Cards" value={String(result.cards)} />
                   <Stat label="Policy flags" value={String(result.violations)} />

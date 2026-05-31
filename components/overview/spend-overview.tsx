@@ -4,7 +4,6 @@ import { Reveal } from "@/components/reveal";
 import { PageHeader } from "@/components/page-header";
 import { SpendBar, TrendLine, CategoryPie } from "@/components/charts";
 import { ExpandSection } from "@/components/show-more";
-import { ImportDialog } from "@/components/import-dialog";
 import { SectionBadge } from "@/components/ui/section-badge";
 import { formatCAD } from "@/lib/utils";
 import { getKpis, aggregate, timeSeries, topMerchants } from "@/lib/queries";
@@ -28,13 +27,8 @@ export function SpendOverview() {
 
   return (
     <div>
-      <div className="flex flex-col items-center gap-2 px-8 pt-6 pb-3">
-        <ImportDialog variant="prominent" />
-        <p className="text-xs text-neutral-500">Drop a card export (.csv or .xlsx) to refresh your spend data</p>
-      </div>
-
       <PageHeader
-        title="Spend Overview"
+        title="Spending Overview"
         description={`${kpis.dateStart} -> ${kpis.dateEnd} · ${kpis.txnCount.toLocaleString()} card transactions`}
         blur
       />
@@ -43,16 +37,16 @@ export function SpendOverview() {
         {/* KPIs */}
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
           <Reveal delay={0}>
-            <KpiCard label="Operational Spend" countTo={kpis.operationalSpend} format="cad" sub={`Avg ${formatCAD(kpis.avgTxn)} / txn`} icon={DollarSign} brackets />
+            <KpiCard label="Operational Spending" countTo={kpis.operationalSpend} format="cad" sub={`Avg ${formatCAD(kpis.avgTxn)} / txn`} icon={DollarSign} brackets />
           </Reveal>
           <Reveal delay={70}>
             <KpiCard label="Transactions" countTo={kpis.txnCount} format="int" sub={`${kpis.cardCount} company cards`} icon={Receipt} brackets />
           </Reveal>
           <Reveal delay={140}>
-            <KpiCard label="Cross-Border" countTo={kpis.crossBorderPct} format="pct" sub="of spend is US/foreign" icon={Globe} accent="warning" brackets />
+            <KpiCard label="Cross-Border" countTo={kpis.crossBorderPct} format="pct" sub="of spending is US/foreign" icon={Globe} accent="warning" brackets />
           </Reveal>
           <Reveal delay={210}>
-            <KpiCard label="Card Payments" countTo={kpis.settlementsSpend} format="cad" sub={`${kpis.settlementsCount} settlements (excl. from spend)`} icon={CreditCard} accent="muted" brackets />
+            <KpiCard label="Card Payments" countTo={kpis.settlementsSpend} format="cad" sub={`${kpis.settlementsCount} settlements (excl. from spending)`} icon={CreditCard} accent="muted" brackets />
           </Reveal>
         </div>
 
@@ -60,17 +54,17 @@ export function SpendOverview() {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
           <Reveal delay={0} className="lg:col-span-2">
             <div className="flex h-full flex-col gap-2">
-              <SectionBadge>Spend by Category</SectionBadge>
-              <SectionCard title="Spend by Category" description="Operational spend, settlements excluded" className="h-full flex-1">
+              <SectionBadge>Spending by Category</SectionBadge>
+              <SectionCard title="Spending by Category" description="Operational spending, settlements excluded" className="h-full flex-1">
                 <CategoryPie data={byCategory} height={320} showTotal />
               </SectionCard>
             </div>
           </Reveal>
           <Reveal delay={70} className="lg:col-span-3">
             <div className="flex h-full flex-col gap-2">
-              <SectionBadge>Monthly Spend Trend</SectionBadge>
-              <SectionCard title="Monthly Spend Trend" description="Total operational spend per month" className="h-full flex-1">
-                <TrendLine data={monthData} series={[{ key: "spend", label: "Spend" }]} height={320} />
+              <SectionBadge>Monthly Spending Trend</SectionBadge>
+              <SectionCard title="Monthly Spending Trend" description="Total operational spending per month" className="h-full flex-1">
+                <TrendLine data={monthData} series={[{ key: "spend", label: "Spending" }]} height={320} />
               </SectionCard>
             </div>
           </Reveal>
@@ -81,14 +75,14 @@ export function SpendOverview() {
           <div className="space-y-6">
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
               <div className="flex flex-col gap-2">
-                <SectionBadge>Spend by State / Province</SectionBadge>
-                <SectionCard title="Spend by State / Province" description="Top 10 regions by spend">
+                <SectionBadge>Spending by State / Province</SectionBadge>
+                <SectionCard title="Spending by State / Province" description="Top 10 regions by spending">
                   <SpendBar data={byState} horizontal height={Math.max(280, byState.length * 36)} />
                 </SectionCard>
               </div>
               <div className="flex flex-col gap-2">
-                <SectionBadge>Spend by Card</SectionBadge>
-                <SectionCard title="Spend by Card (Cost Center)" description="Primary company card carries most volume">
+                <SectionBadge>Spending by Card</SectionBadge>
+                <SectionCard title="Spending by Card (Cost Center)" description="Primary company card carries most volume">
                   <SpendBar data={byCard} horizontal height={Math.max(280, byCard.length * 36)} />
                 </SectionCard>
               </div>

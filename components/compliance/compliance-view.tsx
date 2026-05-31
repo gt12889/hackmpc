@@ -99,7 +99,7 @@ export function ComplianceView({ initial }: { initial: any }) {
   const metrics = [
     { label: "At risk", value: formatCAD(summary.amount, { compact: true }), tone: "text-destructive", hint: "Total CAD value of transactions with an open policy violation." },
     { label: "Critical", value: String(summary.counts.critical), tone: "text-destructive", hint: "Genuine breach or strong evasion signal - amounts engineered under a threshold, a prohibited category, or a non-routine merchant. Triggers an outbound alert." },
-    { label: "High", value: String(summary.counts.high), tone: "text-warning", hint: "Large or unusual spend that needs pre-authorization visibility. Legitimate but should be reviewed." },
+    { label: "High", value: String(summary.counts.high), tone: "text-warning", hint: "Large or unusual spending that needs pre-authorization visibility. Legitimate but should be reviewed." },
     { label: "Medium / low", value: `${summary.counts.medium} / ${summary.counts.low}`, tone: "text-neutral-600", hint: "Minor or likely-legitimate items - shown in the feed only, no alert." },
   ] as const;
 
@@ -180,7 +180,7 @@ export function ComplianceView({ initial }: { initial: any }) {
         <SectionCard title="Flagged Violations" description="Ranked by severity · AI-adjusted for context" className="h-full">
           {violations.length === 0 ? (
             <div className="flex items-center gap-2 py-8 text-sm text-muted-foreground">
-              <ShieldCheck className="h-5 w-5 text-primary" /> No open violations - spend is compliant.
+              <ShieldCheck className="h-5 w-5 text-primary" /> No open violations - spending is compliant.
             </div>
           ) : (
             <ShowMore items={violations} initial={5} noun="violations" className="space-y-1" render={(v: any) => {

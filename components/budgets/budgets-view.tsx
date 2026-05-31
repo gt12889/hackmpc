@@ -108,7 +108,7 @@ export function BudgetsView({ initial }: { initial: any }) {
 
   const metrics = [
     { label: "Monthly budget", value: formatCAD(summary.totalBudget, { compact: true }), tone: "text-primary" },
-    { label: "Actual spend", value: formatCAD(summary.totalActual, { compact: true }), tone: "text-neutral-600" },
+    { label: "Actual spending", value: formatCAD(summary.totalActual, { compact: true }), tone: "text-neutral-600" },
     { label: "Over budget", value: String(summary.overBudget), tone: "text-destructive" },
     { label: "Overrun risk", value: String(summary.atRisk), tone: "text-warning" },
   ] as const;
@@ -134,7 +134,7 @@ export function BudgetsView({ initial }: { initial: any }) {
       <Reveal delay={0}>
         <div className="rounded-lg border border-border/60 p-4">
           <SectionBadge>Set a budget</SectionBadge>
-          <p className="mt-2 text-xs text-neutral-600">Monthly limit per spend category</p>
+          <p className="mt-2 text-xs text-neutral-600">Monthly limit per spending category</p>
           <form onSubmit={addBudget} className="mt-3 flex flex-wrap items-end gap-3">
             <label className="min-w-[12rem] flex-1 space-y-1">
               <span className="text-[13px] font-medium uppercase tracking-wide text-neutral-500">Category</span>
@@ -194,7 +194,7 @@ export function BudgetsView({ initial }: { initial: any }) {
         <div>
           <SectionBadge>Category budgets</SectionBadge>
           <p className="mt-2 text-xs text-neutral-600">
-            Spend vs limit for {summary.month} - click a row to expand · click a limit to edit
+            Spending vs limit for {summary.month} - click a row to expand · click a limit to edit
           </p>
           <div className="mt-3 rounded-lg border border-border/60 divide-y divide-border/60">
             {budgets.length === 0 ? (

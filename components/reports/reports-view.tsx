@@ -75,7 +75,7 @@ export function ReportsView({ initial }: { initial: any }) {
 
       <div className="flex items-center justify-between gap-3">
         <p className="text-sm text-muted-foreground">
-          Grouped by location &amp; month - a clear view of where and when company spend happened, ready for review.
+          Grouped by location &amp; month - a clear view of where and when company spending happened, ready for review.
         </p>
         <div className="flex items-center gap-2">
           <button

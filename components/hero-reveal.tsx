@@ -1,11 +1,14 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowDown } from "lucide-react";
-import { SplatSky } from "@/components/splat-sky";
-import { SplineSky } from "@/components/spline-sky";
 import { BrimWordmark } from "@/components/brim-wordmark";
+
+// WebGL / Spline — client-only; must not run during SSR (breaks webpack on the server).
+const SplatSky = dynamic(() => import("@/components/splat-sky").then((m) => m.SplatSky), { ssr: false });
+const SplineSky = dynamic(() => import("@/components/spline-sky").then((m) => m.SplineSky), { ssr: false });
 
 // "From noise to clarity" - a scroll-pinned cinematic brand overview (home page).
 // A tight, focal canvas of teal/cyan particles starts as chaos and organizes +
