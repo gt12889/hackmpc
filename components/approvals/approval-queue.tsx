@@ -185,7 +185,15 @@ function ApprovalCard({ req, busy, onDecide }: { req: any; busy: boolean; onDeci
   const [showCtx, setShowCtx] = useState(false);
 
   return (
-    <div className="rounded-xl border border-border bg-card p-6">
+    <div
+      className="rounded-xl border border-border p-6"
+      // Slightly warm/tan surface with a faint dotted texture (instead of flat white).
+      style={{
+        backgroundColor: "#f6f1e7",
+        backgroundImage: "radial-gradient(rgba(120, 96, 56, 0.05) 1px, transparent 1px)",
+        backgroundSize: "13px 13px",
+      }}
+    >
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-4 border-b border-border/60 pb-5">
         <div className="min-w-0 flex-1">
@@ -223,11 +231,7 @@ function ApprovalCard({ req, busy, onDecide }: { req: any; busy: boolean; onDeci
       {/* Policy flags */}
       {flags.length > 0 && (
         <div className="mt-5 rounded-lg border border-warning/40 bg-warning/5 p-4">
-          <div className="flex items-center gap-2 text-sm font-semibold text-warning">
-            <AlertTriangle className="h-4 w-4" />
-            Policy flags on this transaction
-          </div>
-          <ul className="mt-2 space-y-2">
+          <ul className="space-y-2">
             {flags.map((v: any, i: number) => (
               <li key={i} className="flex items-start gap-2 text-sm">
                 <span className={cn("mt-1.5 h-2 w-2 shrink-0 rounded-full", SEV_DOT[v.severity] ?? "bg-slate-400")} />
