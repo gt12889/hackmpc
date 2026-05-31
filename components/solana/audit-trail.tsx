@@ -26,9 +26,9 @@ type Anchor = {
 };
 
 const TYPE_META: Record<Anchor["record_type"], { label: string; icon: typeof FileText; href: (id: string) => string }> = {
-  report: { label: "Report", icon: FileText, href: () => "/reports" },
-  request: { label: "Approval", icon: CheckSquare, href: () => "/approvals" },
-  alert: { label: "Alert", icon: AlertTriangle, href: () => "/compliance" },
+  report: { label: "Report", icon: FileText, href: () => "/workflow?tab=reports" },
+  request: { label: "Approval", icon: CheckSquare, href: () => "/workflow?tab=approvals" },
+  alert: { label: "Alert", icon: AlertTriangle, href: () => "/governance?tab=violations" },
 };
 
 function explorerUrl(sig: string) {

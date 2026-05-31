@@ -187,7 +187,7 @@ export function HeroReveal() {
             })}
 
             <div className="absolute flex flex-col items-center" style={{ opacity: brand, transform: `translateY(${(1 - brand) * 32}px) scale(${0.92 + brand * 0.08})` }}>
-              <Link href="/dashboard" aria-label="Enter the dashboard" className="group relative inline-flex cursor-pointer transition-transform duration-300 hover:scale-105" style={{ pointerEvents: brand > 0.5 ? "auto" : "none" }}>
+              <Link href="/overview" aria-label="Enter the dashboard" className="group relative inline-flex cursor-pointer transition-transform duration-300 hover:scale-105" style={{ pointerEvents: brand > 0.5 ? "auto" : "none" }}>
                 {/* idle breathing glow */}
                 <span aria-hidden className="pointer-events-none absolute inset-0 -z-10 animate-pulse rounded-full bg-primary/25 blur-2xl" />
                 <BrimWordmark

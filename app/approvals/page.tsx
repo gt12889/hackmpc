@@ -1,18 +1,6 @@
-import { PageHeader } from "@/components/page-header";
-import { ApprovalQueue } from "@/components/approvals/approval-queue";
-import { getRequests, getApprovalSummary } from "@/lib/approvals";
+import { redirect } from "next/navigation";
 
-export const dynamic = "force-dynamic";
-
+// Consolidated into the Workflow tab (Approvals sub-tab).
 export default function ApprovalsPage() {
-  const initial = { requests: getRequests(), summary: getApprovalSummary() };
-  return (
-    <div>
-      <PageHeader
-        title="Pre-Approval Workflow"
-        description="Every request, with card history, budget status, and an AI recommendation - decide once"
-      />
-      <ApprovalQueue initial={initial} />
-    </div>
-  );
+  redirect("/workflow?tab=approvals");
 }

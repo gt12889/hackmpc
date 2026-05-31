@@ -1,19 +1,6 @@
-import { PageHeader } from "@/components/page-header";
-import { ReceiptsView } from "@/components/receipts/receipts-view";
-import { receiptSummary, recentReceipts, unmatchedRequiredCharges } from "@/lib/receipts";
+import { redirect } from "next/navigation";
 
-export const dynamic = "force-dynamic";
-
+// Consolidated into the Governance tab (Receipts sub-tab).
 export default function ReceiptsPage() {
-  const initial = {
-    summary: receiptSummary(),
-    recent: recentReceipts(20),
-    unmatched: unmatchedRequiredCharges(20),
-  };
-  return (
-    <div>
-      <PageHeader title="Receipts" description="AI Vision matches receipts to transactions and flags charges missing one" />
-      <ReceiptsView initial={initial} />
-    </div>
-  );
+  redirect("/governance?tab=receipts");
 }

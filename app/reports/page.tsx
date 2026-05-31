@@ -1,18 +1,6 @@
-import { PageHeader } from "@/components/page-header";
-import { ReportsView } from "@/components/reports/reports-view";
-import { getReports, getReportsSummary } from "@/lib/reports";
+import { redirect } from "next/navigation";
 
-export const dynamic = "force-dynamic";
-
+// Consolidated into the Workflow tab (Reports sub-tab).
 export default function ReportsPage() {
-  const initial = { reports: getReports(), summary: getReportsSummary() };
-  return (
-    <div>
-      <PageHeader
-        title="Expense Reports"
-        description="Auto-grouped transactions with category breakdowns, policy checks, and AI summaries - CFO-ready"
-      />
-      <ReportsView initial={initial} />
-    </div>
-  );
+  redirect("/workflow?tab=reports");
 }

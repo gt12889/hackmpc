@@ -6,11 +6,7 @@ import {
   LayoutDashboard,
   ShieldCheck,
   CheckSquare,
-  FileText,
   Sparkles,
-  ReceiptText,
-  Wallet,
-  Link2,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -21,14 +17,10 @@ import { BrimCardIcon } from "@/components/brim-card-icon";
 type Item = { href: string; label: string; icon: LucideIcon };
 
 const NAV_ITEMS: Item[] = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/compliance", label: "Compliance", icon: ShieldCheck },
-  { href: "/approvals", label: "Approvals", icon: CheckSquare },
-  { href: "/reports", label: "Reports", icon: FileText },
-  { href: "/receipts", label: "Receipts", icon: ReceiptText },
-  { href: "/budgets", label: "Budgets", icon: Wallet },
+  { href: "/overview", label: "Overview", icon: LayoutDashboard },
   { href: "/insights", label: "Insights", icon: Sparkles },
-  { href: "/audit", label: "Audit Trail", icon: Link2 },
+  { href: "/governance", label: "Governance", icon: ShieldCheck },
+  { href: "/workflow", label: "Workflow", icon: CheckSquare },
 ];
 
 function isActive(pathname: string, href: string) {

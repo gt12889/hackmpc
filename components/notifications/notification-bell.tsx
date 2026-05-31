@@ -104,7 +104,7 @@ export function NotificationBell() {
             {items.map((n) => (
               <a
                 key={n.id}
-                href="/compliance"
+                href="/governance?tab=violations"
                 onClick={() => markOne(n)}
                 className={cn("block border-b border-border/60 px-3 py-2.5 transition-colors hover:bg-secondary/50", !n.read && "bg-primary/5")}
               >

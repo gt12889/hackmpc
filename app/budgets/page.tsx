@@ -1,14 +1,6 @@
-import { PageHeader } from "@/components/page-header";
-import { BudgetsView } from "@/components/budgets/budgets-view";
-import { getBudgetStatus } from "@/lib/budgets";
+import { redirect } from "next/navigation";
 
-export const dynamic = "force-dynamic";
-
+// Consolidated into the Overview tab (Budgets sub-tab).
 export default function BudgetsPage() {
-  return (
-    <div>
-      <PageHeader title="Budgets" description="Per-category monthly limits with burn-down and projected-overrun alerts" />
-      <BudgetsView initial={getBudgetStatus()} />
-    </div>
-  );
+  redirect("/overview?tab=budgets");
 }
