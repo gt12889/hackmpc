@@ -136,7 +136,7 @@ export function ComplianceView({ initial }: { initial: any }) {
           <SectionBadge className="mb-3">Policy Rules</SectionBadge>
           <div className="space-y-2.5">
             {rules.map((r: any) => (
-              <div key={r.id} className={cn("rounded-lg border border-border p-3", !r.enabled && "opacity-50")}>
+              <div key={r.id} className={cn("group rounded-lg border border-border p-3 transition-colors hover:border-primary/30", !r.enabled && "opacity-50")}>
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
@@ -144,16 +144,23 @@ export function ComplianceView({ initial }: { initial: any }) {
                       <SeverityBadge severity={r.severity_base} />
                     </div>
                     <p className="mt-0.5 line-clamp-2 text-[13px] text-muted-foreground">{r.description}</p>
-                    {r.threshold_amount != null && (
-                      <span className="mt-1 inline-block text-[13px] text-muted-foreground">Threshold: {formatCAD(r.threshold_amount, { compact: true })}{r.window && r.window !== "transaction" ? ` / ${r.window}` : ""}</span>
-                    )}
                   </div>
                   <button onClick={() => toggleRule(r.id, r.enabled)} disabled={busy} title={r.enabled ? "Disable" : "Enable"} className={cn("rounded-md p-1.5", r.enabled ? "text-primary hover:bg-primary/10" : "text-muted-foreground hover:bg-secondary")}>
                     <Power className="h-4 w-4" />
                   </button>
                 </div>
-                {r.policy_clause && (
-                  <p className="mt-2 border-l-2 border-border pl-2 text-[12px] italic text-muted-foreground/70">"{r.policy_clause}"</p>
+                {/* Threshold + example: hidden by default, revealed on hover/focus to keep cards condensed */}
+                {(r.threshold_amount != null || r.policy_clause) && (
+                  <div className="grid grid-rows-[0fr] transition-all duration-200 ease-out group-hover:grid-rows-[1fr] group-focus-within:grid-rows-[1fr] motion-reduce:transition-none">
+                    <div className="overflow-hidden">
+                      {r.threshold_amount != null && (
+                        <span className="mt-1 inline-block text-[13px] text-muted-foreground">Threshold: {formatCAD(r.threshold_amount, { compact: true })}{r.window && r.window !== "transaction" ? ` / ${r.window}` : ""}</span>
+                      )}
+                      {r.policy_clause && (
+                        <p className="mt-2 border-l-2 border-border pl-2 text-[12px] italic text-muted-foreground/70">"{r.policy_clause}"</p>
+                      )}
+                    </div>
+                  </div>
                 )}
               </div>
             ))}
