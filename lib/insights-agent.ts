@@ -1,4 +1,4 @@
-import { getClient, generateWithFallback } from "./gemini";
+import { getClient, generateWithFallback, hasOpenAIKey } from "./gemini";
 import { anomalySummary, duplicateCharges } from "./anomaly";
 import { vendorSummary, consolidationOpportunities } from "./vendors";
 import { forecastSummary, categoryForecasts } from "./forecast";
@@ -55,7 +55,7 @@ export async function generateFeed(): Promise<Insight[]> {
   const signals = gatherSignals();
   const fallback = ruleBasedInsights(signals);
   const ai = getClient();
-  if (!ai) { cache = fallback; return fallback; }
+  if (!ai && !hasOpenAIKey()) { cache = fallback; return fallback; }
 
   try {
     const { resp } = await generateWithFallback(ai, {
