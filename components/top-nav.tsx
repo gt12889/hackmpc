@@ -27,8 +27,46 @@ function isActive(pathname: string, href: string) {
   return pathname.startsWith(href);
 }
 
+function NavRibbon({ pathname }: { pathname: string }) {
+  return (
+    <nav className="bg-primary shadow-sm">
+      <div className="no-scrollbar flex w-full items-stretch justify-evenly overflow-x-auto px-2 sm:px-6 lg:px-10">
+        {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+          const active = isActive(pathname, href);
+          return (
+            <Link
+              key={href}
+              href={href}
+              className={cn(
+                "flex min-w-[4.25rem] flex-1 flex-col items-center justify-center gap-1.5 border-b-2 px-2 py-3 transition-colors sm:min-w-0 sm:px-4 md:px-6",
+                active
+                  ? "border-white text-white"
+                  : "border-transparent text-white/70 hover:text-white"
+              )}
+            >
+              <Icon className="h-5 w-5 shrink-0" strokeWidth={active ? 2.25 : 1.75} />
+              <span className="whitespace-nowrap text-[12px] uppercase tracking-wide sm:text-[13px]">{label}</span>
+            </Link>
+          );
+        })}
+      </div>
+    </nav>
+  );
+}
+
 export function TopNav() {
   const pathname = usePathname();
+  const isLanding = pathname === "/";
+
+  // Landing page: hide the white logo bar entirely. The blue ribbon hides above the viewport,
+  // leaving a thin peek at the top edge that slides the full nav into view on hover.
+  if (isLanding) {
+    return (
+      <header className="fixed inset-x-0 top-0 z-40 -translate-y-[calc(100%-0.5rem)] transition-transform duration-300 ease-out hover:translate-y-0">
+        <NavRibbon pathname={pathname} />
+      </header>
+    );
+  }
 
   return (
     <header className="sticky top-0 z-40">
@@ -45,28 +83,7 @@ export function TopNav() {
       </div>
 
       {/* Nav ribbon */}
-      <nav className="bg-primary shadow-sm">
-        <div className="no-scrollbar flex w-full items-stretch justify-evenly overflow-x-auto px-2 sm:px-6 lg:px-10">
-          {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
-            const active = isActive(pathname, href);
-            return (
-              <Link
-                key={href}
-                href={href}
-                className={cn(
-                  "flex min-w-[4.25rem] flex-1 flex-col items-center justify-center gap-1.5 border-b-2 px-2 py-3 transition-colors sm:min-w-0 sm:px-4 md:px-6",
-                  active
-                    ? "border-white text-white"
-                    : "border-transparent text-white/70 hover:text-white"
-                )}
-              >
-                <Icon className="h-5 w-5 shrink-0" strokeWidth={active ? 2.25 : 1.75} />
-                <span className="whitespace-nowrap text-[12px] uppercase tracking-wide sm:text-[13px]">{label}</span>
-              </Link>
-            );
-          })}
-        </div>
-      </nav>
+      <NavRibbon pathname={pathname} />
     </header>
   );
 }
