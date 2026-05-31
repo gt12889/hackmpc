@@ -153,10 +153,11 @@ export function HeroReveal() {
             })}
 
             <div className="absolute flex flex-col items-center" style={{ opacity: brand, transform: `translateY(${(1 - brand) * 32}px) scale(${0.92 + brand * 0.08})` }}>
-              <div className="flex items-center gap-3 md:gap-5">
-                <img src="/brim-logo.png" alt="Brim" className="h-20 w-auto drop-shadow-[0_0_30px_hsl(199_85%_55%/0.4)] md:h-36" />
-                <span className="text-7xl tracking-tight text-foreground md:text-9xl">It</span>
-              </div>
+              <img
+                src="/brim-it-logo.png"
+                alt="Brim It"
+                className="h-20 w-auto drop-shadow-[0_0_40px_hsl(199_85%_55%/0.45)] md:h-32"
+              />
               <p className="mt-4 text-lg text-muted-foreground md:text-2xl" style={{ opacity: tagline }}>
                 AI expense intelligence for every dollar.
               </p>
