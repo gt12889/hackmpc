@@ -6,22 +6,6 @@ A non-technical finance manager can chat with their company's spend in plain Eng
 
 
 ## Documentation
-```
-
-
-
-
-Full docs live in [`docs/`](docs/):
-
-- [Submission](docs/SUBMISSION.md) - the writeup (Inspiration / build / challenges), full tech list, and judging scorecard
-- [Architecture](docs/ARCHITECTURE.md) - stack, data flow, module map, patterns
-- [Features](docs/FEATURES.md) - the 4 required + 3 optional + import, with file references
-- [Brim Agents](docs/AGENTS.md) - the Python/LangGraph multi-agent sidecar (debate, fraud, compliance, insights swarms)
-- [Data & Ingest](docs/DATA-AND-INGEST.md) - dataset, schema, the shared ingest pipeline, dedup
-- [AI Layer](docs/AI.md) - agentic chat, batched passes, model fallback, configuration
-- [Setup & Deploy](docs/SETUP-AND-DEPLOY.md) - scripts, env, hosting, troubleshooting
-- [Solana Audit Anchor](docs/SOLANA.md) - on-chain tamper-evidence for approvals & alerts
-- [Design Decisions](docs/DECISIONS.md) - the non-obvious calls and why
 
 ## Working with the real data
 
