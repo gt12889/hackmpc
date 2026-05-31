@@ -51,7 +51,55 @@ The dataset is **4,235 anonymized company-card transactions** (Aug 2025–Mar 20
 
 ## Multi-agent layer — Brim Agents (`/workflow` → Agents)
 
-A **Python LangGraph sidecar** adds multi-agent reasoning on top of the single-call AI. Four swarms: an approval **debate** (Prosecutor ‖ Defender → Judge), a **fraud investigator** (one agent per suspect), a **compliance reviewer + false-positive challenger** (cuts unnecessary critical phone alerts), and an **insights multi-lens sweep** (4 lenses → ranker). The sidecar is **stateless** (the TS routes gather context and persist results + per-agent traces) and **degrades gracefully** — if it isn't running, every route falls back to the original single-call path. The **Agents** tab visualizes the swarm running live. Run with `npm run agents` (optional). Full detail in [Brim Agents](docs/AGENTS.md).
+A **Python LangGraph sidecar** adds multi-agent reasoning on top of the single-call AI. Four swarms: an approval **debate** (Prosecutor ‖ Defender → Judge), a **fraud investigator** (one agent per suspect), a **compliance reviewer + false-positive challenger** (cuts unnecessary critical phone alerts), and an **insights multi-lens sweep** (4 lenses → ranker). The sidecar is **stateless** (the TS routes gather context and persist results + per-agent traces) and **degrades gracefully** — if it isn't running, every route falls back to the original single-call path. The **Agents** tab # Brim It - AI Expense Intelligence
+
+**Brim Financial × MPC Hacks.** An AI-powered expense-intelligence platform for SMB credit-card spending - built on real (anonymized) company-card transaction data and the real Brim expense policy. *Make the data talk.*
+
+A non-technical finance manager can chat with their company's spend in plain English, manage a digitized expense policy and triage violations, run an AI pre-approval queue, and generate review-ready expense reports - all grounded in real numbers.
+
+> **Pages:** `/` is a cinematic scroll-reveal brand overview. The app is four surfaces - **Overview** (Spending · Budgets), **Insights**, **Governance** (Violations · Receipts · Audit), and **Workflow** (Approvals · Reports · Agents) - plus a floating **Ask AI** chat on every page. The older `/dashboard`, `/compliance`, `/approvals`, `/reports`, `/chat` routes redirect into these.
+
+## Documentation
+
+```mermaid
+flowchart LR
+    %% ── INPUT ──
+    subgraph INPUT ["Input"]
+        A["CSV / XLSX\nUpload"]
+    end
+
+    %% ── DATA LAYER ──
+    subgraph DATA["Data Layer"]
+        B["Ingest &\nNormalize\nlib/ingest.ts"]
+        C[("SQLite\n.data/hackmpc.db")]
+        D["Parameterized\nQuery Engine\nlib/queries.ts"]
+    end
+
+    %% ── AI ENGINE ──
+    subgraph AI["AI Decision Engine"]
+        E["Build Context\n(live schema facts,\ndate bounds, cards)"]
+        F{"Tool-Use\nLoop\n≤5 iters"}
+        G["Compliance\nScanner"]
+        H["Domain Engines\n(fraud / anomaly /\nforecast / vendors)"]
+    end
+
+    %% ── OUTPUT ──
+    subgraph OUT["Output"]
+        I["✅ Approved\n+ AI Reasoning"]
+        J["⚠️ Flagged\nViolation"]
+        K["📊 Dashboard\nChart + Prose"]
+    end
+
+    A --> B --> C --> D
+    D --> E
+    E --> F
+    F -->|"tool calls\n(aggregate_spend\ntime_series etc.)"| D
+    D -->|"results"| F
+    F --> G
+    F --> H
+    G -->|"APPROVED"| I
+    G -->|"VIOLATION"| J
+    H -->|"insight +\nviz"| Kvisualizes the swarm running live. Run with `npm run agents` (optional). Full detail in [Brim Agents](docs/AGENTS.md).
 
 ## On-chain audit trail (`/audit`)
 
