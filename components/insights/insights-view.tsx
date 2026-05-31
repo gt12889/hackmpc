@@ -147,8 +147,8 @@ export function InsightsView({ data }: { data: any }) {
       summary: (
         <div className="flex h-full flex-col">
           <div className="flex items-end gap-5">
-            <Stat value={String(data.forecast?.summary?.atRisk ?? 0)} label="overrun risk" tone="text-destructive" />
-            <Stat value={formatCAD(data.forecast?.summary?.projectedOverrun ?? 0, { compact: true })} label="projected" tone="text-warning" />
+            <Stat value={String(data.forecast?.summary?.atRisk ?? 0)} label="overrun risk" tone="text-primary" />
+            <Stat value={formatCAD(data.forecast?.summary?.projectedOverrun ?? 0, { compact: true })} label="projected" tone="text-primary" />
           </div>
           {fc0 && (
             <div className="mt-3 flex-1">
@@ -166,10 +166,10 @@ export function InsightsView({ data }: { data: any }) {
       summary: (
         <div className="space-y-2">
           <div className="flex items-end gap-5">
-            <Stat value={String(data.anomaly?.summary?.duplicateGroups ?? 0)} label="duplicate groups" tone="text-warning" />
-            <Stat value={formatCAD(data.anomaly?.summary?.duplicateExposure ?? 0, { compact: true })} label="exposure" tone="text-destructive" />
+            <Stat value={String(data.anomaly?.summary?.duplicateGroups ?? 0)} label="duplicate groups" tone="text-primary" />
+            <Stat value={formatCAD(data.anomaly?.summary?.duplicateExposure ?? 0, { compact: true })} label="exposure" tone="text-primary" />
           </div>
-          <Chip tone="bg-warning/15 text-warning">{data.anomaly?.summary?.roundNumberCount ?? 0} round-number charges</Chip>
+          <Chip tone="bg-primary/10 text-primary">{data.anomaly?.summary?.roundNumberCount ?? 0} round-number charges</Chip>
         </div>
       ),
       panel: <AnomalyTab a={data.anomaly} />,
@@ -180,10 +180,10 @@ export function InsightsView({ data }: { data: any }) {
       summary: (
         <div className="space-y-2">
           <div className="flex items-end gap-5">
-            <Stat value={String(data.fraud?.summary?.flagged ?? 0)} label="flagged" tone="text-destructive" />
-            <Stat value={String(data.fraud?.summary?.byTier?.high ?? 0)} label="high-risk" tone="text-warning" />
+            <Stat value={String(data.fraud?.summary?.flagged ?? 0)} label="flagged" tone="text-primary" />
+            <Stat value={String(data.fraud?.summary?.byTier?.high ?? 0)} label="high-risk" tone="text-primary" />
           </div>
-          {data.fraud?.summary?.topReason && <Chip tone="bg-destructive/10 text-destructive">Top signal: {data.fraud.summary.topReason}</Chip>}
+          {data.fraud?.summary?.topReason && <Chip tone="bg-primary/10 text-primary">Top signal: {data.fraud.summary.topReason}</Chip>}
         </div>
       ),
       panel: <FraudTab f={data.fraud} />,
@@ -194,8 +194,8 @@ export function InsightsView({ data }: { data: any }) {
       summary: (
         <div className="flex h-full flex-col">
           <div className="flex items-end gap-5">
-            <Stat value={`${data.fx?.summary?.usdShare ?? 0}%`} label="cross-border" tone="text-warning" />
-            <Stat value={formatCAD(data.fx?.summary?.estFxCost ?? 0, { compact: true })} label="est. FX cost" tone="text-destructive" />
+            <Stat value={`${data.fx?.summary?.usdShare ?? 0}%`} label="cross-border" tone="text-primary" />
+            <Stat value={formatCAD(data.fx?.summary?.estFxCost ?? 0, { compact: true })} label="est. FX cost" tone="text-primary" />
           </div>
           <div className="mt-2 flex-1">
             <CategoryPie data={fxPie} height={150} />
@@ -220,7 +220,7 @@ export function InsightsView({ data }: { data: any }) {
       body: "Subscriptions and recurring charges on autopilot - your fixed monthly committed spend.",
       summary: (
         <div className="space-y-1.5">
-          <Stat value={formatCAD(data.recurring?.summary?.monthlyCommitted ?? 0, { compact: true })} label="committed / month" tone="text-warning" />
+          <Stat value={formatCAD(data.recurring?.summary?.monthlyCommitted ?? 0, { compact: true })} label="committed / month" tone="text-primary" />
           <p className="text-xs text-muted-foreground">{data.recurring?.summary?.count ?? 0} recurring · {formatCAD(data.recurring?.summary?.annualized ?? 0, { compact: true })}/yr</p>
         </div>
       ),
@@ -304,9 +304,9 @@ function MetricsBar({
 
 function AnomalyTab({ a }: { a: any }) {
   const metrics = [
-    { label: "Duplicate groups", value: String(a.summary.duplicateGroups), tone: "text-warning" },
-    { label: "Duplicate exposure", value: formatCAD(a.summary.duplicateExposure, { compact: true }), tone: "text-destructive" },
-    { label: "Round-number charges", value: String(a.summary.roundNumberCount), tone: "text-warning" },
+    { label: "Duplicate groups", value: String(a.summary.duplicateGroups), tone: "text-primary" },
+    { label: "Duplicate exposure", value: formatCAD(a.summary.duplicateExposure, { compact: true }), tone: "text-primary" },
+    { label: "Round-number charges", value: String(a.summary.roundNumberCount), tone: "text-primary" },
     { label: "Settlements (not spend)", value: formatCAD(a.summary.settlements.total, { compact: true }), tone: "text-neutral-600" },
   ] as const;
 
@@ -316,7 +316,7 @@ function AnomalyTab({ a }: { a: any }) {
         metrics={metrics}
         footer={
           <p className="border-t border-border/60 px-4 py-2.5 text-sm text-neutral-600">
-            <span className="font-medium text-warning">Context:</span>{" "}
+            <span className="font-medium text-primary">Context:</span>{" "}
             The single largest line in the data is a {formatCAD(a.summary.settlements.largest)} card-balance payment - correctly classified as a settlement, not operational spend or fraud. {a.summary.settlements.count} such payments total {formatCAD(a.summary.settlements.total)}.
           </p>
         }
@@ -344,7 +344,7 @@ function AnomalyTab({ a }: { a: any }) {
                     <TableCell className="text-neutral-600">{d.transaction_code}</TableCell>
                     <TableCell className="text-neutral-600">{d.dates}</TableCell>
                     <TableCell className="text-right">
-                      <span className="rounded bg-warning/15 px-1.5 py-0.5 text-[12px] font-medium text-warning">{d.occurrences}×</span>
+                      <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[12px] font-medium text-primary">{d.occurrences}×</span>
                     </TableCell>
                     <TableCell className="text-right tabular-nums text-neutral-900">{formatCAD(d.amount_cad)}</TableCell>
                   </TableRow>
@@ -387,8 +387,8 @@ function AnomalyTab({ a }: { a: any }) {
 
 /* ---------- Fraud Watch ---------- */
 const VERDICT_STYLE: Record<string, { cls: string; label: string }> = {
-  likely_fraud: { cls: "bg-destructive/15 text-destructive", label: "Likely fraud" },
-  suspicious: { cls: "bg-warning/15 text-warning", label: "Suspicious" },
+  likely_fraud: { cls: "bg-primary/15 text-primary", label: "Likely fraud" },
+  suspicious: { cls: "bg-primary/10 text-primary", label: "Suspicious" },
   benign: { cls: "bg-primary/15 text-primary", label: "Benign" },
   unreviewed: { cls: "bg-secondary text-muted-foreground", label: "Unreviewed" },
 };
@@ -412,7 +412,7 @@ function FraudTab({ f }: { f: any }) {
     try {
       const d = await fetch("/api/fraud/investigate", { method: "POST" }).then((r) => r.json());
       setCases(Object.fromEntries((d.cases ?? []).map((c: any) => [c.transaction_id, c])));
-      if (d.mode === "degraded") toast.warning("Agent sidecar offline - showing deterministic signals only");
+      if (d.mode === "degraded") toast("Agent sidecar offline - showing deterministic signals only");
       else toast.success(`Investigated ${d.investigated} suspect${d.investigated === 1 ? "" : "s"}`);
     } catch {
       toast.error("Investigation failed");
@@ -422,15 +422,15 @@ function FraudTab({ f }: { f: any }) {
   }
 
   const metrics = [
-    { label: "Flagged", value: String(summary.flagged), tone: "text-destructive" },
-    { label: "Exposure", value: formatCAD(summary.exposure, { compact: true }), tone: "text-warning" },
-    { label: "High-risk", value: String(summary.byTier.high), tone: "text-destructive" },
+    { label: "Flagged", value: String(summary.flagged), tone: "text-primary" },
+    { label: "Exposure", value: formatCAD(summary.exposure, { compact: true }), tone: "text-primary" },
+    { label: "High-risk", value: String(summary.byTier.high), tone: "text-primary" },
     { label: "Top signal", value: summary.topReason ?? "-", tone: "text-neutral-600" },
   ] as const;
 
   function tierBadgeClass(score: number) {
-    if (score >= 60) return "bg-destructive/15 text-destructive";
-    if (score >= 40) return "bg-warning/15 text-warning";
+    if (score >= 60) return "bg-primary/15 text-primary";
+    if (score >= 40) return "bg-primary/10 text-primary";
     return "bg-secondary text-muted-foreground";
   }
 
@@ -535,7 +535,7 @@ function VendorTab({ v }: { v: any }) {
         cols={3}
         metrics={[
           { label: "Distinct vendors", value: String(v.summary.totalVendors) },
-          { label: "Fragmented categories", value: String(v.summary.fragmentedCategories), tone: "text-warning" },
+          { label: "Fragmented categories", value: String(v.summary.fragmentedCategories), tone: "text-primary" },
           { label: "Est. annual savings", value: formatCAD(v.summary.estimatedAnnualSavings, { compact: true }), tone: "text-primary" },
         ]}
       />
@@ -574,15 +574,15 @@ function VendorTab({ v }: { v: any }) {
 
 function ForecastTab({ f }: { f: any }) {
   const trendIcon = { rising: ArrowUpRight, falling: ArrowDownRight, flat: Minus };
-  const trendTone = { rising: "text-warning", falling: "text-primary", flat: "text-muted-foreground" };
+  const trendTone = { rising: "text-primary", falling: "text-primary", flat: "text-muted-foreground" };
   return (
     <div className="space-y-6">
       <MetricsBar
         metrics={[
           { label: "Categories modeled", value: String(f.summary.categories) },
-          { label: "Overrun risk", value: String(f.summary.atRisk), tone: "text-destructive" },
-          { label: "Projected overrun", value: formatCAD(f.summary.projectedOverrun, { compact: true }), tone: "text-warning" },
-          { label: "Rising trends", value: String(f.summary.risingCount), tone: "text-warning" },
+          { label: "Overrun risk", value: String(f.summary.atRisk), tone: "text-primary" },
+          { label: "Projected overrun", value: formatCAD(f.summary.projectedOverrun, { compact: true }), tone: "text-primary" },
+          { label: "Rising trends", value: String(f.summary.risingCount), tone: "text-primary" },
         ]}
       />
 
@@ -605,7 +605,7 @@ function ForecastTab({ f }: { f: any }) {
               <div className="mt-2 flex items-center justify-between text-xs">
                 <span className="text-muted-foreground">Projected {c.projectedMonth}: <span className="font-semibold text-foreground">{formatCAD(c.projected)}</span></span>
                 {c.overrunRisk ? (
-                  <span className="inline-flex items-center gap-1 rounded bg-destructive/15 px-2 py-0.5 font-medium text-destructive">
+                  <span className="inline-flex items-center gap-1 rounded bg-primary/15 px-2 py-0.5 font-medium text-primary">
                     <AlertTriangle className="h-3 w-3" /> Overrun +{formatCAD(c.overrunBy, { compact: true })}
                   </span>
                 ) : (
@@ -669,7 +669,7 @@ function RecurringTab({ r }: { r: any }) {
       <MetricsBar
         metrics={[
           { label: "Recurring charges", value: String(r.summary.count), tone: "text-primary" },
-          { label: "Committed / month", value: formatCAD(r.summary.monthlyCommitted, { compact: true }), tone: "text-warning" },
+          { label: "Committed / month", value: formatCAD(r.summary.monthlyCommitted, { compact: true }), tone: "text-primary" },
           { label: "Annualized", value: formatCAD(r.summary.annualized, { compact: true }), tone: "text-neutral-600" },
           { label: "Top category", value: r.summary.topCategory || "-", tone: "text-neutral-600" },
         ]}
@@ -719,9 +719,9 @@ function FxTab({ x }: { x: any }) {
     <div className="space-y-4">
       <MetricsBar
         metrics={[
-          { label: "Cross-border share", value: `${x.summary.usdShare}%`, tone: "text-warning" },
+          { label: "Cross-border share", value: `${x.summary.usdShare}%`, tone: "text-primary" },
           { label: "USD spend", value: formatCAD(x.summary.usdValue, { compact: true }), tone: "text-primary" },
-          { label: "Est. FX cost", value: formatCAD(x.summary.estFxCost, { compact: true }), tone: "text-destructive" },
+          { label: "Est. FX cost", value: formatCAD(x.summary.estFxCost, { compact: true }), tone: "text-primary" },
           { label: "Avg FX rate", value: String(x.summary.avgRate), tone: "text-neutral-600" },
         ]}
       />
@@ -749,14 +749,14 @@ function FxTab({ x }: { x: any }) {
 function ProfilesTab({ p }: { p: any }) {
   const max = Math.max(...p.categories.map((c: any) => c.vsBaseline), 1);
   const trendIcon: any = { rising: ArrowUpRight, falling: ArrowDownRight, flat: Minus };
-  const trendTone: any = { rising: "text-warning", falling: "text-primary", flat: "text-muted-foreground" };
+  const trendTone: any = { rising: "text-primary", falling: "text-primary", flat: "text-muted-foreground" };
   return (
     <div className="space-y-6">
       <MetricsBar
         metrics={[
           { label: "Categories", value: String(p.summary.categories) },
           { label: "Company avg txn", value: formatCAD(p.summary.baselineAvg), tone: "text-neutral-600" },
-          { label: "Biggest riser", value: p.summary.biggestRiser || "-", tone: "text-warning" },
+          { label: "Biggest riser", value: p.summary.biggestRiser || "-", tone: "text-primary" },
           { label: "Top share", value: p.summary.topShare || "-", tone: "text-primary" },
         ]}
       />
