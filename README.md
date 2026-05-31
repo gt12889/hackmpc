@@ -7,10 +7,12 @@ A non-technical finance manager can chat with their company's spend in plain Eng
 > **Pages:** `/` is a cinematic scroll-reveal brand overview. The app is four surfaces - **Overview** (Spending · Budgets), **Insights**, **Governance** (Violations · Receipts · Audit), and **Workflow** (Approvals · Reports · Agents) - plus a floating **Ask AI** chat on every page. The older `/dashboard`, `/compliance`, `/approvals`, `/reports`, `/chat` routes redirect into these.
 
 ## Documentation
+## Documentation
 
+```mermaid
 flowchart LR
     %% ── INPUT ──
-    subgraph INPUT["Input"]
+    subgraph INPUT ["Input"]
         A["CSV / XLSX\nUpload"]
     end
 
