@@ -42,7 +42,7 @@ export const MCC_MAP: Record<string, CategoryDef> = {
   "5983": { category: "Fuel", subcategory: "Fuel Dealer", description: "Fuel Dealers (fuel oil, wood, coal, LPG)" },
   "5172": { category: "Fuel", subcategory: "Petroleum", description: "Petroleum and Petroleum Products" },
 
-  // ---- Permits & Compliance (govt) — the single biggest bucket in this fleet ----
+  // ---- Permits & Compliance (govt) - the single biggest bucket in this fleet ----
   "9399": { category: "Permits & Compliance", subcategory: "Government Services", description: "Government Services (oversize/overweight permits, DOT)" },
   "9311": { category: "Permits & Compliance", subcategory: "Tax", description: "Tax Payments" },
   "9222": { category: "Permits & Compliance", subcategory: "Fines", description: "Fines / Government" },
@@ -167,7 +167,7 @@ export const MCC_MAP: Record<string, CategoryDef> = {
 // Merchant-name pattern overrides (applied after MCC lookup). Border-crossing and
 // scale companies show up under several MCCs, so we pin them by name.
 export const MERCHANT_OVERRIDES: { pattern: RegExp; def: CategoryDef }[] = [
-  // Financial settlements first — these are not operational spend.
+  // Financial settlements first - these are not operational spend.
   { pattern: /EFT PAYMENT|\bPAYMENT\b|PAYMENT - THANK|POINT REDEMPTION|REWARDS REDEMPTION|BALANCE TRANSFER|AUTOPAY|PRE-?AUTH(ORIZED)? PAYMENT/i, def: { category: "Payments & Settlements", subcategory: "Card Payment", description: "Card balance payment / rewards redemption (not an expense)" } },
   { pattern: /\bDTOPS\b|SINGLE CROSSING|BORDER|CBSA|CUSTOMS/i, def: { category: "Tolls & Border", subcategory: "Border Crossing", description: "Border crossing / customs decal (DTOPS)" } },
   { pattern: /CAT SCALE|SCALE/i, def: { category: "Scales & Wash", subcategory: "Truck Scale", description: "Truck weigh scale" } },

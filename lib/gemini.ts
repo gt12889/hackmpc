@@ -8,7 +8,7 @@ import { GoogleGenAI, type GenerateContentParameters } from "@google/genai";
 const PRIMARY = process.env.GEMINI_MODEL || "gemini-2.5-flash";
 
 // Google's free tier meters quota PER MODEL PER DAY, so each entry is an
-// independent quota pool — the more (real, tool-capable) models we list, the
+// independent quota pool - the more (real, tool-capable) models we list, the
 // longer the app keeps working once any one model is daily-exhausted. We span
 // model generations (2.x + 3.x flash) because newer generations get their own
 // fresh quota buckets. Override the whole chain with GEMINI_MODELS (comma-sep).
@@ -35,7 +35,7 @@ export function getClient(): GoogleGenAI | null {
   return apiKey ? new GoogleGenAI({ apiKey }) : null;
 }
 
-/** True when the error means "this model can't serve right now — try another":
+/** True when the error means "this model can't serve right now - try another":
  *  quota exhaustion (429) OR the model being unavailable/retired for this key
  *  (404 NOT_FOUND). Anything else is a real bug and should surface immediately. */
 function shouldTryNextModel(e: any): boolean {
@@ -70,9 +70,9 @@ export async function generateWithFallback(
     } catch (e) {
       if (shouldTryNextModel(e)) {
         lastErr = e;
-        continue; // quota'd or unavailable — try the next free model
+        continue; // quota'd or unavailable - try the next free model
       }
-      throw e; // genuine error (bad request, etc.) — surface immediately
+      throw e; // genuine error (bad request, etc.) - surface immediately
     }
   }
   throw lastErr ?? new Error("All Gemini models exhausted");

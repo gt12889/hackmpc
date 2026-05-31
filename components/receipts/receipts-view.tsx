@@ -75,7 +75,7 @@ export function ReceiptsView({ initial }: { initial: any }) {
       <div className="rounded-lg border border-border/60 p-4">
         <SectionBadge className="mb-2">Scan a Receipt</SectionBadge>
         <h3 className="text-sm font-medium text-neutral-900">Scan a receipt</h3>
-        <p className="mt-0.5 text-xs text-neutral-600">Upload a photo — AI Vision reads it and matches it to a transaction</p>
+        <p className="mt-0.5 text-xs text-neutral-600">Upload a photo - AI Vision reads it and matches it to a transaction</p>
         <div
           onDragOver={(e) => { e.preventDefault(); setDrag(true); }}
           onDragLeave={() => setDrag(false)}
@@ -107,15 +107,15 @@ export function ReceiptsView({ initial }: { initial: any }) {
               <ScanLine className="h-3.5 w-3.5" /> Extracted
             </div>
             <div className="grid grid-cols-3 gap-2 text-neutral-800">
-              <Field label="Merchant" value={result.extracted?.merchant ?? "—"} />
-              <Field label="Date" value={result.extracted?.date ?? "—"} />
-              <Field label="Amount" value={result.extracted?.amount != null ? formatCAD(Number(result.extracted.amount)) : "—"} />
+              <Field label="Merchant" value={result.extracted?.merchant ?? "-"} />
+              <Field label="Date" value={result.extracted?.date ?? "-"} />
+              <Field label="Amount" value={result.extracted?.amount != null ? formatCAD(Number(result.extracted.amount)) : "-"} />
             </div>
             <div className={cn("mt-3 flex items-center gap-2 rounded-md p-2 text-xs", result.matched ? "bg-primary/10 text-primary" : "bg-warning/10 text-warning")}>
               {result.matched ? <Link2 className="h-4 w-4" /> : <Link2Off className="h-4 w-4" />}
               {result.matched
                 ? <span>Matched to <b>{result.txn?.merchant_name}</b> · {formatCAD(result.txn?.amount_cad)} · {result.txn?.txn_date} ({Math.round((result.confidence || 0) * 100)}% confidence)</span>
-                : <span>No matching transaction found — saved as an unmatched receipt.</span>}
+                : <span>No matching transaction found - saved as an unmatched receipt.</span>}
             </div>
           </div>
         )}

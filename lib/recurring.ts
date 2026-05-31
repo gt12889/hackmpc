@@ -1,7 +1,7 @@
 import { getDb } from "./db";
 
 // Recurring / subscription detection. Merchants charged on a regular cadence with
-// consistent amounts across multiple months are surfaced as "committed" spend —
+// consistent amounts across multiple months are surfaced as "committed" spend -
 // the subscriptions a finance manager may not realize are on autopilot.
 
 const NON_OP = `category NOT IN ('Payments & Settlements') AND direction='Debit'`;
@@ -22,7 +22,7 @@ export function recurringCharges(limit = 25) {
     )
     .all() as any[];
 
-  // Keep only consistent-amount series (low coefficient of variation) — true recurring.
+  // Keep only consistent-amount series (low coefficient of variation) - true recurring.
   return rows
     .map((r) => {
       const cv = r.avg_amount > 0 ? Math.sqrt(Math.max(0, r.variance)) / r.avg_amount : 1;

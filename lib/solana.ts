@@ -16,7 +16,7 @@ import { getReport } from "./reports";
 // into a Solana Memo transaction. This gives a publicly verifiable, timestamped proof on
 // Explorer, and lets us later detect post-approval tampering by re-hashing the live record.
 //
-// Server-only module (uses node:crypto + better-sqlite3). Never imported by client code —
+// Server-only module (uses node:crypto + better-sqlite3). Never imported by client code -
 // the UI talks to /api/anchor instead. All operations are best-effort: anchoring failures
 // never throw into the approval flow; the feature is simply off when SOLANA_PAYER_SECRET
 // is unset.

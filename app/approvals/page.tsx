@@ -10,7 +10,7 @@ export default function ApprovalsPage() {
     <div>
       <PageHeader
         title="Pre-Approval Workflow"
-        description="Every request, with card history, budget status, and an AI recommendation — decide once"
+        description="Every request, with card history, budget status, and an AI recommendation - decide once"
       />
       <ApprovalQueue initial={initial} />
     </div>

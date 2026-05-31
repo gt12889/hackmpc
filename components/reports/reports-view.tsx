@@ -73,7 +73,7 @@ export function ReportsView({ initial }: { initial: any }) {
 
       <div className="flex items-center justify-between gap-3">
         <p className="text-sm text-muted-foreground">
-          Grouped by location &amp; month — a clear view of where and when company spend happened, ready for review.
+          Grouped by location &amp; month - a clear view of where and when company spend happened, ready for review.
         </p>
         <button onClick={regenerate} disabled={busy} className="inline-flex items-center gap-1.5 rounded-full border border-border px-5 py-1.5 text-xs hover:bg-secondary disabled:opacity-50">
           <RefreshCw className={cn("h-3.5 w-3.5", busy && "animate-spin")} /> Regenerate

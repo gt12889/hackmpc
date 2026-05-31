@@ -27,11 +27,11 @@ function gatherSignals() {
   return { anomaly, dups, vendors, topConsolidation, forecast, risers, recurring, fx, receipts, budgets };
 }
 
-/** Deterministic fallback insights (no AI) — also the input the model ranks. */
+/** Deterministic fallback insights (no AI) - also the input the model ranks. */
 function ruleBasedInsights(s: ReturnType<typeof gatherSignals>): Insight[] {
   const out: Insight[] = [];
   if (s.fx.usdShare > 50) out.push({ title: `${s.fx.usdShare}% of spend is cross-border USD`, detail: `$${Math.round(s.fx.usdValue).toLocaleString()} in USD-origin charges; estimated FX cost ~$${Math.round(s.fx.estFxCost).toLocaleString()}.`, severity: "high", metric: `$${Math.round(s.fx.estFxCost).toLocaleString()} FX cost`, link: "/insights" });
-  if (s.topConsolidation[0]) { const c = s.topConsolidation[0]; out.push({ title: `${c.category} is fragmented across ${c.vendors} vendors`, detail: `Top vendor is only ${c.topShare}% of spend — consolidating could save ~$${Math.round(c.savings).toLocaleString()}/yr.`, severity: "medium", metric: `$${Math.round(c.savings).toLocaleString()} savings` }); }
+  if (s.topConsolidation[0]) { const c = s.topConsolidation[0]; out.push({ title: `${c.category} is fragmented across ${c.vendors} vendors`, detail: `Top vendor is only ${c.topShare}% of spend - consolidating could save ~$${Math.round(c.savings).toLocaleString()}/yr.`, severity: "medium", metric: `$${Math.round(c.savings).toLocaleString()} savings` }); }
   if (s.recurring.count) out.push({ title: `${s.recurring.count} recurring charges = $${Math.round(s.recurring.monthlyCommitted).toLocaleString()}/mo committed`, detail: `$${Math.round(s.recurring.annualized).toLocaleString()}/yr in subscription-like spend.`, severity: "medium", metric: `$${Math.round(s.recurring.monthlyCommitted).toLocaleString()}/mo`, link: "/insights" });
   if (s.risers[0]) out.push({ title: `${s.risers[0].category} spend is rising`, detail: `Projected next month $${Math.round(s.risers[0].projected).toLocaleString()} vs last $${Math.round(s.risers[0].lastValue).toLocaleString()}.`, severity: s.budgets.atRisk ? "high" : "medium", link: "/budgets" });
   if (s.receipts.missing) out.push({ title: `${s.receipts.missing} charges missing a receipt`, detail: `$${Math.round(s.receipts.missingValue).toLocaleString()} of spend over $50 has no receipt on file.`, severity: "medium", metric: `${s.receipts.coveragePct}% coverage`, link: "/receipts" });

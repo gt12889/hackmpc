@@ -75,8 +75,8 @@ export default function DashboardPage() {
           </Reveal>
         </div>
 
-        {/* Secondary breakdowns — collapsed by default to keep the view minimal */}
-        <ExpandSection label="More breakdowns — by state, card & merchant">
+        {/* Secondary breakdowns - collapsed by default to keep the view minimal */}
+        <ExpandSection label="More breakdowns - by state, card & merchant">
           <div className="space-y-6">
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
               <div className="flex flex-col gap-2">

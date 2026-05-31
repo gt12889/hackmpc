@@ -12,7 +12,7 @@ import {
 } from "./queries";
 
 // Tool layer for the agent. Each tool maps to a parameterized, read-only query.
-// The model never writes SQL — it picks a tool + whitelisted args, which we
+// The model never writes SQL - it picks a tool + whitelisted args, which we
 // validate with zod before touching the DB. Every result carries a `suggested_viz`
 // hint the client uses to auto-render the right chart.
 

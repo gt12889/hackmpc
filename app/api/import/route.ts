@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
     const db = getDb();
     const result = ingestRows(db, rows, { mode: "append" });
     if (!result.added && !result.skipped) {
-      return NextResponse.json({ error: "No transactions could be read — check the column headers." }, { status: 400 });
+      return NextResponse.json({ error: "No transactions could be read - check the column headers." }, { status: 400 });
     }
 
     // Only re-derive downstream data if something actually changed.
@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
       scan = runScan();
       requests = synthesizeRequests();
       reports = generateReports(12);
-      // AI enrichment — best effort so a quota limit never fails the upload.
+      // AI enrichment - best effort so a quota limit never fails the upload.
       try { ai.severity = await adjustSeverityWithAI(); } catch {}
       try { ai.recommendations = await generateRecommendations(); } catch {}
       try { ai.summaries = await summarizeReports(); } catch {}

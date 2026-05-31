@@ -7,20 +7,20 @@ import { useEffect, useRef, useState } from "react";
 // canvas so the hero's teal particles, glows, and beige vignette frame it.
 //
 // On load it measures the splat cloud's bounds, recenters it at the origin, and
-// frames the camera to fit — a capture lives at an arbitrary position/scale, so
+// frames the camera to fit - a capture lives at an arbitrary position/scale, so
 // without this the camera would point at empty space. Then it gently auto-drifts
 // and parallaxes with scroll `progress` (0..1 from the pinned hero).
 //
-// Tuning knobs — adjust once you see it in-browser:
+// Tuning knobs - adjust once you see it in-browser:
 const SPLAT_URL = "/hero/sky.spz";
 const FLIP_UPRIGHT = true;   // most captures import upside-down; flip 180° on X
 // "immersive" puts the camera inside the capture (best for a sky/panorama);
 // "fit" backs off to view the whole cloud as an object.
 const MODE: "immersive" | "fit" = "immersive";
-const FIT = 1.15;            // (fit mode) camera distance multiplier — more margin around the cloud
+const FIT = 1.15;            // (fit mode) camera distance multiplier - more margin around the cloud
 const IMMERSE = 0.12;        // (immersive mode) camera offset from centre, as a fraction of radius
 const PITCH_DEG = -8;        // resting tilt; negative looks slightly upward into the sky
-const DRIFT_SPEED = 0.018;   // radians/sec of slow yaw — keep tiny for "ambient"
+const DRIFT_SPEED = 0.018;   // radians/sec of slow yaw - keep tiny for "ambient"
 const SCROLL_YAW = 0.45;     // extra yaw across a full scroll of the pinned hero
 const SCROLL_PITCH = 0.12;   // extra upward tilt across a full scroll
 
@@ -34,7 +34,7 @@ export function SplatSky({ progress = 0, className }: { progress?: number; class
   useEffect(() => { progRef.current = progress; }, [progress]);
 
   useEffect(() => {
-    // Respect reduced-motion and skip the heavy splat on small/mobile screens —
+    // Respect reduced-motion and skip the heavy splat on small/mobile screens -
     // the hero's particle canvas stands on its own there.
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduced || window.innerWidth < 768) return;
@@ -49,7 +49,7 @@ export function SplatSky({ progress = 0, className }: { progress?: number; class
       if (disposed || !mount) return;
 
       const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true, powerPreference: "high-performance" });
-      renderer.setClearColor(0x000000, 0); // transparent — hero layers blend over it
+      renderer.setClearColor(0x000000, 0); // transparent - hero layers blend over it
       renderer.setPixelRatio(Math.min(1.75, window.devicePixelRatio || 1));
       const size = () => renderer.setSize(mount.clientWidth, mount.clientHeight, false);
       size();

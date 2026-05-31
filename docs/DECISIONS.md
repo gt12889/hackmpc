@@ -12,10 +12,10 @@ The data has no department/employee fields. Rather than invent them, the app sli
 The largest line (~$264K) and ~$1.2M total are **bank card-balance payments**, not operational spend. They're categorized as `Payments & Settlements` and excluded from all spend analytics, so a payment never distorts the numbers. Surfaced in Insights as a context flag.
 
 ### Reports grouped by jurisdiction + month
-The data is shared company spend across many locations (no per-trip identifier), so reports group by **state/province + month** — the natural way a business reviews where and when money went. CFO-ready, with policy flags and AI summaries.
+The data is shared company spend across many locations (no per-trip identifier), so reports group by **state/province + month** - the natural way a business reviews where and when money went. CFO-ready, with policy flags and AI summaries.
 
 ### MCC-derived categories
-The file's own category column is 99% one value. Categories come from a curated **MCC → category** map (95 codes) plus merchant-pattern overrides — the real category signal.
+The file's own category column is 99% one value. Categories come from a curated **MCC → category** map (95 codes) plus merchant-pattern overrides - the real category signal.
 
 ### AI is agentic but bounded, and never writes SQL
 The chat is a tool-use loop over whitelisted, zod-validated query tools. The other three AI features are single batched JSON calls. This gives multi-step reasoning and contextual judgment without unbounded cost or SQL-injection risk.
@@ -27,7 +27,10 @@ Free-tier quota is per-model, so all AI calls retry down a chain of free Gemini 
 Uploads add to the dataset (a business accrues transactions over time) and skip exact duplicate charges, so re-uploading an overlapping export is safe.
 
 ### Brim teal/cyan branding
-Pulled from Brim Financial's actual CSS (`static.brimfinancial.com`): primary teal `#007d93`, accent cyan `#00c1d5`, near-black surfaces — not the purple first assumed. Helvetica Bold throughout.
+Pulled from Brim Financial's actual CSS (`static.brimfinancial.com`): primary teal `#007d93`, accent cyan `#00c1d5`, near-black surfaces - not the purple first assumed. Helvetica Bold throughout.
 
 ### Home = cinematic overview; dashboard separate
 `/` is a scroll-reveal brand hero ("noise → clarity" particle field); the working dashboard lives at `/dashboard`. Minimal top-nav (Dashboard, Ask AI, and a Menu dropdown) with progressive disclosure (view-more / expand) to keep each page lean.
+
+### On-chain anchoring: devnet, server keypair, Memo program
+The audit anchor uses a Solana **Memo transaction on devnet**, signed by a **server-side keypair**, rather than a custom Anchor program, an SPL-token settlement, or a browser wallet. Rationale: the Memo program needs nothing deployed, the server keypair means zero setup for a judge, and it stays server-only so `@solana/web3.js` never enters the client bundle. It is best-effort and env-gated, so it never blocks an approval and is simply off when `SOLANA_PAYER_SECRET` is unset. See [SOLANA.md](SOLANA.md).

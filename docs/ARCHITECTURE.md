@@ -9,7 +9,7 @@ Brim It is a Next.js 15 (App Router) app over a local SQLite database, with a Go
 | Framework | Next.js 15 (App Router) + TypeScript |
 | UI | Tailwind 3 + shadcn/Radix, Recharts, Helvetica Bold, Brim teal/cyan |
 | Data | SQLite via `better-sqlite3` (single WAL connection) |
-| Ingest | SheetJS (`xlsx`) — CSV + XLSX |
+| Ingest | SheetJS (`xlsx`) - CSV + XLSX |
 | AI | Google Gemini (`@google/genai`) with per-model fallback |
 | Validation | `zod` (AI tool args) |
 
@@ -36,7 +36,7 @@ CSV/XLSX upload ─────────┴─► lib/ingest.ts ─► SQLite
 |---|---|
 | `db.ts` | `better-sqlite3` singleton, WAL, applies `schema.sql` on first open |
 | `schema.sql` | All tables: transactions, cards, mcc_category_map, policy_rules, violations, requests, expense_reports, report_line_items, chat_* |
-| `ingest.ts` | Shared load pipeline — column aliases, date/amount/MCC normalization, dedup, replace/append modes |
+| `ingest.ts` | Shared load pipeline - column aliases, date/amount/MCC normalization, dedup, replace/append modes |
 | `mcc-seed.ts` | MCC → category map (95 codes) + merchant overrides + settlements quarantine |
 | `queries.ts` | Parameterized read-only analytics (backs dashboard **and** AI tools) |
 | `tools.ts` | AI tool schemas (Gemini functionDeclarations) + zod validation + `suggested_viz` |
@@ -57,7 +57,7 @@ CSV/XLSX upload ─────────┴─► lib/ingest.ts ─► SQLite
 ## Key patterns
 
 - **Single DB connection** (`getDb()`), WAL, foreign keys on. Server components read it directly; client views fetch JSON via SWR.
-- **No raw SQL from the model** — Gemini calls whitelisted, zod-validated query tools (`tools.ts` → `queries.ts`).
-- **AI is bounded** — each non-chat AI feature is one batched call with `responseMimeType: application/json`.
-- **Per-model fallback** — `gemini.ts` retries 429s down a chain of free models so any available model serves the request.
-- **Settlements quarantine** — bank card-payments are categorized separately and excluded from "spend" everywhere.
+- **No raw SQL from the model** - Gemini calls whitelisted, zod-validated query tools (`tools.ts` → `queries.ts`).
+- **AI is bounded** - each non-chat AI feature is one batched call with `responseMimeType: application/json`.
+- **Per-model fallback** - `gemini.ts` retries 429s down a chain of free models so any available model serves the request.
+- **Settlements quarantine** - bank card-payments are categorized separately and excluded from "spend" everywhere.

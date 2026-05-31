@@ -6,7 +6,7 @@ import { ArrowDown } from "lucide-react";
 import { SplatSky } from "@/components/splat-sky";
 import { BrimWordmark } from "@/components/brim-wordmark";
 
-// "From noise to clarity" — a scroll-pinned cinematic brand overview (home page).
+// "From noise to clarity" - a scroll-pinned cinematic brand overview (home page).
 // A tight, focal canvas of teal/cyan particles starts as chaos and organizes +
 // zooms into a bar chart as the user scrolls; text reveals line-by-line into the
 // brand. The live dashboard lives separately at /dashboard.
@@ -114,7 +114,7 @@ export function HeroReveal() {
           let y = pt.cy + (pt.ty - pt.cy) * e + Math.cos(t * 0.5 + pt.ph) * drift;
           x = ccx + (x - ccx) * zoom;
           y = ccy + (y - ccy) * zoom;
-          // Cursor repulsion — fades out as the chart organizes.
+          // Cursor repulsion - fades out as the chart organizes.
           const ptr = pointerRef.current;
           if (ptr) {
             const dx = x - ptr.x, dy = y - ptr.y, d2 = dx * dx + dy * dy, R = 130;
@@ -160,7 +160,7 @@ export function HeroReveal() {
           <div className="absolute inset-0" style={{ opacity: skyFade }}>
             <SplatSky progress={p} className="absolute inset-0 h-full w-full" />
           </div>
-          {/* Optional parallax art — drop /public/hero/streams.png */}
+          {/* Optional parallax art - drop /public/hero/streams.png */}
           <div className="absolute inset-0 bg-cover bg-center opacity-35" style={{ backgroundImage: "url(/hero/streams.png)", transform: `translateY(${p * -50}px)` }} />
           <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />
           {/* Ambient sky-blue glows */}

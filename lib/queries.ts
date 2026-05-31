@@ -3,7 +3,7 @@ import { NON_OPERATIONAL } from "./mcc-seed";
 
 // Read-only, parameterized analytics. These functions back BOTH the dashboard
 // and the AI agent's tools, so all filtering goes through a single whitelisted
-// builder — the model never injects raw SQL.
+// builder - the model never injects raw SQL.
 
 export type Filters = {
   category?: string;
@@ -17,7 +17,7 @@ export type Filters = {
   min_amount?: number;
   max_amount?: number;
   direction?: "Debit" | "Credit";
-  include_settlements?: boolean; // default false — exclude card payments from "spend"
+  include_settlements?: boolean; // default false - exclude card payments from "spend"
 };
 
 const SETTLEMENT_LIST = NON_OPERATIONAL.map((c) => `'${c}'`).join(",");

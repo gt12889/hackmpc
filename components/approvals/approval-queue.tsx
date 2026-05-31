@@ -138,7 +138,7 @@ export function ApprovalQueue({ initial }: { initial: any }) {
         </div>
       ) : (
         <div className="rounded-xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">
-          Queue is clear — every request has been decided.
+          Queue is clear - every request has been decided.
         </div>
       )}
 
@@ -210,7 +210,7 @@ function ApprovalCard({ req, busy, onDecide }: { req: any; busy: boolean; onDeci
       {/* Transaction details */}
       <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <Detail icon={CreditCard} label="Card / holder" value={`${req.transaction_code}${req.cardholder ? ` · ${req.cardholder}` : ""}`} />
-        <Detail icon={Calendar} label="Transaction date" value={ctx.txnDate ? formatDate(ctx.txnDate) : "—"} sub={ctx.postingDate && ctx.postingDate !== ctx.txnDate ? `Posted ${formatDate(ctx.postingDate)}` : undefined} />
+        <Detail icon={Calendar} label="Transaction date" value={ctx.txnDate ? formatDate(ctx.txnDate) : "-"} sub={ctx.postingDate && ctx.postingDate !== ctx.txnDate ? `Posted ${formatDate(ctx.postingDate)}` : undefined} />
         {location && <Detail icon={MapPin} label="Location" value={location} sub={ctx.isCrossBorder ? "Cross-border charge" : undefined} />}
         {ctx.mcc && <Detail icon={Tag} label="MCC" value={ctx.mcc} />}
       </div>

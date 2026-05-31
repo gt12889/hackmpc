@@ -76,7 +76,7 @@ export function AuditTrail({ configured, initial }: { configured: boolean; initi
   if (rows.length === 0) {
     return (
       <div className="mx-8 rounded-xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">
-        No anchors yet. Approve a report or a pre-approval request — its hash will be notarized on Solana and appear here.
+        No anchors yet. Approve a report or a pre-approval request - its hash will be notarized on Solana and appear here.
       </div>
     );
   }
@@ -136,10 +136,10 @@ export function AuditTrail({ configured, initial }: { configured: boolean; initi
                         <ExternalLink className="h-3 w-3" />
                       </a>
                     ) : (
-                      <span className="text-xs text-muted-foreground">—</span>
+                      <span className="text-xs text-muted-foreground">-</span>
                     )}
                   </td>
-                  <td className="px-4 py-2.5 font-mono text-xs text-muted-foreground">{a.slot ?? "—"}</td>
+                  <td className="px-4 py-2.5 font-mono text-xs text-muted-foreground">{a.slot ?? "-"}</td>
                   <td className="px-4 py-2.5 text-xs text-muted-foreground">{a.created_at}</td>
                   <td className="px-4 py-2.5">
                     {failed ? (

@@ -4,7 +4,7 @@
 
 **Goal:** When a compliance scan produces a high/critical alert, persist it to a notification ledger (powering an in-app bell feed) and place an interactive ElevenLabs+Twilio phone call for new high/critical alerts (deduped, capped at 3 per scan).
 
-**Architecture:** A new `notifications` table is the single source of truth — both the bell feed and the dedup ledger (UNIQUE on a stable `alert_key`). After a scan's AI severity pass, `syncFromViolations()` inserts genuinely-new alerts; new high/critical ones are dispatched to `lib/voice-alert.ts`, which calls the ElevenLabs outbound-call API. The ledger lives outside the wiped `violations` table, so dedup survives re-scans.
+**Architecture:** A new `notifications` table is the single source of truth - both the bell feed and the dedup ledger (UNIQUE on a stable `alert_key`). After a scan's AI severity pass, `syncFromViolations()` inserts genuinely-new alerts; new high/critical ones are dispatched to `lib/voice-alert.ts`, which calls the ElevenLabs outbound-call API. The ledger lives outside the wiped `violations` table, so dedup survives re-scans.
 
 **Tech Stack:** Next.js 15 (App Router) · TypeScript · better-sqlite3 · vitest (new) · ElevenLabs Conversational AI REST API · Twilio (imported into ElevenLabs).
 
@@ -15,29 +15,29 @@
 ## File Structure
 
 **New files:**
-- `vitest.config.ts` — test runner config
-- `test/helpers/db.ts` — in-memory test DB factory (applies `lib/schema.sql`)
-- `lib/settings.ts` — KV accessor for the calling toggle
-- `lib/notifications.ts` — ledger logic (alertKey, sync, list, unread, mark-read)
-- `lib/voice-alert.ts` — ElevenLabs outbound-call wrapper + dispatch guard
-- `lib/notifications.test.ts`, `lib/settings.test.ts`, `lib/voice-alert.test.ts` — unit tests
-- `app/api/notifications/route.ts` — GET feed + unread count
-- `app/api/notifications/[id]/route.ts` — PATCH mark-read
-- `app/api/notifications/read-all/route.ts` — POST mark-all-read
-- `app/api/notifications/test-call/route.ts` — POST place a test call
-- `app/api/settings/alerts/route.ts` — GET/PATCH calling toggle + configured status
-- `components/notifications/notification-bell.tsx` — bell + badge + dropdown feed
-- `components/compliance/alert-settings.tsx` — toggle + Test-call control
+- `vitest.config.ts` - test runner config
+- `test/helpers/db.ts` - in-memory test DB factory (applies `lib/schema.sql`)
+- `lib/settings.ts` - KV accessor for the calling toggle
+- `lib/notifications.ts` - ledger logic (alertKey, sync, list, unread, mark-read)
+- `lib/voice-alert.ts` - ElevenLabs outbound-call wrapper + dispatch guard
+- `lib/notifications.test.ts`, `lib/settings.test.ts`, `lib/voice-alert.test.ts` - unit tests
+- `app/api/notifications/route.ts` - GET feed + unread count
+- `app/api/notifications/[id]/route.ts` - PATCH mark-read
+- `app/api/notifications/read-all/route.ts` - POST mark-all-read
+- `app/api/notifications/test-call/route.ts` - POST place a test call
+- `app/api/settings/alerts/route.ts` - GET/PATCH calling toggle + configured status
+- `components/notifications/notification-bell.tsx` - bell + badge + dropdown feed
+- `components/compliance/alert-settings.tsx` - toggle + Test-call control
 
 **Modified files:**
-- `lib/schema.sql` — add `notifications` + `app_settings` tables
-- `lib/compliance.ts` — `getViolations()` gains optional injected `db` param
-- `app/api/policies/scan/route.ts` — sync + dispatch after AI severity pass
-- `components/top-nav.tsx` — mount the bell in the logo bar
-- `app/compliance/page.tsx` — mount the alert-settings control
-- `.env.example` — add ElevenLabs/recipient vars
-- `package.json` — add `test` script + vitest dev deps
-- `README.md` — setup notes + Twilio-trial caveat
+- `lib/schema.sql` - add `notifications` + `app_settings` tables
+- `lib/compliance.ts` - `getViolations()` gains optional injected `db` param
+- `app/api/policies/scan/route.ts` - sync + dispatch after AI severity pass
+- `components/top-nav.tsx` - mount the bell in the logo bar
+- `app/compliance/page.tsx` - mount the alert-settings control
+- `.env.example` - add ElevenLabs/recipient vars
+- `package.json` - add `test` script + vitest dev deps
+- `README.md` - setup notes + Twilio-trial caveat
 
 ---
 
@@ -59,7 +59,7 @@ Expected: vitest added to devDependencies, no errors.
 
 - [ ] **Step 2: Add the `test` script**
 
-Modify `package.json` `"scripts"` — add this line after `"type-check": ...`:
+Modify `package.json` `"scripts"` - add this line after `"type-check": ...`:
 ```json
     "test": "vitest run",
 ```
@@ -164,7 +164,7 @@ describe("test infrastructure", () => {
 - [ ] **Step 6: Run the smoke test**
 
 Run: `npm test`
-Expected: PASS — this first smoke test only checks for `transactions`/`violations` (which exist in the current schema). The `notifications`/`app_settings` assertions are added in Task 2.
+Expected: PASS - this first smoke test only checks for `transactions`/`violations` (which exist in the current schema). The `notifications`/`app_settings` assertions are added in Task 2.
 
 - [ ] **Step 7: Commit**
 
@@ -175,7 +175,7 @@ git commit -m "test: add vitest + in-memory DB test harness"
 
 ---
 
-## Task 2: Schema — notifications + app_settings tables
+## Task 2: Schema - notifications + app_settings tables
 
 **Files:**
 - Modify: `lib/schema.sql` (append at end)
@@ -196,7 +196,7 @@ Add to `test/smoke.test.ts` inside the existing `describe`:
 - [ ] **Step 2: Run it to verify it fails**
 
 Run: `npm test`
-Expected: FAIL — the new test cannot find `notifications`/`app_settings`.
+Expected: FAIL - the new test cannot find `notifications`/`app_settings`.
 
 - [ ] **Step 3: Append the tables to `lib/schema.sql`**
 
@@ -242,7 +242,7 @@ git commit -m "feat: add notifications + app_settings tables to schema"
 
 ---
 
-## Task 3: lib/settings.ts — KV calling toggle
+## Task 3: lib/settings.ts - KV calling toggle
 
 **Files:**
 - Create: `lib/settings.ts`
@@ -281,7 +281,7 @@ describe("settings KV", () => {
 - [ ] **Step 2: Run it to verify it fails**
 
 Run: `npx vitest run lib/settings.test.ts`
-Expected: FAIL — `./settings` does not exist.
+Expected: FAIL - `./settings` does not exist.
 
 - [ ] **Step 3: Implement `lib/settings.ts`**
 
@@ -322,7 +322,7 @@ git commit -m "feat: app settings KV with calling-enabled toggle"
 
 ---
 
-## Task 4: lib/notifications.ts — alertKey + ledger sync
+## Task 4: lib/notifications.ts - alertKey + ledger sync
 
 **Files:**
 - Create: `lib/notifications.ts`
@@ -340,7 +340,7 @@ to:
 ```ts
 export function getViolations(severity?: string, db: import("better-sqlite3").Database = getDb()): any[] {
 ```
-(Leave the rest of the function body unchanged — it already uses the local `db`.)
+(Leave the rest of the function body unchanged - it already uses the local `db`.)
 
 - [ ] **Step 2: Write the failing test `lib/notifications.test.ts`**
 
@@ -399,7 +399,7 @@ describe("syncFromViolations", () => {
 - [ ] **Step 3: Run it to verify it fails**
 
 Run: `npx vitest run lib/notifications.test.ts`
-Expected: FAIL — `./notifications` does not exist.
+Expected: FAIL - `./notifications` does not exist.
 
 - [ ] **Step 4: Implement `lib/notifications.ts`**
 
@@ -519,7 +519,7 @@ git commit -m "feat: notification ledger with dedup sync from violations"
 
 ---
 
-## Task 5: lib/voice-alert.ts — ElevenLabs call wrapper + dispatch guard
+## Task 5: lib/voice-alert.ts - ElevenLabs call wrapper + dispatch guard
 
 **Files:**
 - Create: `lib/voice-alert.ts`
@@ -622,7 +622,7 @@ describe("dispatchAlertCalls", () => {
 - [ ] **Step 2: Run it to verify it fails**
 
 Run: `npx vitest run lib/voice-alert.test.ts`
-Expected: FAIL — `./voice-alert` does not exist.
+Expected: FAIL - `./voice-alert` does not exist.
 
 - [ ] **Step 3: Implement `lib/voice-alert.ts`**
 
@@ -669,7 +669,7 @@ export function buildDynamicVars(db: Database.Database, n: Notification): Record
        WHERE transaction_code = ? AND direction='Debit'
        GROUP BY category ORDER BY spend DESC LIMIT 5`
     ).all(card) as { category: string; spend: number }[];
-    if (rows.length) cardSummary = `Card ${card} recent spend — ` + rows.map((r) => `${r.category}: ${cad(r.spend)}`).join(", ") + ".";
+    if (rows.length) cardSummary = `Card ${card} recent spend - ` + rows.map((r) => `${r.category}: ${cad(r.spend)}`).join(", ") + ".";
   }
 
   return {
@@ -809,7 +809,7 @@ Expected: exit 0, no errors.
 
 - [ ] **Step 3: Manual integration check (calling disabled by default)**
 
-Run (in a terminal with the dev server running on its port — substitute `$PORT`):
+Run (in a terminal with the dev server running on its port - substitute `$PORT`):
 ```bash
 curl -s -X POST http://localhost:$PORT/api/policies/scan | python3 -m json.tool
 ```
@@ -824,7 +824,7 @@ git commit -m "feat: scan route syncs notifications and dispatches alert calls"
 
 ---
 
-## Task 7: API routes — notifications feed, mark-read, settings, test-call
+## Task 7: API routes - notifications feed, mark-read, settings, test-call
 
 **Files:**
 - Create: `app/api/notifications/route.ts`
@@ -1149,7 +1149,7 @@ export function AlertSettings() {
     setBusy(true); setMsg(null);
     const res = await fetch("/api/notifications/test-call", { method: "POST" });
     const d = await res.json();
-    setMsg(res.ok ? "Test call placed — your phone should ring." : `Test call failed: ${d.error ?? "unknown"}`);
+    setMsg(res.ok ? "Test call placed - your phone should ring." : `Test call failed: ${d.error ?? "unknown"}`);
     setBusy(false);
   }
 
@@ -1191,7 +1191,7 @@ Then render `<AlertSettings />` near the top of the page's main content (immedia
 ```tsx
         <AlertSettings />
 ```
-(If the page is a server component, `AlertSettings` is a client component and can be rendered directly — no extra wiring needed.)
+(If the page is a server component, `AlertSettings` is a client component and can be rendered directly - no extra wiring needed.)
 
 - [ ] **Step 3: Type-check + build**
 

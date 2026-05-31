@@ -2,7 +2,7 @@
   "name": "brim-it",
   "version": "0.1.0",
   "private": true,
-  "description": "AI-powered expense intelligence for an SMB fleet — Brim x MPC Hacks",
+  "description": "AI-powered expense intelligence for an SMB fleet - Brim x MPC Hacks",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

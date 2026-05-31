@@ -221,7 +221,7 @@ export function Lineage({ tools }: { tools: ToolCallTrace[] }) {
             <Step key={i} t={t} index={i} />
           ))}
           <li className="pl-5 text-[12px] italic text-muted-foreground/70">
-            Every number above came from these parameterized, read-only queries — the model never wrote SQL or
+            Every number above came from these parameterized, read-only queries - the model never wrote SQL or
             invented figures.
           </li>
         </ol>

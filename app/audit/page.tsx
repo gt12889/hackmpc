@@ -12,7 +12,7 @@ export default function AuditPage() {
     <div>
       <PageHeader
         title="Audit Trail"
-        description="Every approval and HIGH/CRITICAL alert notarized on Solana — SHA-256 of the record, written to the chain and re-verifiable for tamper detection."
+        description="Every approval and HIGH/CRITICAL alert notarized on Solana - SHA-256 of the record, written to the chain and re-verifiable for tamper detection."
       />
       <AuditTrail configured={configured} initial={anchors} />
     </div>

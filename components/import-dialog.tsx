@@ -32,7 +32,7 @@ export function ImportDialog({ variant = "default" }: { variant?: "default" | "p
       if (data.added > 0) {
         toast.success(`Added ${data.added.toLocaleString()} transactions${data.skipped ? ` · ${data.skipped} duplicates skipped` : ""}`);
       } else {
-        toast.info(`No new transactions — all ${data.skipped.toLocaleString()} rows were already in your data`);
+        toast.info(`No new transactions - all ${data.skipped.toLocaleString()} rows were already in your data`);
       }
       router.refresh();
     } catch (e: any) {
@@ -69,7 +69,7 @@ export function ImportDialog({ variant = "default" }: { variant?: "default" | "p
 
             <h2 className="text-lg text-neutral-900">Upload Transactions</h2>
             <p className="mt-1 text-sm text-neutral-600">
-              Upload a card-transaction export (.csv or .xlsx). New rows are normalized, categorized, and scanned against your policy — then <b>added to your existing data</b>.
+              Upload a card-transaction export (.csv or .xlsx). New rows are normalized, categorized, and scanned against your policy - then <b>added to your existing data</b>.
             </p>
 
             {!result ? (
@@ -104,7 +104,7 @@ export function ImportDialog({ variant = "default" }: { variant?: "default" | "p
                 <div className="flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/10 p-3 text-sm">
                   <CheckCircle2 className="h-5 w-5 text-primary" />
                   <span>
-                    Added <b>{result.added.toLocaleString()}</b> from {result.fileName} — <b>{result.count.toLocaleString()}</b> total
+                    Added <b>{result.added.toLocaleString()}</b> from {result.fileName} - <b>{result.count.toLocaleString()}</b> total
                     {result.skipped > 0 && <span className="text-muted-foreground"> · {result.skipped.toLocaleString()} duplicate{result.skipped === 1 ? "" : "s"} skipped</span>}
                   </span>
                 </div>
@@ -118,7 +118,7 @@ export function ImportDialog({ variant = "default" }: { variant?: "default" | "p
                   Regenerated: {result.requests} approval requests, {result.reports} expense reports
                   {result.ai && (result.ai.severity || result.ai.recommendations || result.ai.summaries)
                     ? " · AI enrichment applied"
-                    : " · AI enrichment skipped (quota) — use the in-page Re-scan/Regenerate buttons later"}
+                    : " · AI enrichment skipped (quota) - use the in-page Re-scan/Regenerate buttons later"}
                 </div>
                 <div className="flex justify-end gap-2">
                   <button onClick={() => setResult(null)} className="rounded-md border border-border px-3 py-2 text-sm text-neutral-800 hover:bg-secondary">Upload another</button>

@@ -60,7 +60,7 @@ export function AlertSettings() {
       const res = await fetch("/api/notifications/test-call", { method: "POST" });
       const d = await res.json();
       if (res.ok) {
-        setMsg("Test call placed — your phone should ring shortly.");
+        setMsg("Test call placed - your phone should ring shortly.");
         toast.success("Test call placed");
       } else {
         const err = d.error ?? "unknown error";

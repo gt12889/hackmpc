@@ -33,7 +33,7 @@ export function categoryForecasts(topN = 6) {
     const series = db
       .prepare(`SELECT substr(txn_date,1,7) m, ROUND(SUM(amount_cad),2) v FROM transactions WHERE ${NON_OP} AND category=? GROUP BY m ORDER BY m`)
       .all(c.category) as any[];
-    // Drop the final month if it looks partial (trailing data) — keep it simple: use all.
+    // Drop the final month if it looks partial (trailing data) - keep it simple: use all.
     const pts = series.map((s, i) => ({ x: i, y: s.v }));
     const { slope, intercept } = linReg(pts);
     const lastM = series[series.length - 1]?.m;

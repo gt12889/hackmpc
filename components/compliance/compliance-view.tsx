@@ -71,7 +71,7 @@ export function ComplianceView({ initial }: { initial: any }) {
     try {
       const r = await fetch("/api/policies/scan", { method: "POST" }).then((x) => x.json());
       await mutate();
-      toast.success(`Scan complete — ${r.scan.total} flags, AI reviewed ${r.adjusted}`, { id: "scan" });
+      toast.success(`Scan complete - ${r.scan.total} flags, AI reviewed ${r.adjusted}`, { id: "scan" });
     } catch {
       toast.error("Scan failed", { id: "scan" });
     } finally {
@@ -170,14 +170,14 @@ export function ComplianceView({ initial }: { initial: any }) {
         <SectionCard title="Flagged Violations" description="Ranked by severity · AI-adjusted for context" className="h-full">
           {violations.length === 0 ? (
             <div className="flex items-center gap-2 py-8 text-sm text-muted-foreground">
-              <ShieldCheck className="h-5 w-5 text-primary" /> No open violations — spend is compliant.
+              <ShieldCheck className="h-5 w-5 text-primary" /> No open violations - spend is compliant.
             </div>
           ) : (
             <ShowMore items={violations} initial={5} noun="violations" className="space-y-1" render={(v: any) => {
               const isOpen = openIds.has(v.id);
               return (
                 <div key={v.id} className="rounded-lg border border-border overflow-hidden">
-                  {/* Collapsed row — always visible */}
+                  {/* Collapsed row - always visible */}
                   <button
                     onClick={() => toggleViolation(v.id)}
                     aria-expanded={isOpen}
@@ -211,7 +211,7 @@ export function ComplianceView({ initial }: { initial: any }) {
                     />
                   </button>
 
-                  {/* Expanded detail — revealed on click */}
+                  {/* Expanded detail - revealed on click */}
                   <div
                     className={cn(
                       "grid transition-[grid-template-rows] duration-200 motion-reduce:transition-none",
@@ -259,7 +259,7 @@ export function ComplianceView({ initial }: { initial: any }) {
         </Reveal>
       </div>
 
-      {/* Repeat offenders — collapsible */}
+      {/* Repeat offenders - collapsible */}
       <ExpandSection label="Repeat Offenders" defaultOpen={false}>
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <Reveal delay={0}>

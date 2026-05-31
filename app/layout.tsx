@@ -5,7 +5,7 @@ import { TopNav } from "@/components/top-nav";
 import { ChatDock } from "@/components/chat/chat-dock";
 import { Toaster } from "@/components/ui/sonner";
 
-// Arimo — a free, metric-compatible Helvetica substitute. Renders true Helvetica
+// Arimo - a free, metric-compatible Helvetica substitute. Renders true Helvetica
 // metrics on every platform (incl. Windows, which doesn't ship Helvetica).
 const helvetica = Arimo({ subsets: ["latin"], weight: ["400", "700"], variable: "--font-helv", display: "swap" });
 
@@ -17,7 +17,7 @@ const fraunces = Fraunces({
 });
 
 export const metadata: Metadata = {
-  title: "Brim It — AI Expense Intelligence",
+  title: "Brim It - AI Expense Intelligence",
   description: "AI-powered expense intelligence for SMB card spending. Brim × MPC Hacks.",
 };
 

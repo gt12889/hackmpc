@@ -1,4 +1,4 @@
-// Brim It — Solana devnet setup. Generates (or reuses) a server keypair, funds it via the
+// Brim It - Solana devnet setup. Generates (or reuses) a server keypair, funds it via the
 // devnet faucet, and writes SOLANA_PAYER_SECRET + SOLANA_RPC_URL into .env.local so the
 // on-chain audit-anchor feature can sign Memo transactions. Idempotent: re-running keeps the
 // existing key and only tops up the balance.
@@ -80,7 +80,7 @@ async function main() {
 
   let balance = await conn.getBalance(pubkey);
   if (balance < 0.1 * LAMPORTS_PER_SOL) {
-    console.log(`Balance ${(balance / LAMPORTS_PER_SOL).toFixed(4)} SOL — requesting devnet airdrop…`);
+    console.log(`Balance ${(balance / LAMPORTS_PER_SOL).toFixed(4)} SOL - requesting devnet airdrop…`);
     const ok = await airdropWithRetry(conn, pubkey, TARGET_SOL);
     if (!ok) {
       console.log("\n⚠️  Faucet airdrop failed (devnet rate limits are common). Fund manually:");
@@ -91,7 +91,7 @@ async function main() {
   }
 
   console.log(`Balance:  ${(balance / LAMPORTS_PER_SOL).toFixed(4)} SOL`);
-  console.log(balance > 0 ? "\n✅ Ready — on-chain audit anchoring is configured." : "\n⚠️  Key configured but unfunded; anchoring will report 'failed' until funded.");
+  console.log(balance > 0 ? "\n✅ Ready - on-chain audit anchoring is configured." : "\n⚠️  Key configured but unfunded; anchoring will report 'failed' until funded.");
 }
 
 main().catch((e) => {

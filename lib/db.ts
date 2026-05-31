@@ -2,7 +2,7 @@ import Database from "better-sqlite3";
 import fs from "fs";
 import path from "path";
 
-// Single writable connection, WAL mode — mirrors the Aegis pattern.
+// Single writable connection, WAL mode - mirrors the Aegis pattern.
 // The DB file lives in .data/ (gitignored); built by scripts/etl.ts.
 
 let _db: Database.Database | null = null;

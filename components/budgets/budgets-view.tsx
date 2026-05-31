@@ -194,12 +194,12 @@ export function BudgetsView({ initial }: { initial: any }) {
         <div>
           <SectionBadge>Category budgets</SectionBadge>
           <p className="mt-2 text-xs text-neutral-600">
-            Spend vs limit for {summary.month} — click a row to expand · click a limit to edit
+            Spend vs limit for {summary.month} - click a row to expand · click a limit to edit
           </p>
           <div className="mt-3 rounded-lg border border-border/60 divide-y divide-border/60">
             {budgets.length === 0 ? (
               <div className="px-4 py-8 text-center text-sm text-neutral-600">
-                No budgets set yet — use the form above.
+                No budgets set yet - use the form above.
               </div>
             ) : (
               budgets.map((b: BudgetRow) => {
@@ -272,7 +272,7 @@ export function BudgetsView({ initial }: { initial: any }) {
                     >
                       <div className="overflow-hidden">
                         <dl className="grid grid-cols-2 gap-x-6 gap-y-3 border-t border-border/40 bg-muted/20 px-4 py-3 sm:grid-cols-4">
-                          {/* Limit — inline-editable */}
+                          {/* Limit - inline-editable */}
                           <div>
                             <dt className="text-[11px] font-medium uppercase tracking-wide text-neutral-500">
                               Limit

@@ -1,5 +1,5 @@
 // Vector "BRIM IT" wordmark, rendered as inline SVG so it inherits the site font
-// (--font-sans / Arimo) and stays crisp at any size — unlike the old 435×87 PNG,
+// (--font-sans / Arimo) and stays crisp at any size - unlike the old 435×87 PNG,
 // which blurred when the hero scaled it up. Brand cyan→teal gradient.
 // `className` controls the rendered size (set a height; width is auto via the 5:1 viewBox).
 

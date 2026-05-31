@@ -3,11 +3,11 @@ import { getDb } from "./db";
 
 // Deterministic, explainable fraud-risk scoring. Each operational transaction is
 // scored on independent signals; the score + the reasons that fired are returned.
-// No AI — pure SQL + JS, so it's always available (not blocked by Gemini quota).
+// No AI - pure SQL + JS, so it's always available (not blocked by Gemini quota).
 
 const NON_OP = `category NOT IN ('Payments & Settlements') AND direction='Debit'`;
 // Categories where many same-day charges to one vendor are legitimate per-item fees
-// (permits/tolls/scales) — the compliance engine down-ranks these, so we don't
+// (permits/tolls/scales) - the compliance engine down-ranks these, so we don't
 // treat same-day repeats as a fraud signal for them.
 const BATCH_OK = new Set(["Permits & Compliance", "Tolls & Border", "Scales & Wash"]);
 

@@ -18,7 +18,7 @@ import {
 } from "recharts";
 import { formatCAD } from "@/lib/utils";
 
-/** Blue spectrum for charts — ordered for contrast across pie slices, bars, and lines. */
+/** Blue spectrum for charts - ordered for contrast across pie slices, bars, and lines. */
 export const CHART_COLORS = [
   "#003153", // Prussian Blue
   "#1E90FF", // Dodger Blue

@@ -39,7 +39,7 @@ export function ShowMore<T>({
   );
 }
 
-/** Collapsible section — whole block hidden behind a toggle (for dashboard secondary panels). */
+/** Collapsible section - whole block hidden behind a toggle (for dashboard secondary panels). */
 export function ExpandSection({
   label,
   children,

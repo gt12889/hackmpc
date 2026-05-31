@@ -1,6 +1,6 @@
 /**
  * ETL: load the bundled transactions xlsx into SQLite via the shared ingest
- * pipeline (lib/ingest.ts) — the same path the in-app upload uses.
+ * pipeline (lib/ingest.ts) - the same path the in-app upload uses.
  *
  *   npm run etl
  */

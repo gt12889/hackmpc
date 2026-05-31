@@ -15,7 +15,7 @@ export default function CompliancePage() {
     <div>
       <PageHeader
         title="Policy Compliance"
-        description="Scan transactions against the digitized expense policy — AI ranks violations by real-world severity"
+        description="Scan transactions against the digitized expense policy - AI ranks violations by real-world severity"
       />
       <ComplianceView initial={initial} />
     </div>

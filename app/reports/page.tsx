@@ -10,7 +10,7 @@ export default function ReportsPage() {
     <div>
       <PageHeader
         title="Expense Reports"
-        description="Auto-grouped transactions with category breakdowns, policy checks, and AI summaries — CFO-ready"
+        description="Auto-grouped transactions with category breakdowns, policy checks, and AI summaries - CFO-ready"
       />
       <ReportsView initial={initial} />
     </div>

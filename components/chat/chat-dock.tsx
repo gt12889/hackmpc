@@ -37,7 +37,7 @@ export function ChatDock() {
       {/* Expanded: chat covers the page */}
       {expanded && (
         <div className="fixed inset-0 z-50 flex flex-col">
-          {/* Backdrop — click to minimize */}
+          {/* Backdrop - click to minimize */}
           <button
             type="button"
             aria-label="Minimize chat"

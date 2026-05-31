@@ -1,7 +1,7 @@
 import type DatabaseType from "better-sqlite3";
 import { classify, MCC_MAP } from "./mcc-seed";
 
-// Shared transaction ingest — used by both scripts/etl.ts and the in-app upload
+// Shared transaction ingest - used by both scripts/etl.ts and the in-app upload
 // (/api/import). Tolerant of common column-name variants and of dates given as
 // Excel serials (the sample xlsx) OR real date strings (a typical CSV export).
 
@@ -103,7 +103,7 @@ export function ingestRows(
 
   if (!append) {
     // Clear in FK-safe order: children that reference transactions/cards first.
-    // (policy_rules are preserved — only their violations are cleared.)
+    // (policy_rules are preserved - only their violations are cleared.)
     db.exec(`
       DELETE FROM violations;
       DELETE FROM report_line_items;
@@ -115,7 +115,7 @@ export function ingestRows(
     `);
   }
 
-  // MCC map is reference data — (re)seed idempotently in either mode.
+  // MCC map is reference data - (re)seed idempotently in either mode.
   const insMcc = db.prepare(
     `INSERT OR REPLACE INTO mcc_category_map (mcc, category, subcategory, description, is_restricted) VALUES (?,?,?,?,?)`
   );
@@ -143,7 +143,7 @@ export function ingestRows(
     [...cardSet.entries()].sort((a, b) => b[1] - a[1]).forEach(([code, count], i) => {
       const label = i === 0 ? `Company Card ${code} (primary)` : `Company Card ${code}`;
       const alias = i === 0 ? `Primary · ${code}` : `Card ${code}`;
-      insCard.run(code, `${label} — ${count} txns`, alias);
+      insCard.run(code, `${label} - ${count} txns`, alias);
     });
   }
 
@@ -160,7 +160,7 @@ export function ingestRows(
       @state_province, @conversion_rate, @is_cross_border, @is_round_number
     )`);
 
-  // Dedup (append mode): seed with existing charges, then skip exact repeats —
+  // Dedup (append mode): seed with existing charges, then skip exact repeats -
   // including duplicates within the uploaded file itself.
   const seen = new Set<string>();
   if (append) {

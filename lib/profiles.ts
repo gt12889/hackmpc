@@ -1,7 +1,7 @@
 import { getDb } from "./db";
 
 // Spend profiles & benchmarking. Card 3001 is ~99.6% of spend so there are no
-// peer cardholders to compare — instead each CATEGORY is profiled and benchmarked
+// peer cardholders to compare - instead each CATEGORY is profiled and benchmarked
 // against the company baseline (avg-txn ratio, share, month-over-month trend).
 
 const NON_OP = `category NOT IN ('Payments & Settlements') AND direction='Debit'`;

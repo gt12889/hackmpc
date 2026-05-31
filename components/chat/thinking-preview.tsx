@@ -26,7 +26,7 @@ const STAGES = [
 const BARS = [40, 70, 55, 90, 48, 76, 62, 84];
 
 export function ThinkingPreview() {
-  // Ease toward ~95% and hold — the perception of progress without ever "finishing"
+  // Ease toward ~95% and hold - the perception of progress without ever "finishing"
   // before the response actually arrives (the row unmounts when it does).
   const [pct, setPct] = useState(8);
   useEffect(() => {

@@ -57,7 +57,7 @@ export function InsightsView({ data }: { data: any }) {
       id: "vendors",
       title: "Vendors",
       tag: "SAVINGS",
-      body: "Fragmented vendor spend across categories — consolidation opportunities and estimated annual savings.",
+      body: "Fragmented vendor spend across categories - consolidation opportunities and estimated annual savings.",
       panel: <VendorTab v={data.vendors} />,
     },
     {
@@ -71,7 +71,7 @@ export function InsightsView({ data }: { data: any }) {
       id: "recurring",
       title: "Recurring",
       tag: "COMMITMENTS",
-      body: "Subscriptions and recurring charges on autopilot — your fixed monthly committed spend.",
+      body: "Subscriptions and recurring charges on autopilot - your fixed monthly committed spend.",
       panel: <RecurringTab r={data.recurring} />,
     },
     {
@@ -142,7 +142,7 @@ function AnomalyTab({ a }: { a: any }) {
         footer={
           <p className="border-t border-border/60 px-4 py-2.5 text-sm text-neutral-600">
             <span className="font-medium text-warning">Context:</span>{" "}
-            The single largest line in the data is a {formatCAD(a.summary.settlements.largest)} card-balance payment — correctly classified as a settlement, not operational spend or fraud. {a.summary.settlements.count} such payments total {formatCAD(a.summary.settlements.total)}.
+            The single largest line in the data is a {formatCAD(a.summary.settlements.largest)} card-balance payment - correctly classified as a settlement, not operational spend or fraud. {a.summary.settlements.count} such payments total {formatCAD(a.summary.settlements.total)}.
           </p>
         }
       />
@@ -181,7 +181,7 @@ function AnomalyTab({ a }: { a: any }) {
 
         <div>
           <h3 className="text-sm text-neutral-900">Round-Number Charges</h3>
-          <p className="mt-0.5 text-xs text-neutral-600">Exact $100 multiples ≥ $500 — unusual for fuel/permits</p>
+          <p className="mt-0.5 text-xs text-neutral-600">Exact $100 multiples ≥ $500 - unusual for fuel/permits</p>
           <div className="mt-3 rounded-lg border border-border/60">
             <Table>
               <TableHeader>
@@ -218,7 +218,7 @@ function FraudTab({ f }: { f: any }) {
     { label: "Flagged", value: String(summary.flagged), tone: "text-destructive" },
     { label: "Exposure", value: formatCAD(summary.exposure, { compact: true }), tone: "text-warning" },
     { label: "High-risk", value: String(summary.byTier.high), tone: "text-destructive" },
-    { label: "Top signal", value: summary.topReason ?? "—", tone: "text-neutral-600" },
+    { label: "Top signal", value: summary.topReason ?? "-", tone: "text-neutral-600" },
   ] as const;
 
   function tierBadgeClass(score: number) {
@@ -241,7 +241,7 @@ function FraudTab({ f }: { f: any }) {
         <div className="space-y-4">
           <div>
             <h3 className="text-sm text-neutral-900">Ranked Suspects</h3>
-            <p className="mt-0.5 text-xs text-neutral-600">Scored by independent signals — duplicate charges, outlier amounts, round numbers, pre-auth patterns, and same-day repeats.</p>
+            <p className="mt-0.5 text-xs text-neutral-600">Scored by independent signals - duplicate charges, outlier amounts, round numbers, pre-auth patterns, and same-day repeats.</p>
           </div>
           <div className="divide-y divide-border/60 rounded-lg border border-border/60">
             {suspects.map((s: any, i: number) => (
@@ -300,7 +300,7 @@ function VendorTab({ v }: { v: any }) {
         {v.opportunities.slice(0, 6).map((o: any, i: number) => (
           <Reveal key={i} delay={i * 70}>
           <SectionCard
-            title={`${o.category} — ${o.vendors} vendors`}
+            title={`${o.category} - ${o.vendors} vendors`}
             description={`${formatCAD(o.spend)} across ${o.txns} transactions · top vendor only ${o.topVendorShare}% of spend`}
             action={
               <div className="text-right">
@@ -397,7 +397,7 @@ function FeedTab({ initial }: { initial: any[] }) {
         </button>
       </div>
       {feed.length === 0 ? (
-        <div className="text-sm text-muted-foreground">No summary yet — click Regenerate.</div>
+        <div className="text-sm text-muted-foreground">No summary yet - click Regenerate.</div>
       ) : (
         <ol className="list-decimal space-y-4 pl-5">
           {feed.map((i, idx) => (
@@ -427,12 +427,12 @@ function RecurringTab({ r }: { r: any }) {
           { label: "Recurring charges", value: String(r.summary.count), tone: "text-primary" },
           { label: "Committed / month", value: formatCAD(r.summary.monthlyCommitted, { compact: true }), tone: "text-warning" },
           { label: "Annualized", value: formatCAD(r.summary.annualized, { compact: true }), tone: "text-neutral-600" },
-          { label: "Top category", value: r.summary.topCategory || "—", tone: "text-neutral-600" },
+          { label: "Top category", value: r.summary.topCategory || "-", tone: "text-neutral-600" },
         ]}
       />
       <div>
         <h3 className="text-sm text-neutral-900">Detected Subscriptions & Recurring Spend</h3>
-        <p className="mt-0.5 text-xs text-neutral-600">Consistent amounts on a regular cadence — committed spend you may not realize is on autopilot</p>
+        <p className="mt-0.5 text-xs text-neutral-600">Consistent amounts on a regular cadence - committed spend you may not realize is on autopilot</p>
         <div className="mt-3 rounded-lg border border-border/60">
           <Table>
             <TableHeader>
@@ -512,12 +512,12 @@ function ProfilesTab({ p }: { p: any }) {
         metrics={[
           { label: "Categories", value: String(p.summary.categories) },
           { label: "Company avg txn", value: formatCAD(p.summary.baselineAvg), tone: "text-neutral-600" },
-          { label: "Biggest riser", value: p.summary.biggestRiser || "—", tone: "text-warning" },
-          { label: "Top share", value: p.summary.topShare || "—", tone: "text-primary" },
+          { label: "Biggest riser", value: p.summary.biggestRiser || "-", tone: "text-warning" },
+          { label: "Top share", value: p.summary.topShare || "-", tone: "text-primary" },
         ]}
       />
       <Reveal>
-      <SectionCard title="Category Profiles vs Company Baseline" description="Average-transaction size relative to the company average (1.0×) — and month-over-month trend">
+      <SectionCard title="Category Profiles vs Company Baseline" description="Average-transaction size relative to the company average (1.0×) - and month-over-month trend">
         <div className="space-y-2.5">
           {p.categories.map((c: any, i: number) => {
             const TI = trendIcon[c.trend];

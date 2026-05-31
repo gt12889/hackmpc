@@ -71,7 +71,7 @@ function TxnTable({ rows }: { rows: any[] }) {
             <tr key={i} className="border-t border-border/60">
               {cols.map((c) => (
                 <td key={c} className={`px-3 py-1.5 ${c === "amount_cad" ? "text-right tabular-nums font-medium" : ""}`}>
-                  {c === "amount_cad" ? formatCAD(Number(r[c])) : String(r[c] ?? "—")}
+                  {c === "amount_cad" ? formatCAD(Number(r[c])) : String(r[c] ?? "-")}
                 </td>
               ))}
             </tr>

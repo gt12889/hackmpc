@@ -74,7 +74,7 @@ const RULES: Seed[] = [
   {
     name: "Receipt Required (High-Value)",
     rule_type: "missing_receipt",
-    description: "Material charges with no matching receipt on file — receipts are required before reimbursement.",
+    description: "Material charges with no matching receipt on file - receipts are required before reimbursement.",
     threshold_amount: 1000,
     window: "transaction",
     severity_base: "medium",

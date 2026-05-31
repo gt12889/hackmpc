@@ -4,7 +4,7 @@ import { getClient, generateWithFallback } from "./gemini";
 // Policy Compliance Engine. Scans transactions against configurable rules seeded
 // from the REAL Brim expense policy (decoded from the PDF), flags violations,
 // ranks by severity, and applies AI contextual judgment ("a $200 team dinner is
-// different from a $200 solo dinner" — here: legit permit batching vs. split-to-evade).
+// different from a $200 solo dinner" - here: legit permit batching vs. split-to-evade).
 
 export const POLICY_SUMMARY = `Brim Expense Policy (key controls):
 - All expenses over $50 require manager pre-authorization; receipts required before reimbursement.
@@ -13,7 +13,7 @@ export const POLICY_SUMMARY = `Brim Expense Policy (key controls):
 - Tolls are reimbursed; mileage at Canada Revenue Agency rates.
 - No alcohol unless dining with a customer; guest names + purpose required.
 - Tips up to 15% (services/porterage); meal tips not reimbursed above 20%.
-Context: this is a small/medium business operating across Canada and the US. Recurring operational spend (e.g. permits, fuel, tolls, services) is normal and expected. Multiple charges to the same operational vendor on the same day are often legitimate (per-item fees), not evasion — judge by amount shape and merchant type.`;
+Context: this is a small/medium business operating across Canada and the US. Recurring operational spend (e.g. permits, fuel, tolls, services) is normal and expected. Multiple charges to the same operational vendor on the same day are often legitimate (per-item fees), not evasion - judge by amount shape and merchant type.`;
 
 const SEVERITY_RANK: Record<string, number> = { critical: 4, high: 3, medium: 2, low: 1 };
 
@@ -88,7 +88,7 @@ function detectForRule(rule: Rule): any[] {
     case "split_charge": {
       const t = rule.threshold_amount ?? 5000;
       // Same card + merchant + day, 2+ charges summing over the threshold while
-      // each individual charge stays under it — the classic split-to-evade shape.
+      // each individual charge stays under it - the classic split-to-evade shape.
       const groups = db
         .prepare(
           `SELECT transaction_code, merchant_norm, txn_date, COUNT(*) n,
@@ -127,7 +127,7 @@ function detectForRule(rule: Rule): any[] {
     }
 
     case "no_tickets": {
-      // Narrowly scoped to ACTUAL tickets/citations — paid parking is reimbursable.
+      // Narrowly scoped to ACTUAL tickets/citations - paid parking is reimbursable.
       const rows = db
         .prepare(
           `SELECT id, amount_cad, merchant_name, txn_date FROM transactions WHERE ${NON_OP} AND (
@@ -157,7 +157,7 @@ function detectForRule(rule: Rule): any[] {
         )
         .all(rule.scope_category, rule.threshold_amount ?? 100000) as any[];
       return months.map((mo) =>
-        base(mo.any_id, mo.s, `${rule.scope_category} — ${mo.m} (${mo.n} txns)`, `${mo.m}-01`, `cat|${rule.scope_category}|${mo.m}`)
+        base(mo.any_id, mo.s, `${rule.scope_category} - ${mo.m} (${mo.n} txns)`, `${mo.m}-01`, `cat|${rule.scope_category}|${mo.m}`)
       );
     }
 
@@ -176,7 +176,7 @@ function detectForRule(rule: Rule): any[] {
     }
 
     case "tip_limit":
-      // Requires receipt/tip-line data not present in card transactions — informational only.
+      // Requires receipt/tip-line data not present in card transactions - informational only.
       return [];
 
     default:
@@ -220,7 +220,7 @@ export function getViolations(severity?: string, db: import("better-sqlite3").Da
   return out;
 }
 
-/** Repeat offenders — merchants/cards with the most violations. */
+/** Repeat offenders - merchants/cards with the most violations. */
 export function getRepeatOffenders(): { by_merchant: any[]; by_card: any[] } {
   const db = getDb();
   const by_merchant = db

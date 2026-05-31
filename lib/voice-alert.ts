@@ -36,7 +36,7 @@ export function buildDynamicVars(db: Database.Database, n: Notification): Record
        WHERE transaction_code = ? AND direction='Debit'
        GROUP BY category ORDER BY spend DESC LIMIT 5`
     ).all(card) as { category: string; spend: number }[];
-    if (rows.length) cardSummary = `Card ${card} recent spend — ` + rows.map((r) => `${r.category}: ${formatCad(r.spend)}`).join(", ") + ".";
+    if (rows.length) cardSummary = `Card ${card} recent spend - ` + rows.map((r) => `${r.category}: ${formatCad(r.spend)}`).join(", ") + ".";
   }
 
   return {

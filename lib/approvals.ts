@@ -3,8 +3,8 @@ import { getClient, generateWithFallback } from "./gemini";
 import { POLICY_SUMMARY } from "./compliance";
 
 // AI Pre-Approval Workflow. Each pending request shows the approver everything
-// they need — the requesting card's spend history, the category budget status,
-// and an AI approve/deny recommendation with reasoning — so they decide once.
+// they need - the requesting card's spend history, the category budget status,
+// and an AI approve/deny recommendation with reasoning - so they decide once.
 
 export type ApprovalContext = {
   cardTotalSpend: number;

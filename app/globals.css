@@ -11,7 +11,7 @@
     --card-foreground: 190 100% 34%;
     --popover: 40 30% 97%;
     --popover-foreground: 190 100% 34%;
-    --primary: 190 100% 34%; /* #0093AF — nav ribbon & actions */
+    --primary: 190 100% 34%; /* #0093AF - nav ribbon & actions */
     --primary-foreground: 0 0% 100%;
     --secondary: 40 25% 88%;
     --secondary-foreground: 190 85% 28%;
@@ -47,7 +47,7 @@
     --card-foreground: 185 25% 96%;
     --popover: 195 36% 8%;
     --popover-foreground: 185 25% 96%;
-    --primary: 190 100% 38%; /* #0093AF — slightly lifted on dark */
+    --primary: 190 100% 38%; /* #0093AF - slightly lifted on dark */
     --primary-foreground: 0 0% 100%;
     --secondary: 194 26% 15%;
     --secondary-foreground: 185 25% 96%;
@@ -119,7 +119,7 @@
   .animate-fade-up { animation: none !important; }
 }
 
-/* Scoped serif display layer — wins over `* { font-weight: 700 !important }` via
+/* Scoped serif display layer - wins over `* { font-weight: 700 !important }` via
    class specificity (class > universal selector), even though both use !important.
    Apply to titles only; body, tables, and KPI numbers stay in sans. */
 .display-serif {

@@ -1,4 +1,4 @@
-/** Tilted credit-card mark — matches brand nav reference (outline, chip, floor line). */
+/** Tilted credit-card mark - matches brand nav reference (outline, chip, floor line). */
 export function BrimCardIcon({ className }: { className?: string }) {
   return (
     <svg
@@ -11,7 +11,7 @@ export function BrimCardIcon({ className }: { className?: string }) {
     >
       {/* floor / slot line */}
       <line x1="2" y1="48" x2="26" y2="48" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" />
-      {/* card — tilted ~42° CCW, pivot near bottom-left corner */}
+      {/* card - tilted ~42° CCW, pivot near bottom-left corner */}
       <g transform="rotate(-42 14 38)">
         <rect x="4" y="10" width="34" height="24" rx="3.5" stroke="currentColor" strokeWidth="2.25" />
         {/* magnetic stripe */}

@@ -5,7 +5,7 @@ import { getDb } from "./db";
 
 const NON_OP = `category NOT IN ('Payments & Settlements') AND direction='Debit'`;
 
-/** Same card + merchant + exact amount appearing 2+ times — potential double-billing or recurring charge. */
+/** Same card + merchant + exact amount appearing 2+ times - potential double-billing or recurring charge. */
 export function duplicateCharges(limit = 12) {
   const db = getDb();
   return db
@@ -23,7 +23,7 @@ export function duplicateCharges(limit = 12) {
     .all(limit) as any[];
 }
 
-/** Round-number charges (multiples of $100, >= $500) — unusual for fuel/permits which bill odd cents. */
+/** Round-number charges (multiples of $100, >= $500) - unusual for fuel/permits which bill odd cents. */
 export function roundNumberCharges(limit = 12) {
   const db = getDb();
   return db
@@ -36,7 +36,7 @@ export function roundNumberCharges(limit = 12) {
     .all(limit) as any[];
 }
 
-/** Largest operational charges — statistical outliers worth a manual look. */
+/** Largest operational charges - statistical outliers worth a manual look. */
 export function largestCharges(limit = 10) {
   const db = getDb();
   return db
@@ -44,7 +44,7 @@ export function largestCharges(limit = 10) {
     .all(limit) as any[];
 }
 
-/** The card-payment settlements that are NOT operational spend — surfaced so they aren't mistaken for fraud. */
+/** The card-payment settlements that are NOT operational spend - surfaced so they aren't mistaken for fraud. */
 export function settlements() {
   const db = getDb();
   const agg = db.prepare(`SELECT COUNT(*) n, ROUND(SUM(amount_cad),2) total, ROUND(MAX(amount_cad),2) largest FROM transactions WHERE category='Payments & Settlements'`).get() as any;

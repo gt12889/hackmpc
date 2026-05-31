@@ -3,7 +3,7 @@ import { getClient, generateWithFallback } from "./gemini";
 
 // Automated Expense Report Generation. The card data is shared company spend
 // across many locations, so reports are grouped by LOCATION (state/province) +
-// MONTH — a natural way for a business to review where and when money was spent.
+// MONTH - a natural way for a business to review where and when money was spent.
 // Each report bundles line items by category, counts policy flags, and gets an
 // AI summary, ready for CFO approval.
 

@@ -99,7 +99,7 @@ export function receiptSummary() {
   };
 }
 
-/** Operational charges over the receipt threshold with NO matched receipt — for the compliance rule + UI. */
+/** Operational charges over the receipt threshold with NO matched receipt - for the compliance rule + UI. */
 export function unmatchedRequiredCharges(limit = 50) {
   const db = getDb();
   return db

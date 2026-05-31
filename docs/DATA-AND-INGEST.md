@@ -2,7 +2,7 @@
 
 ## The dataset
 
-`data/transactions.xlsx` — ~4,235 anonymized company-card transactions, Aug 2025 → Mar 2026, CAD. A fresh `npm run db:reset` always loads the canonical set (the live count drifts as you upload more).
+`data/transactions.xlsx` - ~4,235 anonymized company-card transactions, Aug 2025 → Mar 2026, CAD. A fresh `npm run db:reset` always loads the canonical set (the live count drifts as you upload more).
 
 Three realities shaped the build:
 
@@ -24,15 +24,15 @@ Canonical figures after a clean load: **~$1.5M operational spend** (Fuel, Permit
 Shared by the ETL script **and** the in-app upload, so both behave identically.
 
 **`ingestRows(db, rows, { mode })`:**
-- **Column aliases** — resolves `Date`/`Transaction Date`, `Merchant`/`Payee`/`Vendor`, `Amount`/`Transaction Amount`, `MCC`, `Card`/`Account`, etc. (case-insensitive).
-- **Dates** — handles both Excel serials (the sample) and real date strings (`2026-01-15`, `01/18/2026`).
-- **Amounts** — CAD normalization; credits/payments detected (`Credit`, `Cr`, or negative amount) → `Payments & Settlements`.
-- **Merchant normalization** — strips store numbers, processor prefixes (`VCN*…`), phone fragments → `merchant_norm` (powers vendor consolidation + split-charge grouping).
+- **Column aliases** - resolves `Date`/`Transaction Date`, `Merchant`/`Payee`/`Vendor`, `Amount`/`Transaction Amount`, `MCC`, `Card`/`Account`, etc. (case-insensitive).
+- **Dates** - handles both Excel serials (the sample) and real date strings (`2026-01-15`, `01/18/2026`).
+- **Amounts** - CAD normalization; credits/payments detected (`Credit`, `Cr`, or negative amount) → `Payments & Settlements`.
+- **Merchant normalization** - strips store numbers, processor prefixes (`VCN*…`), phone fragments → `merchant_norm` (powers vendor consolidation + split-charge grouping).
 - **MCC → category** via `classify()` (curated map + merchant overrides).
 - **Modes:**
-  - `replace` (default; used by `npm run etl` / `db:reset`) — FK-safe clear of transactions/cards/violations/requests/reports, then rebuild.
-  - `append` (used by upload) — keeps existing data, adds new rows, `INSERT OR IGNORE` new cards.
-- **Dedup (append only)** — skips rows matching an existing charge on **card + date + merchant + amount + direction**, including duplicates within the uploaded file. Returns `added` vs `skipped`.
+  - `replace` (default; used by `npm run etl` / `db:reset`) - FK-safe clear of transactions/cards/violations/requests/reports, then rebuild.
+  - `append` (used by upload) - keeps existing data, adds new rows, `INSERT OR IGNORE` new cards.
+- **Dedup (append only)** - skips rows matching an existing charge on **card + date + merchant + amount + direction**, including duplicates within the uploaded file. Returns `added` vs `skipped`.
 
 ## ETL vs Upload
 
