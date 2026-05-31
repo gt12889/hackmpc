@@ -20,6 +20,14 @@ import {
 import { cn, formatCAD } from "@/lib/utils";
 import { SectionCard } from "@/components/kpi-card";
 import { TrendLine, SpendBar, CategoryPie, CHART_COLORS } from "@/components/charts";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 const TABS = [
   { key: "feed", label: "AI Insights", icon: Sparkles },
@@ -75,44 +83,69 @@ function AnomalyTab({ a }: { a: any }) {
         <Stat label="Settlements (not spend)" value={formatCAD(a.summary.settlements.total, { compact: true })} icon={Banknote} tone="muted" />
       </div>
 
-      <div className="rounded-lg border border-warning/30 bg-warning/5 p-4 text-sm">
+      <p className="text-sm text-neutral-600">
         <span className="font-medium text-warning">Context flag:</span>{" "}
-        <span className="text-muted-foreground">
-          The single largest line in the data is a {formatCAD(a.summary.settlements.largest)} card-balance payment — correctly classified as a settlement, not operational spend or fraud. {a.summary.settlements.count} such payments total {formatCAD(a.summary.settlements.total)}.
-        </span>
-      </div>
+        The single largest line in the data is a {formatCAD(a.summary.settlements.largest)} card-balance payment — correctly classified as a settlement, not operational spend or fraud. {a.summary.settlements.count} such payments total {formatCAD(a.summary.settlements.total)}.
+      </p>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <SectionCard title="Duplicate / Recurring Charges" description="Same card + merchant + exact amount, 2+ times">
-          <div className="space-y-2">
-            {a.duplicates.map((d: any, i: number) => (
-              <div key={i} className="flex items-center justify-between rounded-md border border-border p-2.5 text-sm">
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="truncate font-medium">{d.merchant_name}</span>
-                    <span className="rounded bg-warning/15 px-1.5 py-0.5 text-[10px] font-medium text-warning">{d.occurrences}×</span>
-                  </div>
-                  <div className="text-[11px] text-muted-foreground">card {d.transaction_code} · {d.dates}</div>
-                </div>
-                <span className="shrink-0 font-semibold tabular-nums">{formatCAD(d.amount_cad)}</span>
-              </div>
-            ))}
+      <div className="space-y-8">
+        <div>
+          <h3 className="text-sm text-neutral-900">Duplicate / Recurring Charges</h3>
+          <p className="mt-0.5 text-xs text-neutral-600">Same card + merchant + exact amount, 2+ times</p>
+          <div className="mt-3 rounded-lg border border-border/60">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Merchant</TableHead>
+                  <TableHead>Card</TableHead>
+                  <TableHead>Dates</TableHead>
+                  <TableHead className="text-right">Occurrences</TableHead>
+                  <TableHead className="text-right">Amount</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {a.duplicates.map((d: any, i: number) => (
+                  <TableRow key={i}>
+                    <TableCell className="max-w-[200px] truncate font-medium text-neutral-900">{d.merchant_name}</TableCell>
+                    <TableCell className="text-neutral-600">{d.transaction_code}</TableCell>
+                    <TableCell className="text-neutral-600">{d.dates}</TableCell>
+                    <TableCell className="text-right">
+                      <span className="rounded bg-warning/15 px-1.5 py-0.5 text-[10px] font-medium text-warning">{d.occurrences}×</span>
+                    </TableCell>
+                    <TableCell className="text-right tabular-nums text-neutral-900">{formatCAD(d.amount_cad)}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </div>
-        </SectionCard>
+        </div>
 
-        <SectionCard title="Round-Number Charges" description="Exact $100 multiples ≥ $500 — unusual for fuel/permits">
-          <div className="space-y-2">
-            {a.roundNumbers.map((r: any, i: number) => (
-              <div key={i} className="flex items-center justify-between rounded-md border border-border p-2.5 text-sm">
-                <div className="min-w-0">
-                  <span className="truncate font-medium">{r.merchant_name}</span>
-                  <div className="text-[11px] text-muted-foreground">{r.txn_date} · {r.category}</div>
-                </div>
-                <span className="shrink-0 font-semibold tabular-nums">{formatCAD(r.amount_cad)}</span>
-              </div>
-            ))}
+        <div>
+          <h3 className="text-sm text-neutral-900">Round-Number Charges</h3>
+          <p className="mt-0.5 text-xs text-neutral-600">Exact $100 multiples ≥ $500 — unusual for fuel/permits</p>
+          <div className="mt-3 rounded-lg border border-border/60">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Merchant</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Category</TableHead>
+                  <TableHead className="text-right">Amount</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {a.roundNumbers.map((r: any, i: number) => (
+                  <TableRow key={i}>
+                    <TableCell className="max-w-[240px] truncate font-medium text-neutral-900">{r.merchant_name}</TableCell>
+                    <TableCell className="text-neutral-600">{r.txn_date}</TableCell>
+                    <TableCell className="text-neutral-600">{r.category}</TableCell>
+                    <TableCell className="text-right tabular-nums text-neutral-900">{formatCAD(r.amount_cad)}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </div>
-        </SectionCard>
+        </div>
       </div>
     </div>
   );
