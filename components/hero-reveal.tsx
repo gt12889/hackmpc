@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowDown } from "lucide-react";
+import { BrimRain } from "@/components/brim-rain";
 
 // "From noise to clarity" — a scroll-pinned cinematic brand overview (home page).
 // A tight, focal canvas of teal/cyan particles starts as chaos and organizes +
@@ -168,16 +169,14 @@ export function HeroReveal() {
 
         {/* Text stack */}
         <div className="relative z-10 flex h-full flex-col items-center justify-center px-6 text-center">
-          {/* ASCII art title — the opening of the intro */}
-          <pre
+          {/* Animated BRIM ASCII rain — the opening of the intro, fades on scroll */}
+          <div
             aria-hidden
-            className="pointer-events-none absolute top-[14%] select-none font-mono text-[7px] leading-[1.05] text-primary/70 sm:text-[10px] md:text-sm"
-            style={{ opacity: introArt, transform: `translateY(${introArt * 0 - (1 - introArt) * 20}px)` }}
-          >{String.raw`  ____  ____  ___ __  __   ___ _____
- | __ )|  _ \|_ _|  \/  | |_ _|_   _|
- |  _ \| |_) || || |\/| |  | |  | |
- | |_) |  _ < | || |  | |  | |  | |
- |____/|_| \_\___|_|  |_| |___| |_|`}</pre>
+            className="pointer-events-none absolute top-[11%] w-[min(74vw,540px)]"
+            style={{ opacity: introArt, transform: `translateY(${-(1 - introArt) * 24}px)` }}
+          >
+            <BrimRain className="w-full" />
+          </div>
 
           <div className="relative flex h-44 items-center justify-center">
             {LINES.map((l, i) => {
