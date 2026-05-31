@@ -109,8 +109,7 @@
   requestAnimationFrame(frame);
 
   function flash(id, t) { var b = document.getElementById(id), o = b.textContent; b.textContent = t; setTimeout(function () { b.textContent = o; }, 1200); }
-  function src() { return "<!DOCTYPE html>
-" + document.documentElement.outerHTML; }
+  function src() { return "<!DOCTYPE html>" + String.fromCharCode(10) + document.documentElement.outerHTML; }
   document.getElementById("copy").onclick = function () { navigator.clipboard.writeText(src()).then(function(){ flash("copy","Copied!"); }, function(){ flash("copy","Copy failed"); }); };
   document.getElementById("download").onclick = function () { var b = new Blob([src()], { type: "text/html" }); var a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = "ascii-card.html"; a.click(); URL.revokeObjectURL(a.href); };
 })();
