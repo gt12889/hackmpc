@@ -71,7 +71,7 @@ export function TopNav() {
   return (
     <header className="sticky top-0 z-40">
       {/* Logo bar */}
-      <div className="relative flex h-14 items-center justify-center border-b border-border/40 bg-white px-5 shadow-sm">
+      <div className="relative flex h-14 items-center justify-center border-b border-border/40 bg-background px-5">
         <Link href="/" className="flex items-center gap-3 overflow-visible transition-opacity hover:opacity-80 md:gap-4">
           <img src="/brim-it-logo.png" alt="Brim It" width={435} height={87} className="h-[26px] w-auto max-w-none md:h-[30px]" />
           <BrimCardIcon className="mt-6 h-[36px] w-auto shrink-0 overflow-visible text-primary md:mt-4 md:h-[40px]" />
