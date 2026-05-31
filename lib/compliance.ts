@@ -37,8 +37,9 @@ export function getRules(): Rule[] {
 }
 
 /** Re-scan all enabled rules. Clears prior violations and rebuilds them. */
-export function runScan(): { total: number; byRule: Record<string, number> } {
+export function runScan(opts: { multiplier?: number } = {}): { total: number; byRule: Record<string, number> } {
   const db = getDb();
+  const multiplier = opts.multiplier && opts.multiplier > 0 ? opts.multiplier : 1;
   db.prepare(`DELETE FROM violations`).run();
   const rules = (db.prepare(`SELECT * FROM policy_rules WHERE enabled=1`).all() as Rule[]);
   const byRule: Record<string, number> = {};
@@ -52,7 +53,7 @@ export function runScan(): { total: number; byRule: Record<string, number> } {
   const insertMany = db.transaction((rows: any[]) => rows.forEach((r) => ins.run(r)));
 
   for (const rule of rules) {
-    const rows = detectForRule(rule);
+    const rows = detectForRule(rule, multiplier);
     insertMany(rows);
     byRule[rule.name] = rows.length;
   }
@@ -61,8 +62,12 @@ export function runScan(): { total: number; byRule: Record<string, number> } {
   return { total, byRule };
 }
 
-function detectForRule(rule: Rule): any[] {
+function detectForRule(rule: Rule, multiplier = 1): any[] {
   const db = getDb();
+  // Context preset: scale the rule's stored threshold (lower = stricter).
+  if (multiplier !== 1 && rule.threshold_amount != null) {
+    rule = { ...rule, threshold_amount: Math.round(rule.threshold_amount * multiplier) };
+  }
   const base = (txnId: number, amount: number, merchant: string, date: string, groupKey: string | null = null) => ({
     rule_id: rule.id,
     rule_name: rule.name,
