@@ -11,8 +11,8 @@ import { cn } from "@/lib/utils";
 // manager can audit exactly which rows a number came from.
 
 const TOOL_LABELS: Record<string, string> = {
-  aggregate_spend: "Aggregated spend",
-  time_series: "Spend over time",
+  aggregate_spend: "Aggregated spending",
+  time_series: "Spending over time",
   top_merchants: "Ranked merchants",
   list_transactions: "Listed transactions",
   compare_periods: "Compared two periods",
@@ -81,7 +81,7 @@ function filterTokens(f: any): string[] {
   for (const k of FILTER_KEYS) {
     if (f[k] != null && f[k] !== "") out.push(`${k}: ${f[k]}`);
   }
-  out.push(f.include_settlements ? "incl. settlements" : "spend only (settlements excluded)");
+  out.push(f.include_settlements ? "incl. settlements" : "spending only (settlements excluded)");
   return out;
 }
 

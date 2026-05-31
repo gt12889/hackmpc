@@ -18,7 +18,7 @@ function Shimmer({ className, style }: { className?: string; style?: CSSProperti
 const STAGES = [
   [0, "Parsing your question"],
   [26, "Querying the ledger"],
-  [50, "Aggregating spend"],
+  [50, "Aggregating spending"],
   [72, "Composing the answer"],
   [88, "Rendering chart"],
 ] as const;

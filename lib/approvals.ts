@@ -188,7 +188,7 @@ export async function generateRecommendations(): Promise<number> {
 
   const prompt = `${POLICY_SUMMARY}
 
-You are the finance approver for a small/medium business managing company-card spend across Canada and the USA. For each pre-approval request, weigh policy compliance, card spend history, category budget headroom, merchant familiarity, location, and any policy flags.
+You are the finance approver for a small/medium business managing company-card spend across Canada and the USA. For each pre-approval request, weigh policy compliance, card spending history, category budget headroom, merchant familiarity, location, and any policy flags.
 
 For each request return:
 - recommendation: "approve", "deny", or "review"

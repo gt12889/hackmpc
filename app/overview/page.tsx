@@ -1,5 +1,6 @@
 import { LayoutDashboard, Wallet } from "lucide-react";
 import { SubTabs } from "@/components/ui/sub-tabs";
+import { ImportDialog } from "@/components/import-dialog";
 import { SpendOverview } from "@/components/overview/spend-overview";
 import { PageHeader } from "@/components/page-header";
 import { BudgetsView } from "@/components/budgets/budgets-view";
@@ -11,8 +12,9 @@ export const dynamic = "force-dynamic";
 export default function OverviewPage() {
   return (
     <SubTabs
+      actions={<ImportDialog variant="toolbar" />}
       items={[
-        { value: "spend", label: "Spend", icon: <LayoutDashboard className="h-3.5 w-3.5" />, content: <SpendOverview /> },
+        { value: "spend", label: "Spending", icon: <LayoutDashboard className="h-3.5 w-3.5" />, content: <SpendOverview /> },
         {
           value: "budgets",
           label: "Budgets",

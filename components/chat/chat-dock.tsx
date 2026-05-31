@@ -50,7 +50,7 @@ export function ChatDock() {
               <div className="flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-primary" />
                 <h2 className="text-sm font-semibold">Ask AI</h2>
-                <span className="hidden text-[13px] text-muted-foreground sm:inline">Talk to your spend data</span>
+                <span className="hidden text-[13px] text-muted-foreground sm:inline">Talk to your spending data</span>
               </div>
               <button
                 type="button"
@@ -80,7 +80,7 @@ export function ChatDock() {
             )}
           >
             <Sparkles className="h-4 w-4 shrink-0 text-primary" />
-            <span className="flex-1 truncate text-sm text-muted-foreground">Ask anything about your spend…</span>
+            <span className="flex-1 truncate text-sm text-muted-foreground">Ask anything about your spending…</span>
             <span className="shrink-0 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground">Ask AI</span>
           </button>
         </div>

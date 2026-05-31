@@ -18,10 +18,10 @@ type Msg = {
 };
 
 const SUGGESTIONS = [
-  "Show monthly spend by category",
-  "Top fuel vendors - how concentrated is our fuel spend?",
+  "Show monthly spending by category",
+  "Top fuel vendors - how concentrated is our fuel spending?",
   "Which categories have the biggest average transaction?",
-  "Compare USA vs Canada spend by category",
+  "Compare USA vs Canada spending by category",
   "What did we spend on permits by state?",
 ];
 
@@ -66,7 +66,7 @@ export function ChatPanel({ compact = false }: { compact?: boolean }) {
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-primary/15 ring-1 ring-primary/30">
               <Sparkles className="h-6 w-6 text-primary" />
             </div>
-            <h2 className="mt-4 text-lg font-semibold">Ask anything about company spend</h2>
+            <h2 className="mt-4 text-lg font-semibold">Ask anything about company spending</h2>
             <p className="mt-1 text-sm text-muted-foreground">
               Plain-English questions across categories, merchants, states, cards and time. Follow-ups keep context.
             </p>

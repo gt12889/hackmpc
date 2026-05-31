@@ -46,7 +46,7 @@ export function ChartRenderer({ viz }: { viz: VizPayload }) {
       }
       return <SpendBar data={data} money={money} horizontal={data.length > 6} />;
     case "line":
-      return <TrendLine data={data} series={[{ key: "spend", label: "Spend" }]} money={money} />;
+      return <TrendLine data={data} series={[{ key: "spend", label: "Spending" }]} money={money} />;
     case "multiline": {
       const series = (meta?.series || []).map((k: string) => ({ key: k, label: k }));
       return <TrendLine data={data} series={series} money={money} />;
