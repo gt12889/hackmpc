@@ -161,8 +161,8 @@ export function BudgetsView({ initial }: { initial: any }) {
               <span className="text-[13px] font-medium uppercase tracking-wide text-neutral-500">Monthly limit</span>
               <input
                 type="number"
-                min={1}
-                step={100}
+                min={0}
+                step="any"
                 value={newLimit}
                 onChange={(e) => setNewLimit(e.target.value)}
                 placeholder="e.g. 5000"
