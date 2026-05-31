@@ -7,13 +7,6 @@ A non-technical finance manager can chat with their company's spend in plain Eng
 
 ## Documentation
 
-## Working with the real data
-
-The dataset is **4,235 anonymized company-card transactions** (Aug 2025–Mar 2026, CAD). A few things shaped the build:
-
-- **No department/employee columns** - the data is organized by **card** (cost-center), **merchant**, **category**, **location**, and **time**. The app uses those real dimensions instead of inventing an org chart, and the AI reframes "which department?" questions accordingly.
-- **Categories are derived from MCC codes** (`lib/mcc-seed.ts`, 95 codes), since the file's own category column is unusable (99% one value).
-- **The single largest line ($264,517) is a card-balance payment, not spend** - we detect and **quarantine $1.2M of such settlements** so they don't distort the analytics.
 
 ## The four required capabilities
 
