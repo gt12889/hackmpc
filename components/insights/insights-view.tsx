@@ -256,7 +256,7 @@ export function InsightsView({ data }: { data: any }) {
       <SectionBadge>Insights</SectionBadge>
 
       {/* Animated bento mosaic of all insight components. Click a tile to expand its full panel. */}
-      <div className="grid grid-cols-1 gap-4 md:auto-rows-[210px] md:grid-cols-6">
+      <div className="grid grid-cols-1 gap-4 md:auto-rows-[minmax(210px,auto)] md:grid-cols-6">
         {TILES.map((tile, i) => (
           <Reveal key={tile.id} delay={i * 60} className={cn("min-w-0", tile.span)}>
             <BentoTile tile={tile} active={open === tile.id} onClick={() => setOpen(open === tile.id ? null : tile.id)} />
