@@ -9,4 +9,11 @@ describe("test infrastructure", () => {
     expect(names).toContain("transactions");
     expect(names).toContain("violations");
   });
+
+  it("includes notifications and app_settings tables", () => {
+    const db = makeTestDb();
+    const names = (db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all() as { name: string }[]).map((t) => t.name);
+    expect(names).toContain("notifications");
+    expect(names).toContain("app_settings");
+  });
 });

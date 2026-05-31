@@ -178,3 +178,28 @@ CREATE TABLE IF NOT EXISTS budgets (
   created_at   TEXT DEFAULT (datetime('now')),
   UNIQUE(scope, scope_value, period)
 );
+
+-- Notification ledger: doubles as the in-app bell feed AND the call dedup ledger.
+CREATE TABLE IF NOT EXISTS notifications (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  alert_key TEXT UNIQUE NOT NULL,        -- stable identity: ruleId:groupKey|txn-<id>
+  severity TEXT NOT NULL,                -- critical|high|medium|low
+  title TEXT NOT NULL,
+  body TEXT,
+  merchant_name TEXT,
+  amount_involved REAL,
+  rule_name TEXT,
+  link TEXT,
+  read INTEGER NOT NULL DEFAULT 0,
+  call_status TEXT,                      -- null|called|skipped|failed|disabled
+  call_id TEXT,
+  call_error TEXT,
+  called_at TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- Simple key/value app settings (e.g. alerts_calling_enabled).
+CREATE TABLE IF NOT EXISTS app_settings (
+  key TEXT PRIMARY KEY,
+  value TEXT
+);
