@@ -47,7 +47,7 @@ flowchart LR
     F --> H
     G -->|"APPROVED"| I
     G -->|"VIOLATION"| J
-    H -->|"insight +\nviz"| K'''
+    H -->|"insight +\nviz"| K```
 
 Full docs live in [`docs/`](docs/):
 
