@@ -14,6 +14,7 @@ import {
 import { cn, formatCAD } from "@/lib/utils";
 import { SectionCard } from "@/components/kpi-card";
 import { Reveal } from "@/components/reveal";
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import { ShowMore, ExpandSection } from "@/components/show-more";
 import { AlertSettings } from "@/components/compliance/alert-settings";
 import { AnchorBadge } from "@/components/solana/anchor-badge";
@@ -96,23 +97,32 @@ export function ComplianceView({ initial }: { initial: any }) {
   }
 
   const metrics = [
-    { label: "At risk", value: formatCAD(summary.amount, { compact: true }), tone: "text-destructive" },
-    { label: "Critical", value: String(summary.counts.critical), tone: "text-destructive" },
-    { label: "High", value: String(summary.counts.high), tone: "text-warning" },
-    { label: "Medium / low", value: `${summary.counts.medium} / ${summary.counts.low}`, tone: "text-neutral-600" },
+    { label: "At risk", value: formatCAD(summary.amount, { compact: true }), tone: "text-destructive", hint: "Total CAD value of transactions with an open policy violation." },
+    { label: "Critical", value: String(summary.counts.critical), tone: "text-destructive", hint: "Genuine breach or strong evasion signal - amounts engineered under a threshold, a prohibited category, or a non-routine merchant. Triggers an outbound alert." },
+    { label: "High", value: String(summary.counts.high), tone: "text-warning", hint: "Large or unusual spend that needs pre-authorization visibility. Legitimate but should be reviewed." },
+    { label: "Medium / low", value: `${summary.counts.medium} / ${summary.counts.low}`, tone: "text-neutral-600", hint: "Minor or likely-legitimate items - shown in the feed only, no alert." },
   ] as const;
 
   return (
     <div className="space-y-6 p-8">
       <div className="overflow-hidden rounded-lg border border-border/60">
-        <dl className="grid grid-cols-2 divide-x divide-y divide-border/60 sm:grid-cols-4 sm:divide-y-0">
-          {metrics.map((m) => (
-            <div key={m.label} className="px-4 py-3">
-              <dt className="text-[13px] font-medium uppercase tracking-wide text-neutral-500">{m.label}</dt>
-              <dd className={cn("mt-0.5 text-base font-semibold tabular-nums", m.tone)}>{m.value}</dd>
-            </div>
-          ))}
-        </dl>
+        <TooltipProvider delayDuration={150}>
+          <dl className="grid grid-cols-2 divide-x divide-y divide-border/60 sm:grid-cols-4 sm:divide-y-0">
+            {metrics.map((m) => (
+              <div key={m.label} className="px-4 py-3">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <dt className="w-fit cursor-help text-[13px] font-medium uppercase tracking-wide text-neutral-500 decoration-dotted underline-offset-4 hover:underline">
+                      {m.label}
+                    </dt>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs text-left">{m.hint}</TooltipContent>
+                </Tooltip>
+                <dd className={cn("mt-0.5 text-base font-semibold tabular-nums", m.tone)}>{m.value}</dd>
+              </div>
+            ))}
+          </dl>
+        </TooltipProvider>
         <p className="border-t border-border/60 px-4 py-2.5 text-sm text-neutral-600">
           {summary.total} open policy flags
         </p>
