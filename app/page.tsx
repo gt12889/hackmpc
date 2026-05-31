@@ -4,6 +4,7 @@ import { PageHeader } from "@/components/page-header";
 import { SpendBar, TrendLine, CategoryPie } from "@/components/charts";
 import { ExpandSection } from "@/components/show-more";
 import { ImportDialog } from "@/components/import-dialog";
+import { HeroReveal } from "@/components/hero-reveal";
 import { formatCAD } from "@/lib/utils";
 import {
   getKpis,
@@ -30,6 +31,9 @@ export default function DashboardPage() {
 
   return (
     <div>
+      <HeroReveal />
+
+      <div id="dashboard" className="scroll-mt-14">
       <PageHeader
         title="Spend Overview"
         description={`${kpis.dateStart} → ${kpis.dateEnd} · ${kpis.txnCount.toLocaleString()} card transactions`}
@@ -72,6 +76,7 @@ export default function DashboardPage() {
             </SectionCard>
           </div>
         </ExpandSection>
+      </div>
       </div>
     </div>
   );
