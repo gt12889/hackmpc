@@ -51,3 +51,31 @@ class DebateResult(BaseModel):
 class DebateResponse(BaseModel):
     results: list[DebateResult]
     traces: list[AgentTrace]
+
+
+# ---- /fraud/investigate ----
+
+class FraudVerdict(BaseModel):
+    """What the Investigator agent must return for one suspect."""
+
+    verdict: str = Field(description="likely_fraud | suspicious | benign")
+    confidence: float = 0.0
+    narrative: str = ""
+    recommended_action: str = ""
+
+
+class FraudRequest(BaseModel):
+    suspects: list[dict[str, Any]]
+
+
+class FraudCase(BaseModel):
+    transaction_id: int
+    verdict: str
+    confidence: float
+    narrative: str
+    recommended_action: str
+
+
+class FraudResponse(BaseModel):
+    results: list[FraudCase]
+    traces: list[AgentTrace]
