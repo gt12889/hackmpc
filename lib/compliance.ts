@@ -196,8 +196,7 @@ export function getViolationSummary() {
 }
 
 /** Distinct violations (split-charge groups collapsed to one row), ranked by severity then amount. */
-export function getViolations(severity?: string): any[] {
-  const db = getDb();
+export function getViolations(severity?: string, db: import("better-sqlite3").Database = getDb()): any[] {
   const rows = db
     .prepare(
       `SELECT v.*, t.category, t.transaction_code, t.mcc, t.state_province,

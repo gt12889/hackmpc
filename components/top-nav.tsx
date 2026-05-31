@@ -8,17 +8,17 @@ import {
   CheckSquare,
   FileText,
   Sparkles,
-  Home,
+
   ReceiptText,
   Wallet,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { NotificationBell } from "@/components/notifications/notification-bell";
 
 type Item = { href: string; label: string; icon: LucideIcon };
 
 const NAV_ITEMS: Item[] = [
-  { href: "/", label: "Home", icon: Home },
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/compliance", label: "Compliance", icon: ShieldCheck },
   { href: "/approvals", label: "Approvals", icon: CheckSquare },
@@ -39,10 +39,13 @@ export function TopNav() {
   return (
     <header className="sticky top-0 z-40">
       {/* Logo bar */}
-      <div className="flex h-14 items-center justify-center border-b border-border/40 bg-white px-5 shadow-sm">
+      <div className="relative flex h-14 items-center justify-center border-b border-border/40 bg-white px-5 shadow-sm">
         <Link href="/" className="flex items-center transition-opacity hover:opacity-80">
-          <img src="/brim-it-logo.png" alt="Brim It" className="h-6 w-auto md:h-7" />
+          <img src="/brim-it-logo.png" alt="Brim It" width={435} height={87} className="h-6 w-auto max-w-none md:h-7" />
         </Link>
+        <div className="absolute right-4 top-1/2 -translate-y-1/2">
+          <NotificationBell />
+        </div>
       </div>
 
       {/* Nav ribbon */}

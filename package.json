@@ -9,6 +9,7 @@
     "start": "next start",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
+    "test": "vitest run",
     "etl": "tsx scripts/etl.ts",
     "seed:policies": "tsx scripts/seed-policies.ts",
     "db:reset": "rm -f .data/hackmpc.db .data/hackmpc.db-wal .data/hackmpc.db-shm && tsx scripts/etl.ts && tsx scripts/seed-receipts.ts && tsx scripts/seed-budgets.ts && tsx scripts/seed-policies.ts && tsx scripts/seed-approvals.ts && tsx scripts/seed-reports.ts",
@@ -57,6 +58,7 @@
     "postcss": "^8.5",
     "tailwindcss": "^3.4.17",
     "tsx": "^4.19.2",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^2.1.9"
   }
 }

@@ -14,6 +14,7 @@ import {
 import { cn, formatCAD } from "@/lib/utils";
 import { SectionCard } from "@/components/kpi-card";
 import { ShowMore } from "@/components/show-more";
+import { AlertSettings } from "@/components/compliance/alert-settings";
 
 const fetcher = (u: string) => fetch(u).then((r) => r.json());
 
@@ -74,6 +75,9 @@ export function ComplianceView({ initial }: { initial: any }) {
 
   return (
     <div className="space-y-6 p-8">
+      {/* Phone-alert toggle */}
+      <AlertSettings />
+
       {/* Summary */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <SummaryStat label="At Risk" value={formatCAD(summary.amount, { compact: true })} icon={AlertTriangle} tone="destructive" sub={`${summary.total} open flags`} />

@@ -36,3 +36,7 @@ export function titleCase(s: string): string {
     .replace(/\b\w/g, (c) => c.toUpperCase())
     .trim();
 }
+
+export function formatCad(n: number): string {
+  return new Intl.NumberFormat("en-CA", { style: "currency", currency: "CAD", maximumFractionDigits: 0 }).format(n || 0);
+}
