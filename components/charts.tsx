@@ -117,7 +117,7 @@ export function SpendBar({
           </>
         )}
         <Tooltip content={<MoneyTooltip money={money} />} cursor={{ fill: "hsl(var(--accent))", opacity: 0.25 }} />
-        <Bar dataKey="value" name={money ? "Spending" : "Count"} radius={horizontal ? [0, 6, 6, 0] : [6, 6, 0, 0]} maxBarSize={horizontal ? 22 : 48}>
+        <Bar dataKey="value" name={money ? "Spending" : "Count"} isAnimationActive={false} radius={horizontal ? [0, 6, 6, 0] : [6, 6, 0, 0]} maxBarSize={horizontal ? 22 : 48}>
           {data.map((d, i) => (
             <Cell
               key={i}
@@ -170,7 +170,7 @@ export function GroupedBar({
         <Tooltip content={<MoneyTooltip money={money} />} cursor={{ fill: "hsl(var(--accent))", opacity: 0.2 }} />
         <Legend wrapperStyle={{ fontSize: 12 }} />
         {series.map((s, i) => (
-          <Bar key={s.key} dataKey={s.key} name={s.label} fill={colors[i % colors.length]} radius={horizontal ? [0, 4, 4, 0] : [4, 4, 0, 0]} maxBarSize={horizontal ? 16 : 34} />
+          <Bar key={s.key} dataKey={s.key} name={s.label} fill={colors[i % colors.length]} isAnimationActive={false} radius={horizontal ? [0, 4, 4, 0] : [4, 4, 0, 0]} maxBarSize={horizontal ? 16 : 34} />
         ))}
       </BarChart>
     </ResponsiveContainer>
@@ -216,6 +216,7 @@ export function TrendLine({
             type="monotone"
             dataKey={s.key}
             name={s.label || s.key}
+            isAnimationActive={false}
             stroke={CHART_COLORS[i % CHART_COLORS.length]}
             strokeWidth={2.5}
             fill={`url(#trend-${s.key})`}
@@ -264,6 +265,7 @@ export function CategoryPie({
           data={data}
           dataKey="value"
           nameKey="key"
+          isAnimationActive={false}
           cx="50%"
           cy="50%"
           innerRadius={showTotal ? 72 * scale : 60 * scale}

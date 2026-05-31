@@ -1,8 +1,34 @@
 "use client";
 
-import { SpendBar, TrendLine, CategoryPie, GroupedBar } from "@/components/charts";
+import { TrendLine, CategoryPie, GroupedBar, CHART_COLORS } from "@/components/charts";
 import { formatCAD } from "@/lib/utils";
 import type { VizPayload } from "@/lib/agent";
+
+// Dependency-free horizontal bar list. Recharts' horizontal BarChart collapses
+// (only the first bar gets a size) when it mounts inside the chat's dynamically
+// sized/animated overlay, so for the chat we render bars as plain CSS widths -
+// always correct regardless of container measurement.
+function HBars({ data, money }: { data: any[]; money: boolean }) {
+  const max = Math.max(...data.map((d) => Number(d.value) || 0), 1);
+  return (
+    <div className="space-y-2">
+      {data.map((d, i) => (
+        <div key={i} className="flex items-center gap-3 text-xs">
+          <span className="w-36 shrink-0 truncate text-muted-foreground" title={String(d.key)}>{String(d.key)}</span>
+          <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-secondary">
+            <div
+              className="h-full rounded-full"
+              style={{ width: `${Math.max(2, (Number(d.value) / max) * 100)}%`, background: CHART_COLORS[i % CHART_COLORS.length] }}
+            />
+          </div>
+          <span className="w-24 shrink-0 text-right font-medium tabular-nums">
+            {money ? formatCAD(Number(d.value)) : Number(d.value).toLocaleString()}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 // Auto-render the right visualization from a tool result. The agent chooses the
 // tool; the server tags a suggested_viz; this switch renders it.
@@ -44,7 +70,7 @@ export function ChartRenderer({ viz }: { viz: VizPayload }) {
           />
         );
       }
-      return <SpendBar data={data} money={money} horizontal={data.length > 6} />;
+      return <HBars data={data} money={money} />;
     case "line":
       return <TrendLine data={data} series={[{ key: "spend", label: "Spending" }]} money={money} />;
     case "multiline": {
