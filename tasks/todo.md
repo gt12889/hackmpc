@@ -18,7 +18,7 @@ Full plan: `~/.claude/plans/brim-financial-x-mpc-quirky-pretzel.md`.
 
 **What shipped.** All four required capabilities plus all three optional ones, each verified end-to-end against the real data (not stubs). Production build is clean (17 routes, 0 type errors).
 
-**The defining decision.** The provided data is a cross-border trucking fleet with no employees/departments - contradicting the brief's narrative. Rather than fabricate an org chart (which the real expense policy would contradict), we built around the real dimensions: MCC-derived categories, cards as cost-centers, jurisdiction-period reporting. This also surfaced genuine findings: the $264K "outlier" is a card-balance payment (quarantined $1.2M of settlements), fuel is fragmented across 218 vendors (~$85K savings), and same-day permit "splits" are legitimate batching (the AI correctly down-ranks them).
+**The defining decision.** The provided data is an SMB's company-card spend with no employees/departments columns - contradicting the brief's narrative. Rather than fabricate an org chart (which the real expense policy would contradict), we built around the real dimensions: MCC-derived categories, cards as cost-centers, jurisdiction-period reporting. This also surfaced genuine findings: the $264K "outlier" is a card-balance payment (quarantined $1.2M of settlements), fuel is fragmented across 218 vendors (~$85K savings), and same-day permit "splits" are legitimate batching (the AI correctly down-ranks them).
 
 **AI depth.** Five distinct Gemini integrations, all bounded: an agentic tool-use loop (chat) and four batched single-call reasoning passes (severity triage, approval recs, report summaries). The model never writes SQL - it calls whitelisted, zod-validated query tools.
 
@@ -31,6 +31,6 @@ Full plan: `~/.claude/plans/brim-financial-x-mpc-quirky-pretzel.md`.
 
 ## Known scope notes
 
-- Per-truck "trips" are impossible (shared fleet card spans 10–50 states/day) → reports group by jurisdiction+month (IFTA/IRP-style), which is the authentic fleet analog.
+- Per-trip grouping is impossible (a shared company card spans 10–50 states/day) → reports group by jurisdiction+month, the authentic analog for this data.
 - Tip-limit and alcohol rules are defined from the policy but find 0 hits (no such spend in the data) - correct, not a gap.
 - Deploy needs a volume-backed host (better-sqlite3); serverless would swap `lib/db.ts` to Turso/libSQL.

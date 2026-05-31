@@ -42,7 +42,7 @@ export const MCC_MAP: Record<string, CategoryDef> = {
   "5983": { category: "Fuel", subcategory: "Fuel Dealer", description: "Fuel Dealers (fuel oil, wood, coal, LPG)" },
   "5172": { category: "Fuel", subcategory: "Petroleum", description: "Petroleum and Petroleum Products" },
 
-  // ---- Permits & Compliance (govt) - the single biggest bucket in this fleet ----
+  // ---- Permits & Compliance (govt) - the single biggest bucket in this dataset ----
   "9399": { category: "Permits & Compliance", subcategory: "Government Services", description: "Government Services (oversize/overweight permits, DOT)" },
   "9311": { category: "Permits & Compliance", subcategory: "Tax", description: "Tax Payments" },
   "9222": { category: "Permits & Compliance", subcategory: "Fines", description: "Fines / Government" },
@@ -180,7 +180,7 @@ const DEFAULT: CategoryDef = { category: "Other", description: "Uncategorized" }
 /** Resolve an MCC + merchant name to a category definition (deterministic). */
 export function classify(mcc: string | undefined, merchant: string | undefined): CategoryDef {
   const m = (merchant || "").trim();
-  // Merchant overrides win for the trucking-specific ambiguous merchants.
+  // Merchant overrides win for the dataset's operationally ambiguous merchants.
   for (const o of MERCHANT_OVERRIDES) {
     if (o.pattern.test(m)) return o.def;
   }

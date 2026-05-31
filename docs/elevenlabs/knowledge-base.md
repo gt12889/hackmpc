@@ -13,10 +13,11 @@ alerts are not called out; they appear in the in-app notification bell only. The
 line also answers inbound questions about compliance. All money is in Canadian dollars (CAD).
 
 ## The business and the data
-- The cardholder is a **cross-border trucking fleet**. Spend is dominated by
-  government **permits**, **fuel**, **tolls / border crossings**, and **truck scales**.
+- The cardholder is a **small/medium business** with cross-border (Canada/USA) company-card
+  spend. In this dataset, top categories include **permits & compliance**, **fuel**,
+  **tolls / border crossings**, and **scales/wash** - operationally heavy spend.
 - There are **no employees or departments** in the data - only card codes. One shared
-  fleet card carries ~98% of volume. If asked "which employee?" or "which department?",
+  company card carries ~98% of volume. If asked "which employee?" or "which department?",
   explain the data doesn't track those; the real dimensions are **spend category**,
   **card** (cost-center), **merchant**, **US state / Canadian province**, and **time**.
 - "Cards" (transaction codes, e.g. `3001`) act as **cost-centers**.
