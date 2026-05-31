@@ -3,8 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowDown } from "lucide-react";
-import { BrimRain } from "@/components/brim-rain";
 import { SplatSky } from "@/components/splat-sky";
+import { BrimWordmark } from "@/components/brim-wordmark";
 
 // "From noise to clarity" — a scroll-pinned cinematic brand overview (home page).
 // A tight, focal canvas of teal/cyan particles starts as chaos and organizes +
@@ -146,7 +146,8 @@ export function HeroReveal() {
   const brand = band(p, [0.66, 0.8]);
   const tagline = band(p, [0.72, 0.86]);
   const cue = 1 - clamp(p / 0.08);
-  const introArt = 1 - clamp(p / 0.12); // ASCII title — visible at the very start, fades on scroll
+  // Sky fades out before the final brand reveal so the logo lands on a clean background.
+  const skyFade = 1 - clamp((p - 0.55) / 0.17);
   // Whole composition eases in (zoom) as you scroll for added focus.
   const camScale = 1 + clamp(p) * 0.07;
 
@@ -154,8 +155,11 @@ export function HeroReveal() {
     <section ref={sectionRef} className="relative h-[240vh] bg-background">
       <div className="sticky top-0 h-screen overflow-hidden">
         <div className="absolute inset-0" style={{ transform: `scale(${camScale})`, transformOrigin: "50% 52%" }}>
-          {/* Backmost layer: 3D Gaussian-splat blue sky (drifts + parallaxes on scroll) */}
-          <SplatSky progress={p} className="absolute inset-0 h-full w-full" />
+          {/* Backmost layer: 3D Gaussian-splat blue sky (drifts + parallaxes on scroll).
+              Fades out before the final reveal so the brand lands on a clean background. */}
+          <div className="absolute inset-0" style={{ opacity: skyFade }}>
+            <SplatSky progress={p} className="absolute inset-0 h-full w-full" />
+          </div>
           {/* Optional parallax art — drop /public/hero/streams.png */}
           <div className="absolute inset-0 bg-cover bg-center opacity-35" style={{ backgroundImage: "url(/hero/streams.png)", transform: `translateY(${p * -50}px)` }} />
           <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />
@@ -172,20 +176,11 @@ export function HeroReveal() {
 
         {/* Text stack */}
         <div className="relative z-10 flex h-full flex-col items-center justify-center px-6 text-center">
-          {/* Animated BRIM ASCII rain — full-width, flows in/out at the screen borders, fades on scroll */}
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0"
-            style={{ opacity: introArt }}
-          >
-            <BrimRain className="h-full w-full" />
-          </div>
-
           <div className="relative flex h-44 items-center justify-center">
             {LINES.map((l, i) => {
               const o = band(p, l.in, l.out);
               return (
-                <h2 key={i} className={`absolute max-w-4xl tracking-tight text-foreground ${l.size}`} style={{ opacity: o, transform: `translateY(${(1 - o) * 28}px)` }}>
+                <h2 key={i} className={`absolute max-w-4xl tracking-tight text-white drop-shadow-[0_2px_18px_rgba(0,0,0,0.45)] ${l.size}`} style={{ opacity: o, transform: `translateY(${(1 - o) * 28}px)` }}>
                   {l.text}
                 </h2>
               );
@@ -195,11 +190,7 @@ export function HeroReveal() {
               <Link href="/dashboard" aria-label="Enter the dashboard" className="group relative inline-flex cursor-pointer transition-transform duration-300 hover:scale-105" style={{ pointerEvents: brand > 0.5 ? "auto" : "none" }}>
                 {/* idle breathing glow */}
                 <span aria-hidden className="pointer-events-none absolute inset-0 -z-10 animate-pulse rounded-full bg-primary/25 blur-2xl" />
-                <img
-                  src="/brim-it-logo.png"
-                  alt="Brim It"
-                  width={435}
-                  height={87}
+                <BrimWordmark
                   className="h-[85px] w-auto max-w-none drop-shadow-[0_0_40px_hsl(199_85%_55%/0.45)] transition-[filter] duration-300 group-hover:drop-shadow-[0_0_60px_hsl(199_85%_55%/0.7)] md:h-[119px]"
                 />
               </Link>

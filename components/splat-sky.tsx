@@ -5,24 +5,32 @@ import { useEffect, useRef, useState } from "react";
 // 3D Gaussian-splat sky backdrop for the hero (Niantic Spark + Three.js).
 // Renders /public/hero/sky.spz as the backmost full-bleed layer: transparent
 // canvas so the hero's teal particles, glows, and beige vignette frame it.
-// Gently auto-drifts and parallaxes with scroll `progress` (0..1 from the hero).
 //
-// Tuning knobs — adjust these to reframe the capture once you see it in-browser:
+// On load it measures the splat cloud's bounds, recenters it at the origin, and
+// frames the camera to fit — a capture lives at an arbitrary position/scale, so
+// without this the camera would point at empty space. Then it gently auto-drifts
+// and parallaxes with scroll `progress` (0..1 from the pinned hero).
+//
+// Tuning knobs — adjust once you see it in-browser:
 const SPLAT_URL = "/hero/sky.spz";
 const FLIP_UPRIGHT = true;   // most captures import upside-down; flip 180° on X
-const BASE_TILT_DEG = -4;    // resting camera pitch (negative looks slightly up)
-const DRIFT_SPEED = 0.015;   // radians/sec of slow yaw — keep tiny for "ambient"
+// "immersive" puts the camera inside the capture (best for a sky/panorama);
+// "fit" backs off to view the whole cloud as an object.
+const MODE: "immersive" | "fit" = "immersive";
+const FIT = 1.15;            // (fit mode) camera distance multiplier — more margin around the cloud
+const IMMERSE = 0.12;        // (immersive mode) camera offset from centre, as a fraction of radius
+const PITCH_DEG = -8;        // resting tilt; negative looks slightly upward into the sky
+const DRIFT_SPEED = 0.018;   // radians/sec of slow yaw — keep tiny for "ambient"
 const SCROLL_YAW = 0.45;     // extra yaw across a full scroll of the pinned hero
-const SCROLL_PITCH = 0.16;   // extra pitch across a full scroll
-const SCROLL_DOLLY = 1.1;    // camera push-in across a full scroll
+const SCROLL_PITCH = 0.12;   // extra upward tilt across a full scroll
 
 export function SplatSky({ progress = 0, className }: { progress?: number; className?: string }) {
   const mountRef = useRef<HTMLDivElement>(null);
   const progRef = useRef(progress);
   const [loaded, setLoaded] = useState(false);
 
-  // Keep the latest scroll progress in a ref so the render loop reads it
-  // without re-running the (expensive) WebGL setup effect.
+  // Keep latest scroll progress in a ref so the render loop reads it without
+  // re-running the (expensive) WebGL setup effect.
   useEffect(() => { progRef.current = progress; }, [progress]);
 
   useEffect(() => {
@@ -49,15 +57,49 @@ export function SplatSky({ progress = 0, className }: { progress?: number; class
       mount.appendChild(renderer.domElement);
 
       const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(62, mount.clientWidth / mount.clientHeight, 0.1, 1000);
+      const camera = new THREE.PerspectiveCamera(62, mount.clientWidth / mount.clientHeight, 0.01, 1e6);
 
       const spark = new SparkRenderer({ renderer });
       scene.add(spark);
 
-      const splat = new SplatMesh({ url: SPLAT_URL, onLoad: () => { if (!disposed) { splat.visible = true; setLoaded(true); } } });
+      // Pivot wraps the splat so we can spin the whole cloud around its own centre.
+      const pivot = new THREE.Group();
+      scene.add(pivot);
+
+      let radius = 1;        // cloud radius
+      let camDist = 0;       // resting camera distance from centre
+      let framed = false;
+
+      const splat = new SplatMesh({
+        url: SPLAT_URL,
+        onLoad: () => {
+          if (disposed) return;
+          if (FLIP_UPRIGHT) splat.rotation.x = Math.PI;
+          splat.updateMatrix();
+
+          // Measure the cloud (splat-local centres) and recentre it at the pivot origin.
+          const box = new THREE.Box3();
+          let n = 0;
+          splat.forEachSplat((_i, center) => { box.expandByPoint(center); n++; });
+          if (n > 0 && box.isEmpty() === false) {
+            const c = box.getCenter(new THREE.Vector3());
+            const s = box.getSize(new THREE.Vector3());
+            radius = Math.max(s.x, s.y, s.z, 0.001) * 0.5;
+            // Account for the upright flip when offsetting back to centre.
+            splat.position.copy(c.applyEuler(splat.rotation)).multiplyScalar(-1);
+          }
+          const fov = THREE.MathUtils.degToRad(camera.fov);
+          camDist = MODE === "fit"
+            ? (radius / Math.max(0.05, Math.sin(fov / 2))) * FIT // back off to frame the whole cloud
+            : radius * IMMERSE;                                  // sit just off-centre, inside the cloud
+          framed = true;
+
+          splat.visible = true;
+          setLoaded(true);
+        },
+      });
       splat.visible = false;
-      if (FLIP_UPRIGHT) splat.rotation.x = Math.PI;
-      scene.add(splat);
+      pivot.add(splat);
 
       const onResize = () => {
         if (!mount.clientWidth) return;
@@ -69,13 +111,19 @@ export function SplatSky({ progress = 0, className }: { progress?: number; class
 
       let raf = 0;
       const start = performance.now();
-      const baseTilt = THREE.MathUtils.degToRad(BASE_TILT_DEG);
+      const basePitch = THREE.MathUtils.degToRad(PITCH_DEG);
+      const target = new THREE.Vector3();
       const render = () => {
         const t = (performance.now() - start) / 1000;
         const p = progRef.current;
-        splat.rotation.y = t * DRIFT_SPEED + p * SCROLL_YAW;
-        camera.rotation.x = baseTilt + p * SCROLL_PITCH;
-        camera.position.z = -p * SCROLL_DOLLY;
+        pivot.rotation.y = t * DRIFT_SPEED + p * SCROLL_YAW;
+        if (framed) {
+          const pitch = basePitch - p * SCROLL_PITCH; // tilt upward into the sky on scroll
+          // Orbit the camera on a small sphere around the centre and look inward.
+          camera.position.set(0, Math.sin(pitch) * camDist, Math.cos(pitch) * camDist);
+          target.set(0, Math.sin(pitch + Math.PI) * radius * 0.1, -radius);
+          camera.lookAt(target);
+        }
         renderer.render(scene, camera);
         raf = requestAnimationFrame(render);
       };
