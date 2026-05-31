@@ -183,7 +183,7 @@ export function HeroReveal() {
             {LINES.map((l, i) => {
               const o = band(p, l.in, l.out);
               return (
-                <h2 key={i} className={`absolute max-w-4xl tracking-tight text-white drop-shadow-[0_2px_18px_rgba(0,0,0,0.45)] ${l.size}`} style={{ opacity: o, transform: `translateY(${(1 - o) * 28}px)` }}>
+                <h2 key={i} className={`hero-3d-text absolute max-w-4xl font-bold tracking-tight ${l.size}`} style={{ opacity: o, transform: `translateY(${(1 - o) * 28}px)` }}>
                   {l.text}
                 </h2>
               );
