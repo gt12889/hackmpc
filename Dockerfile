@@ -1,4 +1,4 @@
-# FleetLedger — deploy image. better-sqlite3 is a native module, so we need
+# Brim It — deploy image. better-sqlite3 is a native module, so we need
 # build tooling at install time. Use a host with a persistent volume mounted at
 # /app/.data (Railway/Render/Fly) and provide GEMINI_API_KEY as an env var.
 FROM node:22-slim AS base

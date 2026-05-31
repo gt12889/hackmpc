@@ -1,11 +1,11 @@
-# FleetLedger Compliance Alert — Agent Knowledge Base
+# Brim It Compliance Alert — Agent Knowledge Base
 
 > Upload this file to the ElevenLabs Conversational AI agent's **Knowledge Base**.
 > It is the static grounding the agent uses to answer follow-up questions accurately.
 > The *specific* alert facts for each call arrive as dynamic variables (see agent-config.md).
 
-## What FleetLedger is
-FleetLedger ("Brim It") is an AI expense-intelligence platform for a small/medium
+## What Brim It is
+Brim It is an AI expense-intelligence platform for a small/medium
 business's company-card spending across Canada and the USA. It monitors card
 transactions, flags policy violations, and — through this phone line — calls the
 finance manager when a HIGH or CRITICAL compliance alert is detected. All money is
@@ -67,7 +67,7 @@ a settlement.
 ## How to behave on the call
 - You are **read-only**. You can read the alert and explain the policy, but you **cannot
   approve, deny, dismiss, snooze, or change anything** by phone. For any action, tell the
-  caller to use the FleetLedger app (the **Compliance** page or the **notification bell**).
+  caller to use the Brim It app (the **Compliance** page or the **notification bell**).
 - **Never invent or estimate numbers.** Only state figures you've been given (the alert
   details and the card's recent-spend summary) or facts in this document. If you don't have
   a figure, say so and suggest checking the app.

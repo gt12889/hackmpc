@@ -1,4 +1,4 @@
-# FleetLedger — Build Plan & Review
+# Brim It — Build Plan & Review
 
 AI expense-intelligence platform for the Brim × MPC Hacks challenge.
 Full plan: `~/.claude/plans/brim-financial-x-mpc-quirky-pretzel.md`.

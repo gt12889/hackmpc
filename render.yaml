@@ -1,4 +1,4 @@
-# Render.com blueprint. Deploys FleetLedger with a persistent disk for the
+# Render.com blueprint. Deploys Brim It with a persistent disk for the
 # SQLite database. Set GEMINI_API_KEY in the Render dashboard (marked sync:false).
 services:
   - type: web

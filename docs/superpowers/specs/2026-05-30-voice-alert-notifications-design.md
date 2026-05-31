@@ -1,7 +1,7 @@
 # Design: Voice-Call Alerts + In-App Notification System
 
 - **Date:** 2026-05-30
-- **Project:** FleetLedger (hackmpc) — AI Expense Intelligence
+- **Project:** Brim It (hackmpc) — AI Expense Intelligence
 - **Status:** Design approved, pending spec review → implementation plan
 - **Author:** brainstormed interactively (Claude + user)
 
@@ -108,7 +108,7 @@ CREATE TABLE app_settings (
 
 ### ElevenLabs + Twilio integration
 **One-time manual setup (documented, not code):**
-- Create a Conversational AI agent in ElevenLabs. System prompt ≈ *"You are FleetLedger's compliance alert line. Read the alert, then answer the finance manager's questions using only the provided context. Be concise."*
+- Create a Conversational AI agent in ElevenLabs. System prompt ≈ *"You are Brim It's compliance alert line. Read the alert, then answer the finance manager's questions using only the provided context. Be concise."*
 - Import the Twilio number into ElevenLabs (Twilio credentials live inside ElevenLabs, not in our app).
 
 **Place call (in `lib/voice-alert.ts`):**
