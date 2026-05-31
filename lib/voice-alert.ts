@@ -1,6 +1,6 @@
 import type Database from "better-sqlite3";
 import { getDb } from "./db";
-import { HIGH_RISK, updateCallStatus, type Notification } from "./notifications";
+import { updateCallStatus, type Notification } from "./notifications";
 import { formatCad } from "./utils";
 
 const ELEVENLABS_CALL_URL = "https://api.elevenlabs.io/v1/convai/twilio/outbound-call";
@@ -80,7 +80,8 @@ export async function placeAlertCall(db: Database.Database, n: Notification, dep
 
 export type DispatchSummary = { called: number; skipped: number; failed: number; disabled: number };
 
-/** Place calls for new high/critical alerts: sequential, capped, dedup-safe. */
+/** Place calls for new CRITICAL alerts only: sequential, capped, dedup-safe.
+ *  High/medium/low alerts stay in the in-app bell feed and never phone out. */
 export async function dispatchAlertCalls(
   db: Database.Database = getDb(),
   created: Notification[],
@@ -89,10 +90,10 @@ export async function dispatchAlertCalls(
   const config = deps.config ?? voiceConfig();
   const summary: DispatchSummary = { called: 0, skipped: 0, failed: 0, disabled: 0 };
   const targets = created
-    .filter((n) => HIGH_RISK.has(n.severity))
+    .filter((n) => n.severity === "critical")
     .sort((a, b) => (SEVERITY_RANK[b.severity] - SEVERITY_RANK[a.severity]) || ((b.amount_involved ?? 0) - (a.amount_involved ?? 0)));
 
-  // Feature off or missing credentials: mark every high/critical alert with the
+  // Feature off or missing credentials: mark every critical alert with the
   // matching status (distinct, so operators can tell "intentionally off" from
   // "misconfigured") and report the suppressed count. No calls placed.
   if (!deps.enabled || !isVoiceConfigured(config)) {

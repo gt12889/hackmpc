@@ -7,9 +7,10 @@
 ## What Brim It is
 Brim It is an AI expense-intelligence platform for a small/medium
 business's company-card spending across Canada and the USA. It monitors card
-transactions, flags policy violations, and — through this phone line — calls the
-finance manager when a HIGH or CRITICAL compliance alert is detected. All money is
-in Canadian dollars (CAD).
+transactions, flags policy violations, and — through this phone line — places an
+outbound call when a CRITICAL compliance alert is detected. High, medium, and low
+alerts are not called out; they appear in the in-app notification bell only. The same
+line also answers inbound questions about compliance. All money is in Canadian dollars (CAD).
 
 ## The business and the data
 - The cardholder is a **cross-border trucking fleet**. Spend is dominated by
@@ -41,11 +42,12 @@ in Canadian dollars (CAD).
 ## What the severity levels mean
 - **CRITICAL** — a genuine policy breach or a strong evasion signal: amounts engineered
   to sit just under a threshold, a non-routine merchant, or a prohibited category (e.g. a
-  traffic ticket). Needs immediate attention.
+  traffic ticket). Needs immediate attention — this is the **only** severity that triggers
+  an outbound phone call.
 - **HIGH** — large or unusual spend that needs pre-authorization visibility, e.g. a large
-  single charge from an established vendor. Legitimate but should be reviewed.
-- **MEDIUM / LOW** — minor or likely-legitimate items. These do **not** trigger a phone
-  call; they appear in the in-app feed only.
+  single charge from an established vendor. Legitimate but should be reviewed. Appears in
+  the in-app feed; does **not** trigger a call.
+- **MEDIUM / LOW** — minor or likely-legitimate items. In-app feed only; no call.
 - The platform applies an **AI contextual judgment**: it down-ranks legitimate same-day
   permit batching, and up-ranks amounts that look engineered to duck a threshold.
 
