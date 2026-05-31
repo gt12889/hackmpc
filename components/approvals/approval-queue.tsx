@@ -19,6 +19,7 @@ import {
   FileText,
   AlertTriangle,
   Tag,
+  ChevronRight,
 } from "lucide-react";
 import { cn, formatCAD } from "@/lib/utils";
 import { SectionCard } from "@/components/kpi-card";
@@ -178,6 +179,7 @@ function ApprovalCard({ req, busy, onDecide }: { req: any; busy: boolean; onDeci
   const location = [ctx.merchantCity, ctx.state, ctx.country].filter(Boolean).join(", ");
   const history: any[] = req.merchantHistory ?? [];
   const flags: any[] = req.violations ?? [];
+  const [showCtx, setShowCtx] = useState(false);
 
   return (
     <div className="rounded-xl border border-border bg-card p-6">
@@ -237,51 +239,62 @@ function ApprovalCard({ req, busy, onDecide }: { req: any; busy: boolean; onDeci
         </div>
       )}
 
-      {/* Spend context */}
+      {/* Deeper context (spend history + prior vendor charges) - collapsed by default to keep the card scannable */}
       <div className="mt-5">
-        <h3 className="text-[13px] font-medium uppercase tracking-wide text-neutral-500">Spend context</h3>
-        <div className="mt-2 grid grid-cols-2 gap-3 lg:grid-cols-4">
-          <Ctx icon={CreditCard} label="Card total spend" value={formatCAD(ctx.cardTotalSpend || 0, { compact: true })} sub={`${ctx.cardTxnCount ?? 0} transactions`} />
-          <Ctx icon={History} label={`Prior ${req.category} (card)`} value={formatCAD(ctx.cardCategorySpend || 0, { compact: true })} />
-          <Ctx icon={History} label="Prior txns w/ vendor" value={String(ctx.cardMerchantCount ?? 0)} sub={ctx.cardMerchantCount > 0 ? "Established vendor" : "First-time vendor"} />
-          <Ctx
-            icon={Wallet}
-            label="Category budget left"
-            value={formatCAD(ctx.categoryRemaining || 0, { compact: true })}
-            sub={`${formatCAD(ctx.categoryThisMonth || 0, { compact: true })} of ${formatCAD(ctx.categoryBudget || 0, { compact: true })} used in ${ctx.month}`}
-            tone={overBudget ? "destructive" : "primary"}
-          />
-        </div>
-      </div>
+        <button
+          type="button"
+          onClick={() => setShowCtx((v) => !v)}
+          aria-expanded={showCtx}
+          className="flex items-center gap-1.5 text-[13px] font-medium uppercase tracking-wide text-neutral-500 transition-colors hover:text-foreground"
+        >
+          <ChevronRight className={cn("h-3.5 w-3.5 transition-transform", showCtx && "rotate-90")} />
+          Spend context{history.length > 0 ? ` & vendor history (${history.length})` : ""}
+        </button>
+        <div className={cn("grid transition-all duration-200", showCtx ? "mt-3 grid-rows-[1fr]" : "grid-rows-[0fr]")}>
+          <div className="overflow-hidden">
+            <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+              <Ctx icon={CreditCard} label="Card total spend" value={formatCAD(ctx.cardTotalSpend || 0, { compact: true })} sub={`${ctx.cardTxnCount ?? 0} transactions`} />
+              <Ctx icon={History} label={`Prior ${req.category} (card)`} value={formatCAD(ctx.cardCategorySpend || 0, { compact: true })} />
+              <Ctx icon={History} label="Prior txns w/ vendor" value={String(ctx.cardMerchantCount ?? 0)} sub={ctx.cardMerchantCount > 0 ? "Established vendor" : "First-time vendor"} />
+              <Ctx
+                icon={Wallet}
+                label="Category budget left"
+                value={formatCAD(ctx.categoryRemaining || 0, { compact: true })}
+                sub={`${formatCAD(ctx.categoryThisMonth || 0, { compact: true })} of ${formatCAD(ctx.categoryBudget || 0, { compact: true })} used in ${ctx.month}`}
+                tone={overBudget ? "destructive" : "primary"}
+              />
+            </div>
 
-      {/* Merchant history */}
-      {history.length > 0 && (
-        <div className="mt-5">
-          <h3 className="text-[13px] font-medium uppercase tracking-wide text-neutral-500">Prior charges with this vendor (same card)</h3>
-          <div className="mt-2 overflow-hidden rounded-lg border border-border/60">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border/60 bg-secondary/30 text-left text-[13px] text-muted-foreground">
-                  <th className="px-3 py-2 font-medium">Date</th>
-                  <th className="px-3 py-2 font-medium">Merchant</th>
-                  <th className="px-3 py-2 font-medium">Category</th>
-                  <th className="px-3 py-2 text-right font-medium">Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                {history.map((h: any, i: number) => (
-                  <tr key={i} className="border-b border-border/40 last:border-0">
-                    <td className="px-3 py-2 text-neutral-600">{h.txn_date}</td>
-                    <td className="max-w-[180px] truncate px-3 py-2">{h.merchant_name}</td>
-                    <td className="px-3 py-2 text-neutral-600">{h.category}</td>
-                    <td className="px-3 py-2 text-right tabular-nums">{formatCAD(h.amount_cad)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            {history.length > 0 && (
+              <div className="mt-4">
+                <h3 className="text-[13px] font-medium uppercase tracking-wide text-neutral-500">Prior charges with this vendor (same card)</h3>
+                <div className="mt-2 overflow-hidden rounded-lg border border-border/60">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-border/60 bg-secondary/30 text-left text-[13px] text-muted-foreground">
+                        <th className="px-3 py-2 font-medium">Date</th>
+                        <th className="px-3 py-2 font-medium">Merchant</th>
+                        <th className="px-3 py-2 font-medium">Category</th>
+                        <th className="px-3 py-2 text-right font-medium">Amount</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {history.map((h: any, i: number) => (
+                        <tr key={i} className="border-b border-border/40 last:border-0">
+                          <td className="px-3 py-2 text-neutral-600">{h.txn_date}</td>
+                          <td className="max-w-[180px] truncate px-3 py-2">{h.merchant_name}</td>
+                          <td className="px-3 py-2 text-neutral-600">{h.category}</td>
+                          <td className="px-3 py-2 text-right tabular-nums">{formatCAD(h.amount_cad)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
           </div>
         </div>
-      )}
+      </div>
 
       {/* AI recommendation */}
       <div className="mt-5 rounded-lg border border-border bg-secondary/30 p-4">
