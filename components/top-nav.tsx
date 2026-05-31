@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils";
 type Item = { href: string; label: string; icon: any; desc?: string };
 
 const PRIMARY: Item[] = [
-  { href: "/", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/chat", label: "Ask AI", icon: MessagesSquare },
 ];
 
