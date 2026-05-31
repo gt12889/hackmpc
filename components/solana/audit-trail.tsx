@@ -111,6 +111,13 @@ export function AuditTrail({ configured, initial }: { configured: boolean; initi
               const key = `${a.record_type}:${a.record_id}`;
               const verdict = verdicts[key];
               const failed = a.status !== "confirmed";
+              const proofTitle = [
+                `${meta.label} #${a.record_id}`,
+                `Stored hash: ${a.hash}`,
+                a.signature ? `Signature: ${a.signature}` : null,
+                a.slot ? `Slot: ${a.slot}` : null,
+                a.error ? `Error: ${a.error}` : null,
+              ].filter(Boolean).join("\n");
               return (
                 <tr key={a.id} className="border-b border-border/60 last:border-0">
                   <td className="px-4 py-2.5">
@@ -121,7 +128,7 @@ export function AuditTrail({ configured, initial }: { configured: boolean; initi
                     </span>
                   </td>
                   <td className="px-4 py-2.5">
-                    <span className="font-mono text-xs text-muted-foreground" title={a.hash}>
+                    <span className="font-mono text-xs text-muted-foreground" title={proofTitle}>
                       {a.hash.slice(0, 10)}…
                     </span>
                   </td>

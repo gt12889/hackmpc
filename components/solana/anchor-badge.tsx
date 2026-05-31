@@ -76,10 +76,20 @@ export function AnchorBadge({
 
   const tampered = !!data.tampered;
   const sig8 = data.signature ? `${data.signature.slice(0, 4)}…${data.signature.slice(-4)}` : null;
+  const hash8 = data.storedHash ? `${data.storedHash.slice(0, 8)}…${data.storedHash.slice(-8)}` : null;
+  const proofTitle = [
+    tampered ? "Tampered Solana proof" : "Solana proof",
+    data.storedHash ? `Stored hash: ${data.storedHash}` : null,
+    data.currentHash ? `Current hash: ${data.currentHash}` : null,
+    data.onChainHash ? `On-chain hash: ${data.onChainHash}` : null,
+    data.signature ? `Signature: ${data.signature}` : null,
+    data.slot ? `Slot: ${data.slot}` : null,
+  ].filter(Boolean).join("\n");
 
   return (
     <span className={cn("inline-flex flex-wrap items-center gap-2 text-xs", className)}>
       <span
+        title={proofTitle}
         className={cn(
           "inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-medium ring-1",
           tampered
@@ -89,6 +99,7 @@ export function AnchorBadge({
       >
         {tampered ? <ShieldAlert className="h-3.5 w-3.5" /> : <ShieldCheck className="h-3.5 w-3.5" />}
         {tampered ? "Tampered" : "Anchored on Solana"}
+        {hash8 && <span className="font-mono font-normal opacity-75">{hash8}</span>}
       </span>
 
       {data.explorerUrl && sig8 && (
@@ -97,7 +108,7 @@ export function AnchorBadge({
           target="_blank"
           rel="noreferrer"
           className="inline-flex items-center gap-1 text-muted-foreground transition-colors hover:text-foreground"
-          title="View the Memo transaction on Solana Explorer (devnet)"
+          title={`View Memo transaction on Solana Explorer (devnet)\n${data.signature}`}
         >
           <span className="font-mono">{sig8}</span>
           <ExternalLink className="h-3 w-3" />
