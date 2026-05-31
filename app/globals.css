@@ -145,13 +145,8 @@
 /* Dimensional, extruded 3D treatment for the hero scroll-reveal text: a light gradient face,
    a stacked teal "depth" extrusion below, a top bevel highlight, and a soft cast shadow. */
 .hero-3d-text {
-  background: linear-gradient(180deg, #ffffff 0%, #e6f6f8 52%, #bfe9ee 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
+  color: #ffffff;
   text-shadow:
-    0 -1px 0 rgba(255, 255, 255, 0.55),
     0 1px 0 rgba(0, 92, 106, 0.55),
     0 2px 0 rgba(0, 86, 100, 0.5),
     0 3px 0 rgba(0, 78, 92, 0.46),
