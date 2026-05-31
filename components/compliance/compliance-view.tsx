@@ -16,7 +16,6 @@ import { SectionCard } from "@/components/kpi-card";
 import { Reveal } from "@/components/reveal";
 import { ShowMore, ExpandSection } from "@/components/show-more";
 import { AlertSettings } from "@/components/compliance/alert-settings";
-import { SectionBadge } from "@/components/ui/section-badge";
 
 const fetcher = (u: string) => fetch(u).then((r) => r.json());
 
@@ -104,8 +103,6 @@ export function ComplianceView({ initial }: { initial: any }) {
 
   return (
     <div className="space-y-6 p-8">
-      <AlertSettings />
-
       <div className="overflow-hidden rounded-lg border border-border/60">
         <dl className="grid grid-cols-2 divide-x divide-y divide-border/60 sm:grid-cols-4 sm:divide-y-0">
           {metrics.map((m) => (
@@ -133,7 +130,6 @@ export function ComplianceView({ initial }: { initial: any }) {
             </button>
           }
         >
-          <SectionBadge className="mb-3">Policy Rules</SectionBadge>
           <div className="space-y-2.5">
             {rules.map((r: any) => (
               <div key={r.id} className={cn("group rounded-lg border border-border p-3 transition-colors hover:border-primary/30", !r.enabled && "opacity-50")}>
@@ -171,7 +167,6 @@ export function ComplianceView({ initial }: { initial: any }) {
         {/* Violations */}
         <Reveal delay={70} className="lg:col-span-2">
         <SectionCard title="Flagged Violations" description="Ranked by severity · AI-adjusted for context" className="h-full">
-          <SectionBadge className="mb-3">Flagged Violations</SectionBadge>
           {violations.length === 0 ? (
             <div className="flex items-center gap-2 py-8 text-sm text-muted-foreground">
               <ShieldCheck className="h-5 w-5 text-primary" /> No open violations — spend is compliant.
@@ -260,19 +255,22 @@ export function ComplianceView({ initial }: { initial: any }) {
       <ExpandSection label="Repeat Offenders" defaultOpen={false}>
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <Reveal delay={0}>
-            <SectionCard title="Repeat Offenders — Merchants" description="Most-flagged vendors" className="h-full">
-              <SectionBadge className="mb-3">Repeat Offenders — Merchants</SectionBadge>
+            <SectionCard title="By merchant" description="Most-flagged vendors" className="h-full">
               <OffenderTable rows={offenders.by_merchant} keyField="merchant_name" />
             </SectionCard>
           </Reveal>
           <Reveal delay={70}>
-            <SectionCard title="Repeat Offenders — Cards" description="Most-flagged cost centers" className="h-full">
-              <SectionBadge className="mb-3">Repeat Offenders — Cards</SectionBadge>
+            <SectionCard title="By card" description="Most-flagged cost centers" className="h-full">
               <OffenderTable rows={offenders.by_card} keyField="transaction_code" prefix="Card " />
             </SectionCard>
           </Reveal>
         </div>
       </ExpandSection>
+
+      {/* Phone-alert control: tucked bottom-right to keep the page uncluttered */}
+      <div className="flex justify-end">
+        <AlertSettings />
+      </div>
     </div>
   );
 }
