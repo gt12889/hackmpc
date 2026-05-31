@@ -178,19 +178,21 @@ export function HeroReveal() {
             })}
 
             <div className="absolute flex flex-col items-center" style={{ opacity: brand, transform: `translateY(${(1 - brand) * 32}px) scale(${0.92 + brand * 0.08})` }}>
-              <img
-                src="/brim-it-logo.png"
-                alt="Brim It"
-                width={435}
-                height={87}
-                className="h-20 w-auto max-w-none drop-shadow-[0_0_40px_hsl(199_85%_55%/0.45)] md:h-28"
-              />
-              <p className="mt-4 text-lg text-muted-foreground md:text-2xl" style={{ opacity: tagline }}>
+              <Link href="/dashboard" aria-label="Enter the dashboard" className="group cursor-pointer transition-transform duration-300 hover:scale-105" style={{ pointerEvents: brand > 0.5 ? "auto" : "none" }}>
+                <img
+                  src="/brim-it-logo.png"
+                  alt="Brim It"
+                  width={435}
+                  height={87}
+                  className="h-20 w-auto max-w-none drop-shadow-[0_0_40px_hsl(199_85%_55%/0.45)] transition-[filter] duration-300 group-hover:drop-shadow-[0_0_60px_hsl(199_85%_55%/0.7)] md:h-28"
+                />
+              </Link>
+              <p className="mt-5 text-lg text-muted-foreground md:text-2xl" style={{ opacity: tagline }}>
                 AI expense intelligence for every dollar.
               </p>
-              <Link href="/dashboard" className="mt-8 rounded-full bg-primary px-7 py-3 text-sm text-primary-foreground shadow-xl shadow-primary/40 transition-transform hover:scale-105" style={{ opacity: tagline }}>
-                Enter the dashboard →
-              </Link>
+              <span className="mt-3 text-xs uppercase tracking-[0.2em] text-primary/70" style={{ opacity: tagline }}>
+                Click the logo to enter →
+              </span>
             </div>
           </div>
 
