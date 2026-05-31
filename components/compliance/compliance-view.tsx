@@ -16,7 +16,6 @@ import { SectionCard } from "@/components/kpi-card";
 import { Reveal } from "@/components/reveal";
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import { ShowMore, ExpandSection } from "@/components/show-more";
-import { AlertSettings } from "@/components/compliance/alert-settings";
 import { COMPLIANCE_CONTEXTS } from "@/lib/compliance-contexts";
 import { AnchorBadge } from "@/components/solana/anchor-badge";
 
@@ -303,11 +302,6 @@ export function ComplianceView({ initial }: { initial: any }) {
           </Reveal>
         </div>
       </ExpandSection>
-
-      {/* Phone-alert control: tucked bottom-right to keep the page uncluttered */}
-      <div className="flex justify-end">
-        <AlertSettings />
-      </div>
     </div>
   );
 }

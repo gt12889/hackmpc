@@ -6,7 +6,7 @@ interface CursorProps {
   size?: number;
 }
 
-export const Cursor: React.FC<CursorProps> = ({ size = 76 }) => {
+export const Cursor: React.FC<CursorProps> = ({ size = 56 }) => {
   const cursorRef = useRef<HTMLDivElement>(null);
   const requestRef = useRef<number>();
   const previousPos = useRef({ x: -size, y: -size });
@@ -69,7 +69,7 @@ export const Cursor: React.FC<CursorProps> = ({ size = 76 }) => {
   return (
     <div
       ref={cursorRef}
-      className="fixed pointer-events-none rounded-full bg-white mix-blend-difference z-50 ring-4 ring-white shadow-[0_0_20px_rgba(255,255,255,1),0_0_52px_rgba(255,255,255,0.95),0_0_92px_rgba(255,255,255,0.75)] brightness-150 contrast-150 transition-opacity duration-300"
+      className="fixed pointer-events-none rounded-full bg-white mix-blend-difference z-50 ring-2 ring-white shadow-[0_0_14px_rgba(255,255,255,1),0_0_36px_rgba(255,255,255,0.95),0_0_64px_rgba(255,255,255,0.7)] brightness-150 contrast-150 transition-opacity duration-300"
       style={{
         width: size,
         height: size,

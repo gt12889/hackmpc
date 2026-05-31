@@ -76,8 +76,8 @@ export function AlertSettings() {
   }
 
   return (
-    <div className="flex flex-col items-center gap-2 py-1 text-center">
-      <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
+    <div className="flex shrink-0 flex-col items-end gap-1.5 text-right">
+      <div className="flex flex-wrap items-center justify-end gap-x-3 gap-y-2">
         <span className="flex items-center gap-2 text-sm font-semibold text-neutral-900">
           {enabled ? <Phone className="h-4 w-4 text-primary" /> : <PhoneOff className="h-4 w-4 text-muted-foreground" />}
           Phone alerts
@@ -105,17 +105,17 @@ export function AlertSettings() {
         </button>
       </div>
 
-      <p className="max-w-lg text-xs text-muted-foreground">
-        Call on critical violations after a scan. High, medium, and low alerts stay in the bell.
+      <p className="max-w-xs text-xs text-muted-foreground">
+        Critical violations trigger a call; other severities stay in the bell.
       </p>
 
       {!configured && (
-        <p className="max-w-lg text-xs text-amber-700">
-          Set ElevenLabs vars and <code className="rounded bg-amber-500/10 px-1">ALERT_PHONE_NUMBER</code> in{" "}
-          <code className="rounded bg-amber-500/10 px-1">.env.local</code> for test calls.
+        <p className="max-w-xs text-xs text-amber-700">
+          Set ElevenLabs + <code className="rounded bg-amber-500/10 px-1">ALERT_PHONE_NUMBER</code> in{" "}
+          <code className="rounded bg-amber-500/10 px-1">.env.local</code>.
         </p>
       )}
-      {msg && <p className="text-xs text-muted-foreground">{msg}</p>}
+      {msg && <p className="max-w-xs text-xs text-muted-foreground">{msg}</p>}
     </div>
   );
 }

@@ -79,13 +79,13 @@ function BentoTile({ tile, active, onClick }: { tile: Tile; active: boolean; onC
         <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 ring-1 ring-primary/20">
           <Icon className="h-4 w-4 text-primary" />
         </span>
-        <span className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">{tile.tag}</span>
+        <span className="text-[13px] font-semibold uppercase tracking-widest text-muted-foreground">{tile.tag}</span>
         <ChevronDown className={cn("ml-auto h-4 w-4 text-muted-foreground transition-transform", active && "rotate-180")} />
       </div>
       <div className="mt-3 min-h-0 flex-1">{tile.summary}</div>
       <div className="mt-3">
-        <h3 className="text-sm font-semibold text-neutral-900">{tile.title}</h3>
-        <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{tile.body}</p>
+        <h3 className="text-base font-semibold text-neutral-900">{tile.title}</h3>
+        <p className="mt-0.5 line-clamp-2 text-sm text-muted-foreground">{tile.body}</p>
       </div>
     </button>
   );
@@ -98,8 +98,8 @@ function DetailPanel({ tile, onClose }: { tile: Tile; onClose: () => void }) {
     <div className="animate-fade-up rounded-2xl border border-border/60 bg-card/50 p-6 ring-1 ring-white/[0.02] backdrop-blur-md">
       <div className="mb-5 flex items-center gap-2 border-b border-border/60 pb-3">
         <Icon className="h-4 w-4 text-primary" />
-        <h2 className="text-sm font-semibold text-neutral-900">{tile.title}</h2>
-        <span className="text-[11px] uppercase tracking-widest text-muted-foreground">{tile.tag}</span>
+        <h2 className="text-base font-semibold text-neutral-900">{tile.title}</h2>
+        <span className="text-[13px] uppercase tracking-widest text-muted-foreground">{tile.tag}</span>
         <button onClick={onClose} className="ml-auto inline-flex items-center gap-1 rounded-md border border-border px-2 py-1 text-xs text-muted-foreground hover:bg-secondary">
           <X className="h-3.5 w-3.5" /> Close
         </button>
@@ -131,19 +131,6 @@ export function InsightsView({ data }: { data: any }) {
   const profMax = Math.max(1, ...profCats.map((c: any) => c.vsBaseline ?? 0));
 
   const TILES: Tile[] = [
-    {
-      id: "feed", title: "AI Summary", tag: "DAILY DIGEST", icon: Sparkles, span: "md:col-span-4",
-      body: "Most important highlights and key takeaways from your recently uploaded spend file.",
-      summary: (
-        <div className="space-y-1.5">
-          <Stat value={String(data.feed?.length ?? 0)} label="key highlights" tone="text-primary" />
-          {(data.feed ?? []).slice(0, 2).map((f: any, i: number) => (
-            <p key={i} className="line-clamp-1 text-xs text-neutral-700"><span className="text-primary">•</span> {f.title}</p>
-          ))}
-        </div>
-      ),
-      panel: <FeedTab initial={data.feed} />,
-    },
     {
       id: "forecast", title: "Forecast", tag: "PROJECTION", icon: TrendingUp, span: "md:col-span-2 md:row-span-2",
       body: "Category-level spend projections with budget overrun risk signals.",
@@ -258,7 +245,18 @@ export function InsightsView({ data }: { data: any }) {
     <div className="space-y-6 p-8">
       <SectionBadge>Insights</SectionBadge>
 
-      {/* Animated bento mosaic of all insight components. Click a tile to expand its full panel. */}
+      <Reveal>
+        <div className="rounded-2xl border border-border/60 bg-card/50 p-6 ring-1 ring-white/[0.02] backdrop-blur-md">
+          <FeedTab initial={data.feed} />
+        </div>
+      </Reveal>
+
+      <div>
+        <h2 className="text-lg font-semibold text-neutral-900">Detailed analysis</h2>
+        <p className="mt-1 text-sm text-muted-foreground">Forecasts, anomalies, vendors, FX, recurring spend, and category profiles</p>
+      </div>
+
+      {/* Bento mosaic — click a tile to expand its full panel below the grid. */}
       <div className="grid grid-cols-1 gap-4 md:auto-rows-[minmax(210px,auto)] md:grid-cols-6">
         {TILES.map((tile, i) => (
           <Reveal key={tile.id} delay={i * 60} className={cn("min-w-0", tile.span)}>

@@ -2,6 +2,7 @@ import { ShieldCheck, ReceiptText, Link2 } from "lucide-react";
 import { SubTabs } from "@/components/ui/sub-tabs";
 import { PageHeader } from "@/components/page-header";
 import { ComplianceView } from "@/components/compliance/compliance-view";
+import { AlertSettings } from "@/components/compliance/alert-settings";
 import { ReceiptsView } from "@/components/receipts/receipts-view";
 import { AuditTrail } from "@/components/solana/audit-trail";
 import { getRules, getViolations, getViolationSummary, getRepeatOffenders } from "@/lib/compliance";
@@ -36,7 +37,12 @@ export default function GovernancePage() {
           icon: <ShieldCheck className="h-3.5 w-3.5" />,
           content: (
             <div>
-              <PageHeader title="Policy Compliance" description="Scan transactions against the digitized expense policy - AI ranks violations by real-world severity" />
+              <PageHeader
+                title="Policy Compliance"
+                description="Scan transactions against the digitized expense policy - AI ranks violations by real-world severity"
+              >
+                <AlertSettings />
+              </PageHeader>
               <ComplianceView initial={compliance} />
             </div>
           ),

@@ -31,7 +31,7 @@ export default function InsightsPage() {
     <div>
       <PageHeader
         title="Insights"
-        description="Anomaly detection, vendor consolidation savings, and burn-rate forecasting"
+        description="AI highlights from your card data, then deeper analysis across spend categories"
       />
       <InsightsView data={data} />
     </div>
