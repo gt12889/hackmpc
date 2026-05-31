@@ -7,47 +7,7 @@ A non-technical finance manager can chat with their company's spend in plain Eng
 > **Pages:** `/` is a cinematic scroll-reveal brand overview. The app is four surfaces - **Overview** (Spending · Budgets), **Insights**, **Governance** (Violations · Receipts · Audit), and **Workflow** (Approvals · Reports · Agents) - plus a floating **Ask AI** chat on every page. The older `/dashboard`, `/compliance`, `/approvals`, `/reports`, `/chat` routes redirect into these.
 
 ## Documentation
-## Documentation
-
-```mermaid
-flowchart LR
-    %% ── INPUT ──
-    subgraph INPUT ["Input"]
-        A["CSV / XLSX\nUpload"]
-    end
-
-    %% ── DATA LAYER ──
-    subgraph DATA["Data Layer"]
-        B["Ingest &\nNormalize\nlib/ingest.ts"]
-        C[("SQLite\n.data/hackmpc.db")]
-        D["Parameterized\nQuery Engine\nlib/queries.ts"]
-    end
-
-    %% ── AI ENGINE ──
-    subgraph AI["AI Decision Engine"]
-        E["Build Context\n(live schema facts,\ndate bounds, cards)"]
-        F{"Tool-Use\nLoop\n≤5 iters"}
-        G["Compliance\nScanner"]
-        H["Domain Engines\n(fraud / anomaly /\nforecast / vendors)"]
-    end
-
-    %% ── OUTPUT ──
-    subgraph OUT["Output"]
-        I["✅ Approved\n+ AI Reasoning"]
-        J["⚠️ Flagged\nViolation"]
-        K["📊 Dashboard\nChart + Prose"]
-    end
-
-    A --> B --> C --> D
-    D --> E
-    E --> F
-    F -->|"tool calls\n(aggregate_spend\ntime_series etc.)"| D
-    D -->|"results"| F
-    F --> G
-    F --> H
-    G -->|"APPROVED"| I
-    G -->|"VIOLATION"| J
-    H -->|"insight +\nviz"| K```
+```
 
 
 
