@@ -42,6 +42,11 @@ Tamper-evident notarization of financial decisions on Solana.
 - **Files:** `lib/voice-alert.ts`, `lib/notifications.ts`, `lib/settings.ts`, `components/compliance/alert-settings.tsx`
 - **How:** CRITICAL compliance alerts place an interactive phone call via an ElevenLabs Conversational AI agent over Twilio (deduped, capped at 3 per scan). All alerts also appear in the in-app notification bell. Requires the ElevenLabs/Twilio env vars; off by default.
 
+## Multi-Agent Swarms - Brim Agents (`/workflow` → Agents)
+Optional Python **LangGraph** sidecar that upgrades four AI passes into multi-agent graphs.
+- **Files:** `agents/` (Python: `app/graphs/{debate,fraud,compliance,insights}.py`), `lib/agent-service.ts`, `lib/orchestrator.ts`, `lib/{approval-debate,fraud-investigator,compliance-swarm,insights-swarm}.ts`, `app/api/fraud/investigate/*`, `app/api/agents/*`, `components/agents/*`.
+- **How:** The **debate** swarm (Prosecutor ‖ Defender → Judge) replaces the single approval call; a **fraud investigator** writes a case file per `fraudScan` suspect; a **compliance reviewer + challenger** trims false-positive criticals before they trigger phone alerts; an **insights sweep** (4 lenses → ranker) ranks the feed. Stateless sidecar: TS gathers context, calls it, persists results + per-agent traces (`agent_runs`), and **falls back** to the single-call AI when it's down. The **Agents** tab visualizes a run live. Full detail in [AGENTS.md](AGENTS.md).
+
 ## Data Import - Dashboard "Import" button
 - **Files:** `lib/ingest.ts`, `app/api/import/route.ts`, `components/import-dialog.tsx`
 - **How:** Drag-drop a `.csv`/`.xlsx`. New rows are normalized, categorized, and **appended** (existing data kept), **de-duplicated** against existing charges (card+date+merchant+amount+direction). Then compliance re-scans and approvals/reports regenerate. See [DATA-AND-INGEST.md](DATA-AND-INGEST.md).

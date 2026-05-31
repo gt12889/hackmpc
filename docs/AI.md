@@ -36,6 +36,10 @@ Each is **one** Gemini call returning JSON (`responseMimeType: application/json`
 
 All are best-effort: on error (e.g. quota) they return 0 and the rule-based data stands. Re-run via the in-page **Re-scan / Rebuild queue / Regenerate** buttons or the seed scripts.
 
+## 5. Multi-agent swarms (optional)
+
+Four of these passes can be upgraded to **multi-agent graphs** run by a separate Python **LangGraph** sidecar — an approval debate (Prosecutor ‖ Defender → Judge), a fraud investigator (one agent per suspect), a compliance reviewer + false-positive challenger, and an insights multi-lens sweep. The sidecar is stateless; the TS routes gather context, call it, and persist results + traces, falling back to the single-call passes above when it isn't running. Full detail in [Brim Agents](AGENTS.md).
+
 ## Configuration
 
 `.env.local`:

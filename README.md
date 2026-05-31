@@ -12,6 +12,7 @@ Full docs live in [`docs/`](docs/):
 
 - [Architecture](docs/ARCHITECTURE.md) - stack, data flow, module map, patterns
 - [Features](docs/FEATURES.md) - the 4 required + 3 optional + import, with file references
+- [Brim Agents](docs/AGENTS.md) - the Python/LangGraph multi-agent sidecar (debate, fraud, compliance, insights swarms)
 - [Data & Ingest](docs/DATA-AND-INGEST.md) - dataset, schema, the shared ingest pipeline, dedup
 - [AI Layer](docs/AI.md) - agentic chat, batched passes, model fallback, configuration
 - [Setup & Deploy](docs/SETUP-AND-DEPLOY.md) - scripts, env, hosting, troubleshooting
@@ -43,13 +44,17 @@ The dataset is **4,235 anonymized company-card transactions** (Aug 2025–Mar 20
 - **Forecasting** - linear burn-rate projection per category with **budget-overrun alerts**.
 - **Receipts, Budgets, Recurring spend, Cross-border FX, Spend profiles, and an AI insights feed** round out the `/insights`, `/receipts`, and `/budgets` surfaces.
 
+## Multi-agent layer — Brim Agents (`/workflow` → Agents)
+
+A **Python LangGraph sidecar** adds multi-agent reasoning on top of the single-call AI. Four swarms: an approval **debate** (Prosecutor ‖ Defender → Judge), a **fraud investigator** (one agent per suspect), a **compliance reviewer + false-positive challenger** (cuts unnecessary critical phone alerts), and an **insights multi-lens sweep** (4 lenses → ranker). The sidecar is **stateless** (the TS routes gather context and persist results + per-agent traces) and **degrades gracefully** — if it isn't running, every route falls back to the original single-call path. The **Agents** tab visualizes the swarm running live. Run with `npm run agents` (optional). Full detail in [Brim Agents](docs/AGENTS.md).
+
 ## On-chain audit trail (`/audit`)
 
 Every report approval, pre-approval decision, and HIGH/CRITICAL compliance alert is **notarized on Solana**: a SHA-256 of the record's canonical snapshot is written into a Solana **Memo transaction** (devnet), giving a publicly verifiable Explorer link. A **Verify** action re-hashes the live record and compares it to the immutable on-chain hash, so any post-approval **tampering is provably detectable**. Server-side keypair (no wallet needed), env-gated, best-effort (never blocks an approval). See [Solana Audit Anchor](docs/SOLANA.md). Run `npm run solana:setup` to provision a funded devnet keypair.
 
 ## Stack
 
-Next.js 15 (App Router) · TypeScript · Tailwind + shadcn/Radix · Recharts · **better-sqlite3** · **Google Gemini** (`@google/genai`, function-calling) · **Solana** (`@solana/web3.js` + `@solana/spl-memo`, devnet Memo anchoring) · zod. Branded in Brim's teal/cyan (`#007d93` / `#00c1d5`).
+Next.js 15 (App Router) · TypeScript · Tailwind + shadcn/Radix · Recharts · **better-sqlite3** · **Google Gemini** (`@google/genai`, function-calling) · **Brim Agents** sidecar (Python · FastAPI · **LangGraph** · langchain-google-genai) · **Solana** (`@solana/web3.js` + `@solana/spl-memo`, devnet Memo anchoring) · zod. Branded in Brim's teal/cyan (`#007d93` / `#00c1d5`).
 
 ## Run it locally
 
@@ -61,6 +66,15 @@ npm run dev                        # http://localhost:3000
 ```
 
 `npm run db:reset` rebuilds the SQLite DB from `data/transactions.xlsx`: normalizes dates, CAD amounts, and MCC→category mapping (`scripts/etl.ts`), then seeds policy rules, the approval queue, and expense reports. Without a Gemini key the app still runs - the rule-based engines populate; only the AI reasoning/summaries are skipped.
+
+**Multi-agent swarms (optional):** to enable the Brim Agents layer, run the Python sidecar alongside the dev server:
+
+```bash
+cd agents && uv sync               # one time (Python 3.12 + LangGraph deps)
+npm run agents                     # uvicorn on :8200
+```
+
+The app falls back to single-call AI when it isn't running. See [Brim Agents](docs/AGENTS.md).
 
 **Upload your own data:** the **Import** button on the Dashboard accepts a `.csv` or `.xlsx` card export. It runs the same ingest pipeline (`lib/ingest.ts`, shared with the ETL script) - tolerant of common column-name variants (Date/Merchant/Amount/MCC/Card…) and of either Excel-serial or real date strings. New rows are **appended** (existing data kept) and **de-duplicated** against existing charges, then compliance re-scans and approvals/reports regenerate. See [Data & Ingest](docs/DATA-AND-INGEST.md).
 

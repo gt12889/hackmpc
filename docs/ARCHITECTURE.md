@@ -86,7 +86,7 @@ db.exec(fs.readFileSync(".../lib/schema.sql"));  // idempotent, runs on first op
 - **Schema-on-open**: `schema.sql` is entirely `CREATE TABLE IF NOT EXISTS` / `CREATE INDEX IF NOT EXISTS`, so opening the DB applies any newly-added tables idempotently. New columns are added the same way (edit `schema.sql`; next open applies them). There is no migration framework and no version table by design: the schema is declarative and additive.
 - The DB file lives in `.data/hackmpc.db` (gitignored). `HACKMPC_DB_DIR` / `HACKMPC_DB_PATH` override the location for a deploy volume.
 
-### 4.2 Schema (15 tables)
+### 4.2 Schema (17 tables)
 
 | Group | Tables | Purpose |
 |---|---|---|
@@ -98,6 +98,7 @@ db.exec(fs.readFileSync(".../lib/schema.sql"));  // idempotent, runs on first op
 | Chat | `chat_sessions`, `chat_messages` | Multi-turn agent memory |
 | Alerting | `notifications`, `app_settings` | Alert ledger + call dedup; feature toggles |
 | Audit | `anchors` | Solana on-chain anchor records |
+| Agents | `agent_runs`, `fraud_cases` | Multi-agent run audit trail; fraud investigator case files |
 
 The **`transactions`** table is the spine. It is deliberately wide and pre-normalized so the read path is pure aggregation with no per-query parsing:
 
@@ -192,6 +193,19 @@ The non-chat AI features are each a **single batched Gemini call** with `respons
 
 Each is bounded in cost (one call), structured (JSON schema), and **degrades gracefully**: if the key is missing or all models are exhausted, the feature falls back to its rule-based output and never errors.
 
+### 6.4 Multi-agent swarms (Python LangGraph sidecar)
+
+A fourth tier upgrades four of the bounded passes into **multi-agent graphs** running in a separate, **stateless** Python service (`agents/`, FastAPI + LangGraph + langchain-google-genai). The TS routes gather context, POST it, receive `{ results, traces }`, and persist results + per-agent traces (`agent_runs`). Each route **degrades gracefully** to its single-call pass above if the sidecar is down or `AGENTS_SWARM_ENABLED=false`.
+
+| Swarm | Graph | Replaces |
+|---|---|---|
+| Approval **debate** | Prosecutor ‖ Defender → Judge | `generateRecommendations` |
+| **Fraud investigator** | one Investigator per suspect (fan-out) | — (adds to `fraudScan`) |
+| **Compliance reviewer** | domain Reviewers (`Send`) → false-positive Challenger | `adjustSeverityWithAI` |
+| **Insights sweep** | 4 lens agents → Ranker | `generateFeed` |
+
+TS wiring: `lib/agent-service.ts` (HTTP client), `lib/orchestrator.ts` (`agent_runs` audit + `swarmEnabled`), and `lib/{approval-debate,fraud-investigator,compliance-swarm,insights-swarm}.ts`. The **Agents** tab on `/workflow` visualizes a run live. Full detail in [AGENTS.md](AGENTS.md).
+
 ---
 
 ## 7. Domain engines
@@ -272,7 +286,7 @@ POST `/api/policies/scan` -> `runScan()` (deterministic rules + split detection)
 | File | Responsibility |
 |---|---|
 | `db.ts` | `better-sqlite3` singleton, WAL, applies `schema.sql` on first open |
-| `schema.sql` | All 15 tables (declarative, additive, `IF NOT EXISTS`) |
+| `schema.sql` | All 17 tables (declarative, additive, `IF NOT EXISTS`) |
 | `ingest.ts` | Shared load pipeline: column aliases, date/amount/MCC normalization, dedup, replace/append |
 | `mcc-seed.ts` | MCC to category map (95 codes), merchant overrides, `NON_OPERATIONAL` settlement set |
 | `queries.ts` | Parameterized read-only analytics; backs the dashboard and the AI tools |
@@ -287,12 +301,19 @@ POST `/api/policies/scan` -> `runScan()` (deterministic rules + split detection)
 | `receipts.ts` / `budgets.ts` | Receipt OCR matching; budget burn-down |
 | `notifications.ts` / `voice-alert.ts` / `settings.ts` | Alert ledger, ElevenLabs/Twilio calls, feature toggles |
 | `solana.ts` | On-chain audit anchor: hash, snapshot, anchor (Memo tx), verify |
+| `agent-service.ts` | HTTP client to the Python LangGraph sidecar (injectable fetch, graceful failure) |
+| `orchestrator.ts` | `agent_runs` audit trail (`recordTraces`/`getRecentAgentRuns`) + `swarmEnabled` flag |
+| `approval-debate.ts` / `fraud-investigator.ts` / `compliance-swarm.ts` / `insights-swarm.ts` | Per-feature swarm wiring: gather context → call sidecar → persist + fallback |
 | `auth.ts` | Minimal session auth |
 | `utils.ts` / `use-count-up.ts` / `use-in-view.ts` | `cn`, `formatCAD`, date + UI hooks |
 
+**Sidecar** (`agents/`, Python): `app/main.py` (FastAPI endpoints), `app/llm.py` (Gemini fallback chain), `app/graphs/{debate,fraud,compliance,insights}.py` (LangGraph graphs). See [AGENTS.md](AGENTS.md).
+
 **Pages**: `/` (cinematic hero), `/dashboard`, `/overview`, `/chat`, `/compliance`, `/approvals`, `/reports`, `/receipts`, `/budgets`, `/insights`, `/audit`, `/governance`, `/workflow`.
 
-**API**: `chat`, `import`, `insights` (+`/feed`), `policies` (+`/[id]`, `/scan`), `requests` (+`/[id]`), `reports` (+`/[id]`, `/generate`), `receipts`, `budgets`, `notifications` (+`/[id]`, `/read-all`, `/test-call`), `settings/alerts`, `anchor`, `auth/{login,logout,session}`.
+**API**: `chat`, `import`, `insights` (+`/feed`), `policies` (+`/[id]`, `/scan`), `requests` (+`/[id]`), `reports` (+`/[id]`, `/generate`), `receipts`, `budgets`, `fraud/investigate`, `agents`, `notifications` (+`/[id]`, `/read-all`, `/test-call`), `settings/alerts`, `anchor`, `auth/{login,logout,session}`.
+
+**Sidecar API** (Python, :8200): `health`, `debate`, `fraud/investigate`, `compliance/review`, `insights/sweep`.
 
 ---
 
