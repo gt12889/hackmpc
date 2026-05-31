@@ -47,7 +47,7 @@ export function TopNav() {
       </div>
 
       {/* Nav ribbon */}
-      <nav className="bg-primary shadow-sm">
+      <nav className="bg-[#0093AF] shadow-sm">
         <div className="no-scrollbar flex w-full items-stretch justify-evenly overflow-x-auto px-2 sm:px-6 lg:px-10">
           {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
             const active = isActive(pathname, href);
