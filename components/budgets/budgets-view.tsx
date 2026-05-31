@@ -16,6 +16,25 @@ import {
 
 const fetcher = (u: string) => fetch(u).then((r) => r.json());
 
+// Shape of a budget row from getBudgetStatus() (lib/budgets.ts). Loosely typed
+// (the API returns `any`); this just lets the view read the fields it uses.
+type BudgetRow = {
+  id: number;
+  scope: string;
+  scope_value: string;
+  limit_amount: number;
+  actual: number;
+  pct: number;
+  projected: number;
+  projPct: number;
+  remaining: number;
+  overrun: boolean;
+  projectedOverrun: boolean;
+  overBy: number;
+  trend: string;
+  month: string;
+};
+
 export function BudgetsView({ initial }: { initial: any }) {
   const { data, mutate } = useSWR("/api/budgets", fetcher, { fallbackData: initial });
   const [editing, setEditing] = useState<number | null>(null);
@@ -29,7 +48,7 @@ export function BudgetsView({ initial }: { initial: any }) {
   const categories = data?.categories ?? initial.categories ?? [];
 
   const budgetByCategory = useMemo(
-    () => new Map(budgets.map((b: any) => [b.scope_value, b])),
+    () => new Map<string, BudgetRow>(budgets.map((b: BudgetRow): [string, BudgetRow] => [b.scope_value, b])),
     [budgets]
   );
   const selectedBudget = newCategory ? budgetByCategory.get(newCategory) : undefined;
