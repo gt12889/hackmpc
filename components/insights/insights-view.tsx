@@ -41,7 +41,7 @@ export function InsightsView({ data }: { data: any }) {
 
   return (
     <div className="space-y-6 p-8">
-      <div className="no-scrollbar flex gap-1 overflow-x-auto rounded-lg border border-border bg-card p-1">
+      <div className="no-scrollbar flex w-full items-stretch justify-evenly gap-1 overflow-x-auto rounded-lg border border-border bg-card p-1">
         {TABS.map((t) => {
           const Icon = t.icon;
           return (
@@ -49,7 +49,7 @@ export function InsightsView({ data }: { data: any }) {
               key={t.key}
               onClick={() => setTab(t.key)}
               className={cn(
-                "flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                "flex min-w-[5.5rem] flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-md px-2 py-2 text-sm font-medium transition-colors sm:px-3",
                 tab === t.key ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground"
               )}
             >

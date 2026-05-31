@@ -47,7 +47,7 @@ export function TopNav() {
 
       {/* Nav ribbon */}
       <nav className="bg-primary shadow-sm">
-        <div className="no-scrollbar mx-auto flex max-w-6xl items-stretch justify-evenly gap-2 overflow-x-auto px-4 sm:gap-6 md:gap-10 lg:px-10">
+        <div className="no-scrollbar flex w-full items-stretch justify-evenly overflow-x-auto px-2 sm:px-6 lg:px-10">
           {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
             const active = isActive(pathname, href);
             return (
@@ -55,7 +55,7 @@ export function TopNav() {
                 key={href}
                 href={href}
                 className={cn(
-                  "flex min-w-[4.75rem] flex-col items-center gap-1.5 border-b-2 px-4 py-3 transition-colors sm:min-w-[5.5rem] sm:px-6 md:px-8",
+                  "flex min-w-[4.25rem] flex-1 flex-col items-center justify-center gap-1.5 border-b-2 px-2 py-3 transition-colors sm:min-w-0 sm:px-4 md:px-6",
                   active
                     ? "border-white text-white"
                     : "border-transparent text-white/70 hover:text-white"
