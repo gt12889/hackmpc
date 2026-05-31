@@ -1,5 +1,4 @@
 import type Database from "better-sqlite3";
-import { getDb } from "./db";
 
 export const ALERTS_CALLING_ENABLED = "alerts_calling_enabled";
 
@@ -15,6 +14,6 @@ export function setSetting(db: Database.Database, key: string, value: string): v
   ).run(key, value);
 }
 
-export function isCallingEnabled(db: Database.Database = getDb()): boolean {
+export function isCallingEnabled(db: Database.Database): boolean {
   return getSetting(db, ALERTS_CALLING_ENABLED) === "true";
 }
