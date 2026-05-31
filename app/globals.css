@@ -115,6 +115,10 @@
   }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up { animation: none !important; }
+}
+
 @layer utilities {
   .no-scrollbar {
     -ms-overflow-style: none;
