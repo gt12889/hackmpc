@@ -59,6 +59,32 @@ export function categoryForecasts(topN = 6) {
   });
 }
 
+export type ForecastInput = {
+  category: string;
+  history: { period: string; spend: number }[];
+  budget: number;
+  multiplier: number;
+};
+
+/** Per-category inputs for the Monte Carlo sidecar (history + budget). Reuses the
+ *  deterministic categoryForecasts() so the simulation and the baseline never drift. */
+export function forecastInputs(topN = 8): ForecastInput[] {
+  return categoryForecasts(topN).map((c) => ({
+    category: c.category,
+    history: c.history,
+    budget: c.budget,
+    multiplier: 1,
+  }));
+}
+
+/** Apply per-category what-if multipliers (e.g. { Fuel: 0.85 } = cut Fuel 15%). */
+export function applyMultipliers(inputs: ForecastInput[], multipliers: Record<string, number> = {}): ForecastInput[] {
+  return inputs.map((i) => {
+    const m = multipliers[i.category];
+    return typeof m === "number" && m > 0 ? { ...i, multiplier: m } : i;
+  });
+}
+
 export function forecastSummary() {
   const f = categoryForecasts(8);
   const atRisk = f.filter((c) => c.overrunRisk);
