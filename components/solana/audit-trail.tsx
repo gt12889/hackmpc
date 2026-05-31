@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
 
 type Anchor = {
   id: number;
-  record_type: "report" | "request" | "alert";
+  record_type: "report" | "request" | "alert" | "vendor";
   record_id: string;
   hash: string;
   signature: string | null;
@@ -29,6 +29,7 @@ const TYPE_META: Record<Anchor["record_type"], { label: string; icon: typeof Fil
   report: { label: "Report", icon: FileText, href: () => "/workflow?tab=reports" },
   request: { label: "Approval", icon: CheckSquare, href: () => "/workflow?tab=approvals" },
   alert: { label: "Alert", icon: AlertTriangle, href: () => "/governance?tab=violations" },
+  vendor: { label: "Vendor", icon: FileText, href: () => "/insights" },
 };
 
 function explorerUrl(sig: string) {

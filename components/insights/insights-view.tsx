@@ -15,6 +15,8 @@ import {
   BarChart3,
   RefreshCw,
   ShieldCheck,
+  ShieldAlert,
+  Link2,
   ChevronDown,
   X,
 } from "lucide-react";
@@ -32,6 +34,7 @@ import {
 } from "@/components/ui/table";
 import { ScrollSpyAccordion, type ScrollSpyItem } from "@/components/ui/scroll-spy";
 import { SectionBadge } from "@/components/ui/section-badge";
+import { AnchorBadge } from "@/components/solana/anchor-badge";
 
 type ReactNodeT = ReactNode;
 
@@ -529,6 +532,47 @@ function FraudTab({ f }: { f: any }) {
 }
 
 function VendorTab({ v }: { v: any }) {
+  const [trustByVendor, setTrustByVendor] = useState<Record<string, any>>(v.trustByVendor ?? {});
+  const [busy, setBusy] = useState<string | null>(null);
+
+  async function setTrust(vendor: any, status: "approved" | "watch" | "blocked") {
+    const key = `${vendor.vendor_norm}:${status}`;
+    setBusy(key);
+    try {
+      const res = await fetch("/api/vendors/trust", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          vendorNorm: vendor.vendor_norm,
+          displayName: vendor.display_name,
+          status,
+          note:
+            status === "approved"
+              ? "Approved vendor for recurring operational spend."
+              : status === "blocked"
+                ? "Blocked pending finance review."
+                : "Watchlist vendor pending review.",
+          reviewedBy: "Finance Manager",
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to update vendor trust");
+      setTrustByVendor((m) => ({ ...m, [vendor.vendor_norm]: data.vendor }));
+      toast.success(`${vendor.display_name} marked ${status}`);
+      if (data.anchor?.configured === false) toast.message("Solana anchoring is off; registry saved locally");
+    } catch (e: any) {
+      toast.error(e?.message || "Vendor trust update failed");
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  const statusStyle: Record<string, string> = {
+    approved: "bg-primary/10 text-primary ring-primary/25",
+    watch: "bg-warning/15 text-warning ring-warning/25",
+    blocked: "bg-destructive/10 text-destructive ring-destructive/25",
+  };
+
   return (
     <div className="space-y-6">
       <MetricsBar
@@ -539,6 +583,55 @@ function VendorTab({ v }: { v: any }) {
           { label: "Est. annual savings", value: formatCAD(v.summary.estimatedAnnualSavings, { compact: true }), tone: "text-primary" },
         ]}
       />
+
+      <SectionCard
+        title="Vendor Trust Registry"
+        description="Mark high-spend vendors as approved, watch, or blocked. When Solana is configured, each decision is anchored as a verifiable hash."
+        action={<Link2 className="h-4 w-4 text-primary" />}
+      >
+        <div className="divide-y divide-border/60">
+          {(v.top ?? []).slice(0, 8).map((vendor: any) => {
+            const trust = trustByVendor[vendor.vendor_norm];
+            const status = trust?.status ?? "unreviewed";
+            return (
+              <div key={vendor.vendor_norm} className="flex flex-col gap-2 py-3 first:pt-0 last:pb-0 lg:flex-row lg:items-center">
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="max-w-[280px] truncate text-sm font-medium text-neutral-900">{vendor.display_name}</span>
+                    {status === "unreviewed" ? (
+                      <span className="rounded-full bg-secondary px-2 py-0.5 text-[11px] font-medium text-muted-foreground">Unreviewed</span>
+                    ) : (
+                      <span className={cn("rounded-full px-2 py-0.5 text-[11px] font-medium capitalize ring-1", statusStyle[status])}>
+                        {status === "approved" && <ShieldCheck className="mr-1 inline h-3 w-3" />}
+                        {status === "blocked" && <ShieldAlert className="mr-1 inline h-3 w-3" />}
+                        {status}
+                      </span>
+                    )}
+                  </div>
+                  <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                    <span>{vendor.category}</span>
+                    <span>{formatCAD(vendor.spend_cad, { compact: true })}</span>
+                    <span>{vendor.txn_count} txns</span>
+                    {trust && <AnchorBadge recordType="vendor" recordId={vendor.vendor_norm} />}
+                  </div>
+                </div>
+                <div className="flex shrink-0 flex-wrap gap-1.5">
+                  {(["approved", "watch", "blocked"] as const).map((statusOption) => (
+                    <button
+                      key={statusOption}
+                      onClick={() => setTrust(vendor, statusOption)}
+                      disabled={busy === `${vendor.vendor_norm}:${statusOption}`}
+                      className="rounded-md border border-border px-2 py-1 text-[11px] font-medium capitalize text-muted-foreground hover:border-primary/40 hover:text-foreground disabled:opacity-50"
+                    >
+                      {busy === `${vendor.vendor_norm}:${statusOption}` ? "Saving..." : statusOption}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </SectionCard>
 
       <div className="space-y-4">
         {v.opportunities.slice(0, 6).map((o: any, i: number) => (

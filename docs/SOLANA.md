@@ -13,13 +13,14 @@ SQLite, where they can in principle be edited after the fact with no trace. Anch
 on a public chain makes any post-approval change provably detectable: the on-chain hash is
 immutable, so if the live record's re-hash no longer matches, the record was tampered with.
 
-## What gets anchored (3 record types)
+## What gets anchored (4 record types)
 
 | Record type | Trigger | Keyed by |
 |---|---|---|
 | `report` | Expense report status set to `approved` | report id |
 | `request` | Pre-approval request decided (approve/deny) | request id |
 | `alert` | A newly raised HIGH or CRITICAL compliance alert (capped at 5 per scan) | `alert_key` |
+| `vendor` | Finance marks a vendor `approved`, `watch`, or `blocked` in the Vendor Trust Registry | normalized vendor name |
 
 Anchoring fires automatically inside the existing approval / scan flow. It is best-effort: a
 failure (or an unconfigured wallet) never blocks the approval, it just records the attempt with
@@ -39,16 +40,74 @@ failure (or an unconfigured wallet) never blocks the approval, it just records t
 ## Files
 
 - `lib/solana.ts` - core: `isAnchorConfigured`, `canonicalHash` (sorted-key JSON SHA-256),
-  `buildSnapshot` (report/request/alert), `anchorRecord` (Memo tx, best-effort), `verifyAnchor`
+  `buildSnapshot` (report/request/alert/vendor), `anchorRecord` (Memo tx, best-effort), `verifyAnchor`
   (re-hash + read the memo back from chain), `listAnchors`, `explorerUrl`.
 - `app/api/anchor/route.ts` - `POST` to anchor, `GET ?recordType=&recordId=` to verify,
   `GET` (no params) to list.
+- `app/api/vendors/trust/route.ts` - vendor trust registry API. Saves status locally and,
+  when Solana is configured, anchors the vendor decision as `recordType: "vendor"`.
 - Auto-anchor hooks: `app/api/reports/[id]/route.ts`, `app/api/requests/[id]/route.ts`,
   `app/api/policies/scan/route.ts`.
 - UI: `components/solana/anchor-badge.tsx` (badge + Verify), `components/solana/audit-trail.tsx`,
-  `app/audit/page.tsx` (the `/audit` page), nav entry in `components/top-nav.tsx`.
-- Schema: the `anchors` table in `lib/schema.sql`.
+  `app/audit/page.tsx` (the `/audit` page), nav entry in `components/top-nav.tsx`, and the
+  Vendor Trust Registry panel in `components/insights/insights-view.tsx`.
+- Schema: the `anchors` and `vendor_trust` tables in `lib/schema.sql`.
 - Setup: `scripts/solana-setup.mjs` (`npm run solana:setup`).
+
+## Vendor Trust Registry
+
+The second Solana extension idea has been implemented: keep approved vendors, blocked vendors,
+and high-risk vendor flags anchored on-chain.
+
+What changed:
+
+- Added a `vendor_trust` table with `vendor_norm`, `display_name`, `status`, `category`, `note`,
+  `reviewed_by`, `spend_cad`, `txn_count`, and `updated_at`.
+- Added `topVendors`, `listVendorTrust`, `vendorTrustMap`, `getVendorStats`, and `setVendorTrust`
+  in `lib/vendors.ts`.
+- Added `app/api/vendors/trust/route.ts`.
+  - `GET` returns high-spend vendors, trust rows, and a vendor-keyed trust map.
+  - `POST` accepts `vendorNorm`, `displayName`, `status`, `note`, and `reviewedBy`.
+- Extended `RecordType` in `lib/solana.ts` to include `vendor`.
+- Extended `buildSnapshot()` so vendor decisions hash the stable trust snapshot, including status,
+  reviewer, note, spend context, transaction count, and update time.
+- Updated `app/api/anchor/route.ts`, `AnchorBadge`, and `AuditTrail` so vendor anchors can be
+  verified and listed alongside report/request/alert anchors.
+- Added a Vendor Trust Registry panel to Insights -> Vendors. Users can mark top vendors as
+  `approved`, `watch`, or `blocked`.
+
+Current behavior:
+
+- If `SOLANA_PAYER_SECRET` is unset, vendor decisions are saved locally and the UI reports that
+  Solana anchoring is off.
+- If Solana is configured, each vendor trust change writes a Memo transaction containing:
+  `brim:v1:vendor:<vendor_norm>:<hash>`.
+- Verification re-hashes the current vendor trust row and compares it with the stored/on-chain
+  hash, so a changed vendor decision can be detected as tampered.
+
+## Future Solana ideas
+
+These were considered as possible next Solana uses:
+
+1. **Approval Certificate NFTs or Tokens** - when a report is approved, mint a lightweight
+   non-transferable certificate or token representing that approval. This creates a visible proof
+   artifact for auditors, not just a memo hash.
+2. **Vendor Trust Registry** - keep approved vendors, blocked vendors, and high-risk vendor flags
+   anchored on-chain. The app can prove that a vendor was approved or restricted at the time a
+   payment or report was reviewed. This is now implemented.
+3. **Policy Version Anchoring** - every time the company expense policy changes, anchor the policy
+   hash on Solana. Then each violation or approval can say, "this was judged against policy
+   version X."
+4. **Receipt Proofs** - hash matched receipts and anchor the hash. Receipt images stay off-chain;
+   only the proof is public.
+5. **Multi-Signer Approval Flow** - for high-value expenses, require multiple wallet signatures
+   from finance, operations, and CFO roles.
+6. **Dispute / Exception Ledger** - when a flagged transaction is cleared, anchor the exception
+   decision so the reason a risky spend was accepted is immutable.
+
+The strongest recommended next additions are **Policy Version Anchoring** and **Receipt Proofs**:
+they fit the product naturally, are demo-friendly, and avoid overcomplicating the app with wallets
+or token mechanics.
 
 ## How verification works
 

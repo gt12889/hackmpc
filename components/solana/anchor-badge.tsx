@@ -24,7 +24,7 @@ export function AnchorBadge({
   recordId,
   className,
 }: {
-  recordType: "report" | "request" | "alert";
+  recordType: "report" | "request" | "alert" | "vendor";
   recordId: string | number;
   className?: string;
 }) {

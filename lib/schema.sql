@@ -222,6 +222,21 @@ CREATE TABLE IF NOT EXISTS anchors (
 );
 CREATE INDEX IF NOT EXISTS idx_anchors_created ON anchors(created_at DESC);
 
+-- Vendor trust registry: finance can mark vendors as approved/watch/blocked and
+-- optionally anchor the decision hash on Solana for auditor-visible proof.
+CREATE TABLE IF NOT EXISTS vendor_trust (
+  vendor_norm   TEXT PRIMARY KEY,
+  display_name  TEXT NOT NULL,
+  status        TEXT NOT NULL DEFAULT 'watch', -- approved|watch|blocked
+  category      TEXT,
+  note          TEXT,
+  reviewed_by   TEXT,
+  spend_cad     REAL DEFAULT 0,
+  txn_count     INTEGER DEFAULT 0,
+  updated_at    TEXT DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_vendor_trust_status ON vendor_trust(status, updated_at DESC);
+
 -- Audit trail of multi-agent orchestration runs (the "swarm at work" feed). Each row
 -- is one role-agent's contribution to a feature (debate / investigation / review / sweep).
 CREATE TABLE IF NOT EXISTS agent_runs (

@@ -1,7 +1,7 @@
 import { PageHeader } from "@/components/page-header";
 import { InsightsView } from "@/components/insights/insights-view";
 import { duplicateCharges, roundNumberCharges, largestCharges, anomalySummary } from "@/lib/anomaly";
-import { consolidationOpportunities, vendorSummary } from "@/lib/vendors";
+import { consolidationOpportunities, topVendors, vendorSummary, vendorTrustMap } from "@/lib/vendors";
 import { categoryForecasts, forecastSummary } from "@/lib/forecast";
 import { recurringCharges, recurringSummary } from "@/lib/recurring";
 import { fxSummary, fxByMonth, fxByCategory, topUsdStates } from "@/lib/fx";
@@ -20,7 +20,7 @@ export default function InsightsPage() {
       roundNumbers: roundNumberCharges(12),
       largest: largestCharges(10),
     },
-    vendors: { summary: vendorSummary(), opportunities: consolidationOpportunities(3) },
+    vendors: { summary: vendorSummary(), opportunities: consolidationOpportunities(3), top: topVendors(24), trustByVendor: vendorTrustMap() },
     forecast: { summary: forecastSummary(), categories: categoryForecasts(6) },
     recurring: { summary: recurringSummary(), charges: recurringCharges(20) },
     fx: { summary: fxSummary(), byMonth: fxByMonth(), byCategory: fxByCategory(8), byState: topUsdStates(8) },

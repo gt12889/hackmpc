@@ -22,7 +22,7 @@ import { getReport } from "./reports";
 // is unset.
 // ============================================================================
 
-export type RecordType = "report" | "request" | "alert";
+export type RecordType = "report" | "request" | "alert" | "vendor";
 
 const CLUSTER = process.env.SOLANA_CLUSTER || "devnet";
 const RPC_URL = process.env.SOLANA_RPC_URL || "https://api.devnet.solana.com";
@@ -109,6 +109,22 @@ export function buildSnapshot(recordType: RecordType, recordId: string): Record<
       merchant_name: r.merchant_name ?? null,
       amount_involved: r.amount_involved ?? null,
       rule_name: r.rule_name ?? null,
+    };
+  }
+  if (recordType === "vendor") {
+    const r = db.prepare(`SELECT * FROM vendor_trust WHERE vendor_norm=?`).get(recordId) as any;
+    if (!r) return null;
+    return {
+      type: "vendor",
+      vendor_norm: r.vendor_norm,
+      display_name: r.display_name,
+      status: r.status,
+      category: r.category ?? null,
+      note: r.note ?? null,
+      reviewed_by: r.reviewed_by ?? null,
+      spend_cad: r.spend_cad ?? 0,
+      txn_count: r.txn_count ?? 0,
+      updated_at: r.updated_at ?? null,
     };
   }
   return null;
