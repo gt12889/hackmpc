@@ -79,3 +79,44 @@ class FraudCase(BaseModel):
 class FraudResponse(BaseModel):
     results: list[FraudCase]
     traces: list[AgentTrace]
+
+
+# ---- /compliance/review ----
+
+class ReviewItem(BaseModel):
+    key: str
+    severity: str = Field(description="critical | high | medium | low")
+    reason: str = ""
+
+
+class ReviewBatch(BaseModel):
+    """A domain Reviewer agent's verdicts for its slice of violations."""
+
+    items: list[ReviewItem]
+
+
+class ChallengeItem(BaseModel):
+    key: str
+    false_positive: bool = False
+    why: str = ""
+
+
+class ChallengeBatch(BaseModel):
+    """The Challenger agent's false-positive calls on the critical/high flags."""
+
+    items: list[ChallengeItem]
+
+
+class ComplianceRequest(BaseModel):
+    violations: list[dict[str, Any]]
+
+
+class ReviewResult(BaseModel):
+    key: str
+    severity: str
+    reason: str
+
+
+class ComplianceResponse(BaseModel):
+    results: list[ReviewResult]
+    traces: list[AgentTrace]

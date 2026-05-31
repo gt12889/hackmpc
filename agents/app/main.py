@@ -7,9 +7,12 @@ TypeScript Next.js routes gather context, POST it here, and persist the results
 
 from fastapi import FastAPI
 
+from .graphs.compliance import run_review
 from .graphs.debate import run_debate
 from .graphs.fraud import run_investigation
 from .schemas import (
+    ComplianceRequest,
+    ComplianceResponse,
     DebateRequest,
     DebateResponse,
     FraudRequest,
@@ -34,3 +37,9 @@ def debate(body: DebateRequest) -> DebateResponse:
 def fraud_investigate(body: FraudRequest) -> FraudResponse:
     results, traces = run_investigation(body.suspects)
     return FraudResponse(results=results, traces=traces)
+
+
+@app.post("/compliance/review", response_model=ComplianceResponse)
+def compliance_review(body: ComplianceRequest) -> ComplianceResponse:
+    results, traces = run_review(body.violations)
+    return ComplianceResponse(results=results, traces=traces)
