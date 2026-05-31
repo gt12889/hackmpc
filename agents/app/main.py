@@ -14,6 +14,7 @@ from .graphs.compliance import run_review
 from .graphs.debate import run_debate
 from .graphs.fraud import run_investigation
 from .graphs.insights import run_sweep
+from .montecarlo import run_montecarlo
 from .schemas import (
     ComplianceRequest,
     ComplianceResponse,
@@ -23,6 +24,8 @@ from .schemas import (
     FraudResponse,
     InsightsRequest,
     InsightsResponse,
+    MonteCarloRequest,
+    MonteCarloResponse,
 )
 
 logger = logging.getLogger("brim-agents")
@@ -66,3 +69,9 @@ def compliance_review(body: ComplianceRequest) -> ComplianceResponse:
 def insights_sweep(body: InsightsRequest) -> InsightsResponse:
     insights, traces = run_sweep(body.signals)
     return InsightsResponse(insights=insights, traces=traces)
+
+
+@app.post("/forecast/montecarlo", response_model=MonteCarloResponse)
+def forecast_montecarlo(body: MonteCarloRequest) -> MonteCarloResponse:
+    # Non-agentic: pure numpy simulation, no LLM.
+    return MonteCarloResponse(results=run_montecarlo(body.categories, body.iterations, body.seed))

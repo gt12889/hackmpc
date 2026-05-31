@@ -151,3 +151,40 @@ class InsightsRequest(BaseModel):
 class InsightsResponse(BaseModel):
     insights: list[InsightItem]
     traces: list[AgentTrace]
+
+
+# ---- /forecast/montecarlo (non-agentic: pure numpy simulation) ----
+
+class MCSeriesPoint(BaseModel):
+    period: str
+    spend: float
+
+
+class MCCategory(BaseModel):
+    category: str
+    history: list[MCSeriesPoint]
+    budget: float
+    multiplier: float = 1.0  # what-if lever (1.0 = baseline)
+
+
+class MonteCarloRequest(BaseModel):
+    categories: list[MCCategory]
+    iterations: int = 20000
+    seed: int = 42
+
+
+class MonteCarloResult(BaseModel):
+    category: str
+    p10: float
+    p25: float
+    p50: float
+    p75: float
+    p90: float
+    mean: float
+    volatility: float        # coefficient of variation of monthly spend
+    overrun_probability: float
+    projected: float         # trend-projected mean (multiplier applied)
+
+
+class MonteCarloResponse(BaseModel):
+    results: list[MonteCarloResult]
