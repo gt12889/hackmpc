@@ -1,18 +1,13 @@
 import { describe, it, expect } from "vitest";
 import { makeTestDb } from "../test/helpers/db";
 import {
-  runRoleAgent,
-  runSwarm,
   recordAgentRun,
+  recordTraces,
   getRecentAgentRuns,
   parseAgentJson,
   swarmEnabled,
+  type AgentTrace,
 } from "./orchestrator";
-
-// Fake generateImpl: returns canned JSON, reports which model "served" it.
-function fakeGen(json: unknown) {
-  return async () => ({ resp: { text: JSON.stringify(json) }, model: "fake-flash" });
-}
 
 describe("parseAgentJson", () => {
   it("parses clean JSON and recovers fenced/prose-wrapped JSON", () => {
@@ -20,62 +15,6 @@ describe("parseAgentJson", () => {
     expect(parseAgentJson('```json\n[{"a":1}]\n```')).toEqual([{ a: 1 }]);
     expect(parseAgentJson("not json")).toBeNull();
     expect(parseAgentJson("")).toBeNull();
-  });
-});
-
-describe("runRoleAgent", () => {
-  it("returns parsed JSON and ok=true on success", async () => {
-    const out = await runRoleAgent(
-      { role: "Judge", instruction: "decide", input: { x: 1 } },
-      { generateImpl: fakeGen({ verdict: "approve" }) as any }
-    );
-    expect(out.ok).toBe(true);
-    expect(out.data).toEqual({ verdict: "approve" });
-    expect(out.model).toBe("fake-flash");
-  });
-
-  it("recovers JSON wrapped in prose/fences", async () => {
-    const out = await runRoleAgent(
-      { role: "X", instruction: "i", input: {} },
-      { generateImpl: (async () => ({ resp: { text: '```json\n[{"a":1}]\n```' }, model: "m" })) as any }
-    );
-    expect(out.data).toEqual([{ a: 1 }]);
-  });
-
-  it("returns ok=false (not throw) when the model errors", async () => {
-    const out = await runRoleAgent(
-      { role: "X", instruction: "i", input: {} },
-      {
-        generateImpl: (async () => {
-          throw new Error("429");
-        }) as any,
-      }
-    );
-    expect(out.ok).toBe(false);
-    expect(out.data).toBeNull();
-  });
-
-  it("returns ok=false when the response is not valid JSON", async () => {
-    const out = await runRoleAgent(
-      { role: "X", instruction: "i", input: {} },
-      { generateImpl: (async () => ({ resp: { text: "sorry, no data" }, model: "m" })) as any }
-    );
-    expect(out.ok).toBe(false);
-    expect(out.data).toBeNull();
-  });
-});
-
-describe("runSwarm", () => {
-  it("runs all agents and preserves order", async () => {
-    const outs = await runSwarm(
-      [
-        { role: "A", instruction: "i", input: {} },
-        { role: "B", instruction: "i", input: {} },
-      ],
-      { generateImpl: fakeGen({ ok: true }) as any }
-    );
-    expect(outs.map((o) => o.role)).toEqual(["A", "B"]);
-    expect(outs.every((o) => o.ok)).toBe(true);
   });
 });
 
@@ -89,6 +28,18 @@ describe("agent_runs persistence", () => {
     expect(rows[0].role).toBe("Judge"); // newest first
     expect(JSON.parse(rows[0].payload).v).toBe(1);
     expect(rows[1].payload).toBeNull();
+  });
+
+  it("recordTraces writes a batch and returns the count", () => {
+    const db = makeTestDb();
+    const traces: AgentTrace[] = [
+      { feature: "fraud-investigator", role: "Investigator", subject_key: "1", ok: true, model: "m" },
+      { feature: "fraud-investigator", role: "Investigator", subject_key: "2", ok: false, model: "m" },
+    ];
+    expect(recordTraces(db, traces)).toBe(2);
+    expect(getRecentAgentRuns(db).length).toBe(2);
+    expect(recordTraces(db, [])).toBe(0);
+    expect(recordTraces(db, undefined)).toBe(0);
   });
 });
 

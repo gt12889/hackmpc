@@ -1,33 +1,11 @@
 import type Database from "better-sqlite3";
-import { getClient, generateWithFallback } from "./gemini";
 import { getDb } from "./db";
 
-// Reusable multi-agent orchestration over the existing Gemini fallback chain.
-// A "role agent" is one bounded, JSON-returning Gemini call cast in a perspective.
-// A "swarm" runs role agents concurrently (independent perspectives OR per-item fan-out).
-// Everything degrades gracefully: no key / quota-exhausted / parse-fail → ok:false, data:null.
-
-export type AgentSpec = {
-  role: string;          // perspective label, e.g. "Prosecutor"
-  instruction: string;   // what this agent should do + output shape
-  input: unknown;        // the data it reasons over (JSON-serialized into the prompt)
-  temperature?: number;  // default 0.3
-};
-
-export type AgentOutput<T = any> = {
-  role: string;
-  ok: boolean;
-  data: T | null;
-  raw?: string;
-  model?: string;
-  error?: string;
-};
-
-// Injectable for tests — defaults to the real fallback chain.
-export type GenerateImpl = (params: any) => Promise<{ resp: any; model: string }>;
-// A runner executes one AgentSpec. Swarm features take an injectable runner so tests
-// can supply canned agent outputs without touching Gemini.
-export type AgentRunner = <T = any>(spec: AgentSpec) => Promise<AgentOutput<T>>;
+// Persistence + config for multi-agent orchestration. The agent *reasoning* runs
+// in the Python LangGraph sidecar (see lib/agent-service.ts); this module owns the
+// TS-side concerns: the agent_runs audit trail and the feature flag. Each sidecar
+// response carries `traces` (one per role-agent) which we write here for the
+// "swarm at work" UI.
 
 export function parseAgentJson<T = any>(text: string): T | null {
   if (!text) return null;
@@ -47,52 +25,10 @@ export function parseAgentJson<T = any>(text: string): T | null {
   return null;
 }
 
-export async function runRoleAgent<T = any>(
-  spec: AgentSpec,
-  deps: { generateImpl?: GenerateImpl } = {}
-): Promise<AgentOutput<T>> {
-  const generate =
-    deps.generateImpl ??
-    (() => {
-      const ai = getClient();
-      if (!ai) return null;
-      return (params: any) => generateWithFallback(ai, params);
-    })();
-
-  if (!generate) return { role: spec.role, ok: false, data: null, error: "no-api-key" };
-
-  const prompt = `You are the ${spec.role}. ${spec.instruction}
-
-Respond with ONLY valid JSON — no prose, no markdown code fences.
-
-Input:
-${JSON.stringify(spec.input, null, 1)}`;
-
-  try {
-    const { resp, model } = await generate({
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
-      config: { temperature: spec.temperature ?? 0.3, responseMimeType: "application/json" },
-    });
-    const text = resp?.text || "";
-    const data = parseAgentJson<T>(text);
-    return { role: spec.role, ok: data != null, data, raw: text, model };
-  } catch (e: any) {
-    console.error(`[agent:${spec.role}]`, e);
-    return { role: spec.role, ok: false, data: null, error: e?.message || String(e) };
-  }
-}
-
-/** Run a swarm of agents concurrently; result order matches input order. */
-export async function runSwarm<T = any>(
-  specs: AgentSpec[],
-  deps: { generateImpl?: GenerateImpl } = {}
-): Promise<AgentOutput<T>[]> {
-  return Promise.all(specs.map((s) => runRoleAgent<T>(s, deps)));
-}
-
-export type AgentRunRecord = {
-  feature: string;
-  role: string;
+// One role-agent's contribution to a feature run, as returned by the sidecar.
+export type AgentTrace = {
+  feature: string; // 'approval-debate' | 'fraud-investigator' | 'compliance-swarm' | 'insights-swarm'
+  role: string; // 'Prosecutor' | 'Defender' | 'Judge' | 'Investigator' | 'Reviewer:...' | 'Ranker' | ...
   subject_key?: string | null;
   ok: boolean;
   model?: string | null;
@@ -100,7 +36,7 @@ export type AgentRunRecord = {
   payload?: unknown;
 };
 
-export function recordAgentRun(db: Database.Database, r: AgentRunRecord): void {
+export function recordAgentRun(db: Database.Database, r: AgentTrace): void {
   db.prepare(
     `INSERT INTO agent_runs (feature, role, subject_key, ok, model, summary, payload)
      VALUES (@feature,@role,@subject_key,@ok,@model,@summary,@payload)`
@@ -115,12 +51,20 @@ export function recordAgentRun(db: Database.Database, r: AgentRunRecord): void {
   });
 }
 
+/** Persist a batch of traces from one sidecar response. */
+export function recordTraces(db: Database.Database, traces: AgentTrace[] | undefined | null): number {
+  if (!traces?.length) return 0;
+  const tx = db.transaction((rows: AgentTrace[]) => rows.forEach((t) => recordAgentRun(db, t)));
+  tx(traces);
+  return traces.length;
+}
+
 export function getRecentAgentRuns(db: Database.Database = getDb(), limit = 40): any[] {
   return db.prepare(`SELECT * FROM agent_runs ORDER BY id DESC LIMIT ?`).all(limit) as any[];
 }
 
-/** Feature flag: swarm orchestration on by default; set AGENTS_SWARM_ENABLED=false to use
- *  the original single-call AI paths (cheaper on free-tier quota; demo can show both). */
+/** Feature flag: when true (default), routes call the Python agent sidecar; set
+ *  AGENTS_SWARM_ENABLED=false to use the original single-call AI paths. */
 export function swarmEnabled(): boolean {
   return (process.env.AGENTS_SWARM_ENABLED ?? "true") !== "false";
 }
