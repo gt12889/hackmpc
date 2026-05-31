@@ -117,9 +117,16 @@ ${JSON.stringify(payload, null, 1)}`;
   try {
     parsed = JSON.parse(text);
   } catch {
+    // Tolerant fallback: extract the JSON array; if it's still malformed, keep the
+    // deterministic data and skip the AI pass rather than crashing the seed/build.
     const m = text.match(/\[[\s\S]*\]/);
-    if (!m) return 0;
-    parsed = JSON.parse(m[0]);
+    try {
+      parsed = m ? JSON.parse(m[0]) : [];
+    } catch {
+      console.warn("[ai-seed] model returned unparseable JSON - skipping AI enrichment");
+      return 0;
+    }
+    if (!parsed.length) return 0;
   }
   const upd = db.prepare(`UPDATE expense_reports SET ai_summary=? WHERE id=?`);
   let n = 0;
