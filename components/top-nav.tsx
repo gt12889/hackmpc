@@ -10,6 +10,7 @@ import {
   Sparkles,
   ReceiptText,
   Wallet,
+  Link2,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -27,6 +28,7 @@ const NAV_ITEMS: Item[] = [
   { href: "/receipts", label: "Receipts", icon: ReceiptText },
   { href: "/budgets", label: "Budgets", icon: Wallet },
   { href: "/insights", label: "Insights", icon: Sparkles },
+  { href: "/audit", label: "Audit Trail", icon: Link2 },
 ];
 
 function isActive(pathname: string, href: string) {

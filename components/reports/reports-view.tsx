@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { cn, formatCAD } from "@/lib/utils";
 import { Reveal } from "@/components/reveal";
+import { AnchorBadge } from "@/components/solana/anchor-badge";
 import { CHART_COLORS } from "@/components/charts";
 import { SectionBadge } from "@/components/ui/section-badge";
 
@@ -174,7 +175,11 @@ function ReportCard({ report, open, onToggle, onApprove }: any) {
               </tbody>
             </table>
           </div>
-          {!approved && (
+          {approved ? (
+            <div className="mt-4 flex justify-end">
+              <AnchorBadge recordType="report" recordId={report.id} />
+            </div>
+          ) : (
             <div className="mt-4 flex justify-end">
               <button onClick={onApprove} className="inline-flex items-center gap-1.5 rounded-full bg-primary px-5 py-2 text-sm font-medium text-primary-foreground hover:opacity-90">
                 <Check className="h-4 w-4" /> Approve as CFO

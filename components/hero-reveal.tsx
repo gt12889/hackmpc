@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowDown } from "lucide-react";
 import { BrimRain } from "@/components/brim-rain";
+import { SplatSky } from "@/components/splat-sky";
 
 // "From noise to clarity" — a scroll-pinned cinematic brand overview (home page).
 // A tight, focal canvas of teal/cyan particles starts as chaos and organizes +
@@ -153,6 +154,8 @@ export function HeroReveal() {
     <section ref={sectionRef} className="relative h-[240vh] bg-background">
       <div className="sticky top-0 h-screen overflow-hidden">
         <div className="absolute inset-0" style={{ transform: `scale(${camScale})`, transformOrigin: "50% 52%" }}>
+          {/* Backmost layer: 3D Gaussian-splat blue sky (drifts + parallaxes on scroll) */}
+          <SplatSky progress={p} className="absolute inset-0 h-full w-full" />
           {/* Optional parallax art — drop /public/hero/streams.png */}
           <div className="absolute inset-0 bg-cover bg-center opacity-35" style={{ backgroundImage: "url(/hero/streams.png)", transform: `translateY(${p * -50}px)` }} />
           <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />

@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { cn, formatCAD } from "@/lib/utils";
 import { SectionCard } from "@/components/kpi-card";
+import { AnchorBadge } from "@/components/solana/anchor-badge";
 
 const fetcher = (u: string) => fetch(u).then((r) => r.json());
 
@@ -145,15 +146,20 @@ export function ApprovalQueue({ initial }: { initial: any }) {
         <SectionCard title="Recent Decisions" description="Audit trail">
           <div className="space-y-1.5">
             {decided.map((r: any) => (
-              <div key={r.id} className="flex items-center justify-between border-b border-border/50 py-2 text-sm last:border-0">
-                <div className="flex items-center gap-2">
-                  {r.status === "approved" ? <Check className="h-4 w-4 text-success" /> : <X className="h-4 w-4 text-destructive" />}
-                  <span>{r.merchant_name}</span>
-                  <span className="text-xs text-muted-foreground">· card {r.transaction_code}</span>
+              <div key={r.id} className="border-b border-border/50 py-2 text-sm last:border-0">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    {r.status === "approved" ? <Check className="h-4 w-4 text-success" /> : <X className="h-4 w-4 text-destructive" />}
+                    <span>{r.merchant_name}</span>
+                    <span className="text-xs text-muted-foreground">· card {r.transaction_code}</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="tabular-nums">{formatCAD(r.amount_cad)}</span>
+                    <span className={cn("text-xs font-medium uppercase", r.status === "approved" ? "text-success" : "text-destructive")}>{r.status}</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className="tabular-nums">{formatCAD(r.amount_cad)}</span>
-                  <span className={cn("text-xs font-medium uppercase", r.status === "approved" ? "text-success" : "text-destructive")}>{r.status}</span>
+                <div className="mt-1 pl-6">
+                  <AnchorBadge recordType="request" recordId={r.id} />
                 </div>
               </div>
             ))}

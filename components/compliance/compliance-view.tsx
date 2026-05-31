@@ -16,6 +16,7 @@ import { SectionCard } from "@/components/kpi-card";
 import { Reveal } from "@/components/reveal";
 import { ShowMore, ExpandSection } from "@/components/show-more";
 import { AlertSettings } from "@/components/compliance/alert-settings";
+import { AnchorBadge } from "@/components/solana/anchor-badge";
 
 const fetcher = (u: string) => fetch(u).then((r) => r.json());
 
@@ -233,6 +234,13 @@ export function ComplianceView({ initial }: { initial: any }) {
                             </span>
                           )}
                         </div>
+                        {/* On-chain anchor for HIGH/CRITICAL alerts (alert_key mirrors lib/notifications) */}
+                        {(v.severity === "high" || v.severity === "critical") && v.rule_id != null && (
+                          <AnchorBadge
+                            recordType="alert"
+                            recordId={`${v.rule_id}:${v.group_key ?? (v.transaction_id != null ? `txn-${v.transaction_id}` : "unknown")}`}
+                          />
+                        )}
                         {/* AI reasoning */}
                         {v.ai_reasoning && (
                           <p className="flex gap-1.5 rounded-md bg-secondary/40 p-2 text-[13px] text-muted-foreground">
