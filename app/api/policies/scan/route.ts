@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { runScan, adjustSeverityWithAI } from "@/lib/compliance";
+import { reviewViolationsSwarm } from "@/lib/compliance-swarm";
+import { agentsEnabled } from "@/lib/agent-service";
 import { getDb } from "@/lib/db";
 import { syncFromViolations, HIGH_RISK } from "@/lib/notifications";
 import { dispatchAlertCalls } from "@/lib/voice-alert";
@@ -16,7 +18,9 @@ const ANCHOR_CAP_PER_SCAN = 5;
 export async function POST() {
   try {
     const scan = runScan();
-    const adjusted = await adjustSeverityWithAI();
+    // Multi-agent reviewer swarm (domain reviewers → false-positive challenger)
+    // when enabled; reviewViolationsSwarm itself falls back to the single call.
+    const adjusted = agentsEnabled() ? await reviewViolationsSwarm() : { reviewed: await adjustSeverityWithAI(), mode: "single" as const };
 
     const db = getDb();
     const created = syncFromViolations(db);
