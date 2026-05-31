@@ -2,7 +2,7 @@ import type Database from "better-sqlite3";
 import { getDb } from "./db";
 import { buildRequestPayload, generateRecommendations } from "./approvals";
 import { callAgentService } from "./agent-service";
-import { recordTraces, type AgentTrace } from "./orchestrator";
+import { recordTraces, recordAgentRun, type AgentTrace } from "./orchestrator";
 
 // Approval debate: send pending requests to the LangGraph sidecar (Prosecutor ‖
 // Defender → Judge) and persist the verdict + both advocates' cases. Falls back
@@ -33,6 +33,12 @@ export async function debateRequests(
   if (!res.ok) {
     // Sidecar down / disabled → single-call fallback (uses its own getDb()).
     const n = await generateRecommendations();
+    recordAgentRun(db, {
+      feature: "approval-debate",
+      role: "Advisor (single-call)",
+      ok: true,
+      summary: `Recommended ${n} pending request${n === 1 ? "" : "s"} via single-call fallback (debate sidecar unavailable).`,
+    });
     return { debated: n, mode: "single" };
   }
 

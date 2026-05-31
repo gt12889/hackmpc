@@ -2,7 +2,7 @@ import type Database from "better-sqlite3";
 import { getDb } from "./db";
 import { getViolations, adjustSeverityWithAI } from "./compliance";
 import { callAgentService } from "./agent-service";
-import { recordTraces, type AgentTrace } from "./orchestrator";
+import { recordTraces, recordAgentRun, type AgentTrace } from "./orchestrator";
 
 // Compliance reviewer swarm. Sends the top open violations to the LangGraph
 // sidecar (domain reviewers → false-positive challenger) and writes the adjusted
@@ -38,6 +38,12 @@ export async function reviewViolationsSwarm(
 
   if (!res.ok) {
     const n = await adjustSeverityWithAI();
+    recordAgentRun(db, {
+      feature: "compliance-swarm",
+      role: "Reviewer (single-call)",
+      ok: true,
+      summary: `Adjusted ${n} violation${n === 1 ? "" : "s"} via single-call fallback (reviewer swarm unavailable).`,
+    });
     return { reviewed: n, mode: "single" };
   }
 

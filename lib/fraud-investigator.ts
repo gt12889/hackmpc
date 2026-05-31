@@ -2,7 +2,7 @@ import type Database from "better-sqlite3";
 import { getDb } from "./db";
 import { fraudScan, type FraudSuspect } from "./fraud";
 import { callAgentService } from "./agent-service";
-import { recordTraces, type AgentTrace } from "./orchestrator";
+import { recordTraces, recordAgentRun, type AgentTrace } from "./orchestrator";
 
 // Fraud investigator swarm. Takes the deterministic fraudScan suspects, builds
 // per-suspect context (card+merchant history, category norms), sends them to the
@@ -88,6 +88,12 @@ export async function investigateSuspects(
       }
     });
     tx(suspects);
+    recordAgentRun(db, {
+      feature: "fraud-investigator",
+      role: "Scanner (deterministic)",
+      ok: true,
+      summary: `Flagged ${suspects.length} suspect${suspects.length === 1 ? "" : "s"} by rule signals; investigator sidecar unavailable for case review.`,
+    });
     return { investigated: suspects.length, mode: "degraded" };
   }
 
