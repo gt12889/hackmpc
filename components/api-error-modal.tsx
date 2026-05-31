@@ -4,14 +4,24 @@ import { useEffect, useState } from "react";
 import { Zap, X } from "lucide-react";
 
 const EVENT = "brim:api-error";
+const COOLDOWN_MS = 6000;
+let lastFired = 0;
 
-/** Pop the global "API credits ran out" modal from anywhere on the client. */
+/** Pop the global error modal from anywhere on the client. Throttled so repeated
+ *  or background failures never spam it. */
 export function notifyApiError() {
-  if (typeof window !== "undefined") window.dispatchEvent(new Event(EVENT));
+  if (typeof window === "undefined") return;
+  const now = Date.now();
+  if (now - lastFired < COOLDOWN_MS) return;
+  lastFired = now;
+  window.dispatchEvent(new Event(EVENT));
 }
 
-// A minimal, theme-matched modal shown when an AI/API call fails. Message is fixed
-// ("API credits ran out") per design. Dismiss via the button, backdrop, or Escape.
+// A single, theme-matched modal shown for ANY error across the site (always the same
+// fixed message). It listens for the explicit `notifyApiError()` event AND installs a
+// site-wide net: any server error (5xx) or network failure on a fetch, plus any unhandled
+// promise rejection, opens it. Expected 4xx (auth / validation / not-found) and intentional
+// aborts are ignored so it only fires on genuine breakage. Dismiss via button, backdrop, or Escape.
 export function ApiErrorModal() {
   const [open, setOpen] = useState(false);
 
@@ -19,6 +29,29 @@ export function ApiErrorModal() {
     const show = () => setOpen(true);
     window.addEventListener(EVENT, show);
     return () => window.removeEventListener(EVENT, show);
+  }, []);
+
+  // Site-wide error net.
+  useEffect(() => {
+    const origFetch = window.fetch;
+    window.fetch = async (...args: Parameters<typeof fetch>) => {
+      try {
+        const res = await origFetch(...args);
+        if (res.status >= 500) notifyApiError();
+        return res;
+      } catch (err: any) {
+        if (err?.name !== "AbortError") notifyApiError();
+        throw err;
+      }
+    };
+    const onReject = (e: PromiseRejectionEvent) => {
+      if (e?.reason?.name !== "AbortError") notifyApiError();
+    };
+    window.addEventListener("unhandledrejection", onReject);
+    return () => {
+      window.fetch = origFetch;
+      window.removeEventListener("unhandledrejection", onReject);
+    };
   }, []);
 
   useEffect(() => {
