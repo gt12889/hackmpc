@@ -120,3 +120,34 @@ class ReviewResult(BaseModel):
 class ComplianceResponse(BaseModel):
     results: list[ReviewResult]
     traces: list[AgentTrace]
+
+
+# ---- /insights/sweep ----
+
+class InsightItem(BaseModel):
+    title: str
+    detail: str = ""
+    severity: str = Field(default="medium", description="high | medium | low")
+    metric: str = ""
+    link: str = ""
+
+
+class InsightBatch(BaseModel):
+    """A lens agent's candidate insights for its slice of the signals."""
+
+    items: list[InsightItem]
+
+
+class RankedInsights(BaseModel):
+    """The Ranker agent's final deduped, prioritized 5-7 insights."""
+
+    items: list[InsightItem]
+
+
+class InsightsRequest(BaseModel):
+    signals: dict[str, Any]
+
+
+class InsightsResponse(BaseModel):
+    insights: list[InsightItem]
+    traces: list[AgentTrace]
