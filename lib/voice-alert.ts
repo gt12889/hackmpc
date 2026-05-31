@@ -68,6 +68,7 @@ export async function placeAlertCall(db: Database.Database, n: Notification, dep
       method: "POST",
       headers: { "xi-api-key": config.apiKey as string, "Content-Type": "application/json" },
       body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(15000),
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) return { ok: false, error: `ElevenLabs ${res.status}: ${JSON.stringify(data).slice(0, 200)}` };

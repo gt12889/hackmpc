@@ -77,6 +77,10 @@ High/critical compliance alerts can call your phone via an ElevenLabs Conversati
 
 Alerts always appear in the in-app notification bell regardless of phone config. Calls are deduped (one per distinct alert) and capped at 3 per scan; the rest stay in the feed. Twilio trial accounts can only call verified numbers.
 
+**Notes & limitations:**
+- Turn **Phone alerts** on *before* running a scan. Alerts already in the feed from an earlier scan are not re-called when you toggle calling on later — use the **Test call** button to place a live call at any time.
+- An alert's severity is recorded when it's first seen. If a later AI re-rating escalates an existing alert into high/critical, that change won't trigger a new call (it's still visible in the bell).
+
 ## Deploy
 
 `better-sqlite3` needs a persistent filesystem. Deploy to a host with a volume (Render / Railway / Fly) and run `npm run db:reset` on first boot — see `Dockerfile` and `render.yaml`. For a serverless target (Vercel), swap the client in `lib/db.ts` to Turso/libSQL (SQLite-compatible). Full instructions in [Setup & Deploy](docs/SETUP-AND-DEPLOY.md).
