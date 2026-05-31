@@ -72,7 +72,7 @@ export function SectionCard({
   action?: React.ReactNode;
 }) {
   return (
-    <div className={cn("rounded-2xl border border-border/60 bg-card/50 p-5 ring-1 ring-inset ring-white/[0.02] backdrop-blur-md", className)}>
+    <div className={cn("rounded-2xl border border-border/60 bg-card/50 p-5 ring-1 ring-inset ring-white/[0.02] backdrop-blur-md transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg", className)}>
       <div className="mb-4 flex items-start justify-between gap-2">
         <div>
           <h3 className={cn("text-sm text-neutral-900", "display-serif")}>{title}</h3>
