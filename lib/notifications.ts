@@ -1,6 +1,7 @@
 import type Database from "better-sqlite3";
 import { getDb } from "./db";
 import { getViolations } from "./compliance";
+import { formatCad } from "./utils";
 
 export type Notification = {
   id: number;
@@ -28,10 +29,6 @@ export function alertKey(v: { rule_id: number | string; group_key?: string | nul
   return `${v.rule_id}:${ref}`;
 }
 
-function cad(n: number): string {
-  return new Intl.NumberFormat("en-CA", { style: "currency", currency: "CAD", maximumFractionDigits: 0 }).format(n || 0);
-}
-
 /** Diff current open violations into the ledger; return rows created this call. */
 export function syncFromViolations(db: Database.Database = getDb()): Notification[] {
   const violations = getViolations(undefined, db);
@@ -44,7 +41,7 @@ export function syncFromViolations(db: Database.Database = getDb()): Notificatio
     for (const v of rows) {
       const key = alertKey(v);
       const title = `${String(v.severity).toUpperCase()} risk: ${v.merchant_name ?? "Unknown merchant"}`;
-      const body = `${cad(v.amount_involved)} · ${v.rule_name ?? "policy violation"}`;
+      const body = `${formatCad(v.amount_involved)} · ${v.rule_name ?? "policy violation"}`;
       const info = insert.run({
         alert_key: key,
         severity: v.severity,

@@ -55,6 +55,15 @@ describe("placeAlertCall", () => {
     expect(res.ok).toBe(false);
     expect(res.error).toContain("422");
   });
+
+  it("returns ok:false when fetch throws", async () => {
+    const db = makeTestDb();
+    seedTransaction(db, { id: 1, transaction_code: "3001" });
+    const fetchImpl = vi.fn().mockRejectedValue(new Error("ECONNREFUSED"));
+    const res = await placeAlertCall(db, notif(), { config: CONFIG, fetchImpl: fetchImpl as any });
+    expect(res.ok).toBe(false);
+    expect(res.error).toContain("ECONNREFUSED");
+  });
 });
 
 describe("dispatchAlertCalls", () => {
@@ -84,5 +93,29 @@ describe("dispatchAlertCalls", () => {
     expect(fetchImpl).not.toHaveBeenCalled();
     const row = db.prepare("SELECT call_status FROM notifications WHERE id=1").get() as any;
     expect(row.call_status).toBe("disabled");
+  });
+
+  it("counts failed calls and records the failed status", async () => {
+    const db = makeTestDb();
+    const created = [notif({ id: 1, severity: "critical" })];
+    db.prepare("INSERT INTO notifications (id, alert_key, severity, title) VALUES (?,?,?,?)").run(1, "kf", "critical", "t");
+    const fetchImpl = vi.fn().mockResolvedValue({ ok: false, status: 500, json: async () => ({ detail: "boom" }) });
+    const summary = await dispatchAlertCalls(db, created, { enabled: true, config: CONFIG, fetchImpl: fetchImpl as any });
+    expect(summary.failed).toBe(1);
+    expect(summary.called).toBe(0);
+    const row = db.prepare("SELECT call_status FROM notifications WHERE id=1").get() as any;
+    expect(row.call_status).toBe("failed");
+  });
+
+  it("marks high/critical unconfigured when credentials are missing", async () => {
+    const db = makeTestDb();
+    const created = [notif({ id: 1, severity: "critical" })];
+    db.prepare("INSERT INTO notifications (id, alert_key, severity, title) VALUES (?,?,?,?)").run(1, "ku", "critical", "t");
+    const fetchImpl = vi.fn();
+    const summary = await dispatchAlertCalls(db, created, { enabled: true, config: { apiKey: "", agentId: "", phoneNumberId: "", toNumber: "" }, fetchImpl: fetchImpl as any });
+    expect(summary.disabled).toBe(1);
+    expect(fetchImpl).not.toHaveBeenCalled();
+    const row = db.prepare("SELECT call_status FROM notifications WHERE id=1").get() as any;
+    expect(row.call_status).toBe("unconfigured");
   });
 });

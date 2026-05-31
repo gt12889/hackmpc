@@ -1,6 +1,7 @@
 import type Database from "better-sqlite3";
 import { getDb } from "./db";
 import { HIGH_RISK, updateCallStatus, type Notification } from "./notifications";
+import { formatCad } from "./utils";
 
 const ELEVENLABS_CALL_URL = "https://api.elevenlabs.io/v1/convai/twilio/outbound-call";
 const SEVERITY_RANK: Record<string, number> = { critical: 4, high: 3, medium: 2, low: 1 };
@@ -22,10 +23,6 @@ export function isVoiceConfigured(c: VoiceConfig = voiceConfig()): boolean {
   return !!(c.apiKey && c.agentId && c.phoneNumberId && c.toNumber);
 }
 
-function cad(n: number): string {
-  return new Intl.NumberFormat("en-CA", { style: "currency", currency: "CAD", maximumFractionDigits: 0 }).format(n || 0);
-}
-
 /** Pre-loaded context bundle so the read-only agent can answer follow-ups. */
 export function buildDynamicVars(db: Database.Database, n: Notification): Record<string, string> {
   const card = (db.prepare(
@@ -39,13 +36,13 @@ export function buildDynamicVars(db: Database.Database, n: Notification): Record
        WHERE transaction_code = ? AND direction='Debit'
        GROUP BY category ORDER BY spend DESC LIMIT 5`
     ).all(card) as { category: string; spend: number }[];
-    if (rows.length) cardSummary = `Card ${card} recent spend — ` + rows.map((r) => `${r.category}: ${cad(r.spend)}`).join(", ") + ".";
+    if (rows.length) cardSummary = `Card ${card} recent spend — ` + rows.map((r) => `${r.category}: ${formatCad(r.spend)}`).join(", ") + ".";
   }
 
   return {
     severity: n.severity,
     merchant: n.merchant_name ?? "an unknown merchant",
-    amount: cad(n.amount_involved ?? 0),
+    amount: formatCad(n.amount_involved ?? 0),
     card: card ?? "unknown",
     rule_name: n.rule_name ?? "a policy rule",
     alert_summary: n.title,
@@ -80,7 +77,7 @@ export async function placeAlertCall(db: Database.Database, n: Notification, dep
   }
 }
 
-export type DispatchSummary = { called: number; skipped: number; failed: number };
+export type DispatchSummary = { called: number; skipped: number; failed: number; disabled: number };
 
 /** Place calls for new high/critical alerts: sequential, capped, dedup-safe. */
 export async function dispatchAlertCalls(
@@ -89,17 +86,24 @@ export async function dispatchAlertCalls(
   deps: { enabled: boolean; config?: VoiceConfig; fetchImpl?: typeof fetch }
 ): Promise<DispatchSummary> {
   const config = deps.config ?? voiceConfig();
-  const summary: DispatchSummary = { called: 0, skipped: 0, failed: 0 };
+  const summary: DispatchSummary = { called: 0, skipped: 0, failed: 0, disabled: 0 };
   const targets = created
     .filter((n) => HIGH_RISK.has(n.severity))
     .sort((a, b) => (SEVERITY_RANK[b.severity] - SEVERITY_RANK[a.severity]) || ((b.amount_involved ?? 0) - (a.amount_involved ?? 0)));
 
+  // Feature off or missing credentials: mark every high/critical alert with the
+  // matching status (distinct, so operators can tell "intentionally off" from
+  // "misconfigured") and report the suppressed count. No calls placed.
+  if (!deps.enabled || !isVoiceConfigured(config)) {
+    const status = !deps.enabled ? "disabled" : "unconfigured";
+    for (const n of targets) updateCallStatus(db, n.id, { call_status: status });
+    summary.disabled = targets.length;
+    return summary;
+  }
+
   for (let i = 0; i < targets.length; i++) {
     const n = targets[i];
-    if (!deps.enabled) { updateCallStatus(db, n.id, { call_status: "disabled" }); continue; }
-    if (!isVoiceConfigured(config)) { updateCallStatus(db, n.id, { call_status: "disabled" }); continue; }
     if (i >= CALL_CAP_PER_SCAN) { updateCallStatus(db, n.id, { call_status: "skipped" }); summary.skipped++; continue; }
-
     const res = await placeAlertCall(db, n, { config, fetchImpl: deps.fetchImpl });
     if (res.ok) {
       updateCallStatus(db, n.id, { call_status: "called", call_id: res.callId, called_at: new Date().toISOString() });

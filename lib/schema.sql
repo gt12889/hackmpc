@@ -191,7 +191,7 @@ CREATE TABLE IF NOT EXISTS notifications (
   rule_name TEXT,
   link TEXT,
   read INTEGER NOT NULL DEFAULT 0,
-  call_status TEXT,                      -- null|called|skipped|failed|disabled
+  call_status TEXT,                      -- null|called|skipped|failed|disabled|unconfigured
   call_id TEXT,
   call_error TEXT,
   called_at TEXT,
