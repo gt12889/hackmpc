@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { cn, formatCAD } from "@/lib/utils";
 import { SectionCard } from "@/components/kpi-card";
+import { ShowMore } from "@/components/show-more";
 
 const fetcher = (u: string) => fetch(u).then((r) => r.json());
 
@@ -81,9 +82,13 @@ export function ApprovalQueue({ initial }: { initial: any }) {
       </div>
 
       <div className="space-y-4">
-        {pending.map((r: any) => (
-          <ApprovalCard key={r.id} req={r} busy={busy === r.id} onDecide={decide} />
-        ))}
+        <ShowMore
+          items={pending}
+          initial={3}
+          noun="requests"
+          className="space-y-4"
+          render={(r: any) => <ApprovalCard key={r.id} req={r} busy={busy === r.id} onDecide={decide} />}
+        />
         {pending.length === 0 && (
           <div className="rounded-xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">
             Queue is clear — every request has been decided.

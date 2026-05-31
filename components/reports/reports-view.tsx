@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { cn, formatCAD } from "@/lib/utils";
 import { CHART_COLORS } from "@/components/charts";
+import { ShowMore } from "@/components/show-more";
 
 const fetcher = (u: string) => fetch(u).then((r) => r.json());
 
@@ -66,11 +67,15 @@ export function ReportsView({ initial }: { initial: any }) {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        {reports.map((r: any) => (
+      <ShowMore
+        items={reports}
+        initial={6}
+        noun="reports"
+        className="grid grid-cols-1 gap-4 lg:grid-cols-2"
+        render={(r: any) => (
           <ReportCard key={r.id} report={r} open={openId === r.id} onToggle={() => setOpenId(openId === r.id ? null : r.id)} onApprove={() => approve(r.id)} />
-        ))}
-      </div>
+        )}
+      />
     </div>
   );
 }

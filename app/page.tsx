@@ -2,6 +2,7 @@ import { DollarSign, Receipt, Globe, CreditCard } from "lucide-react";
 import { KpiCard, SectionCard } from "@/components/kpi-card";
 import { PageHeader } from "@/components/page-header";
 import { SpendBar, TrendLine, CategoryPie } from "@/components/charts";
+import { ExpandSection } from "@/components/show-more";
 import { formatCAD } from "@/lib/utils";
 import {
   getKpis,
@@ -52,20 +53,22 @@ export default function DashboardPage() {
           </SectionCard>
         </div>
 
-        {/* State + Card */}
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <SectionCard title="Spend by State / Province" description="Top 10 regions by spend">
-            <SpendBar data={byState} horizontal />
-          </SectionCard>
-          <SectionCard title="Spend by Card (Cost Center)" description="Primary company card carries most volume">
-            <SpendBar data={byCard} horizontal />
-          </SectionCard>
-        </div>
-
-        {/* Merchants */}
-        <SectionCard title="Top Merchants" description="Where the money goes">
-          <SpendBar data={merchants.map((m) => ({ key: m.merchant, value: m.spend, count: m.count }))} horizontal />
-        </SectionCard>
+        {/* Secondary breakdowns — collapsed by default to keep the view minimal */}
+        <ExpandSection label="More breakdowns — by state, card & merchant">
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+              <SectionCard title="Spend by State / Province" description="Top 10 regions by spend">
+                <SpendBar data={byState} horizontal />
+              </SectionCard>
+              <SectionCard title="Spend by Card (Cost Center)" description="Primary company card carries most volume">
+                <SpendBar data={byCard} horizontal />
+              </SectionCard>
+            </div>
+            <SectionCard title="Top Merchants" description="Where the money goes">
+              <SpendBar data={merchants.map((m) => ({ key: m.merchant, value: m.spend, count: m.count }))} horizontal />
+            </SectionCard>
+          </div>
+        </ExpandSection>
       </div>
     </div>
   );

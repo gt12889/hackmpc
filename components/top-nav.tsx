@@ -12,6 +12,7 @@ import {
   Sparkles,
   CreditCard,
   ChevronDown,
+  LayoutGrid,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -24,17 +25,11 @@ const PRIMARY: Item[] = [
 
 const GROUPS: { label: string; icon: any; items: Item[] }[] = [
   {
-    label: "Govern",
-    icon: ShieldCheck,
+    label: "Menu",
+    icon: LayoutGrid,
     items: [
       { href: "/compliance", label: "Compliance", icon: ShieldCheck, desc: "Policy rules & violations" },
       { href: "/approvals", label: "Approvals", icon: CheckSquare, desc: "AI pre-approval queue" },
-    ],
-  },
-  {
-    label: "Reports",
-    icon: FileText,
-    items: [
       { href: "/reports", label: "Expense Reports", icon: FileText, desc: "Grouped, CFO-ready" },
       { href: "/insights", label: "Insights", icon: Sparkles, desc: "Anomaly · vendors · forecast" },
     ],

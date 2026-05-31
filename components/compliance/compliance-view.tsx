@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { cn, formatCAD } from "@/lib/utils";
 import { SectionCard } from "@/components/kpi-card";
+import { ShowMore } from "@/components/show-more";
 
 const fetcher = (u: string) => fetch(u).then((r) => r.json());
 
@@ -127,8 +128,7 @@ export function ComplianceView({ initial }: { initial: any }) {
               <ShieldCheck className="h-5 w-5 text-primary" /> No open violations — spend is compliant.
             </div>
           ) : (
-            <div className="space-y-2">
-              {violations.map((v: any) => (
+            <ShowMore items={violations} initial={5} noun="violations" className="space-y-2" render={(v: any) => (
                 <div key={v.id} className="rounded-lg border border-border p-3">
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex min-w-0 items-center gap-2">
@@ -156,8 +156,7 @@ export function ComplianceView({ initial }: { initial: any }) {
                     </p>
                   )}
                 </div>
-              ))}
-            </div>
+            )} />
           )}
         </SectionCard>
       </div>
