@@ -773,6 +773,12 @@ function ProfilesTab({ p }: { p: any }) {
                 </div>
                 <span className="w-12 shrink-0 text-right tabular-nums">{c.vsBaseline}×</span>
                 <span className="w-16 shrink-0 text-right text-xs text-muted-foreground">{c.share}%</span>
+                <span
+                  title="Monthly spend volatility (coefficient of variation)"
+                  className={cn("w-20 shrink-0 text-right text-[11px] tabular-nums", (c.volatility ?? 0) >= 0.6 ? "text-primary" : "text-muted-foreground")}
+                >
+                  vol {(c.volatility ?? 0).toFixed(2)}
+                </span>
                 <span className={cn("flex w-16 shrink-0 items-center justify-end gap-0.5 text-xs", trendTone[c.trend])}><TI className="h-3.5 w-3.5" />{c.momPct}%</span>
               </div>
             );
