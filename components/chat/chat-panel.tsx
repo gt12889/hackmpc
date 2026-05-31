@@ -9,6 +9,7 @@ import { ThinkingPreview } from "./thinking-preview";
 import { Lineage } from "./lineage";
 import type { VizPayload, ToolCallTrace } from "@/lib/agent";
 import { cn } from "@/lib/utils";
+import { notifyApiError } from "@/components/api-error-modal";
 
 type Msg = {
   role: "user" | "model";
@@ -54,6 +55,7 @@ export function ChatPanel({ compact = false }: { compact?: boolean }) {
       setMessages((m) => [...m, { role: "model", text: data.text, viz: data.viz, tools: data.toolCalls, followUps: data.followUps }]);
     } catch (e: any) {
       setMessages((m) => [...m, { role: "model", text: `⚠️ ${e.message}` }]);
+      notifyApiError();
     } finally {
       setLoading(false);
     }

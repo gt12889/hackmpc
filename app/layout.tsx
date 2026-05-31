@@ -4,6 +4,7 @@ import "./globals.css";
 import { TopNav } from "@/components/top-nav";
 import { ChatDock } from "@/components/chat/chat-dock";
 import { Toaster } from "@/components/ui/sonner";
+import { ApiErrorModal } from "@/components/api-error-modal";
 
 // Arimo - a free, metric-compatible Helvetica substitute. Renders true Helvetica
 // metrics on every platform (incl. Windows, which doesn't ship Helvetica).
@@ -31,6 +32,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </div>
         <Toaster richColors position="top-right" />
         <ChatDock />
+        <ApiErrorModal />
       </body>
     </html>
   );

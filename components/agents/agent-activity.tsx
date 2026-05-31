@@ -7,6 +7,7 @@ import { Sparkles, Gavel, ShieldAlert, Search, Lightbulb, RefreshCw, Play } from
 import { cn } from "@/lib/utils";
 import { SectionCard } from "@/components/kpi-card";
 import { AgentSwarmVisualizer, type SwarmFeature } from "@/components/agents/agent-swarm-visualizer";
+import { notifyApiError } from "@/components/api-error-modal";
 
 const fetcher = (u: string) => fetch(u).then((r) => r.json());
 
@@ -57,11 +58,14 @@ export function AgentActivity() {
       ]);
       setDemo((d) => (d ? { ...d, running: false } : d));
       await mutate();
-      if (res && res.ok === false) toast.warning("Run completed with fallback (sidecar offline?)");
+      // Treat a hard failure, an explicit ok:false, or a degraded/fallback run
+      // (what happens when the AI credits/quota are exhausted) as an error.
+      const degraded = !res || res.ok === false || res.mode === "degraded" || res?.adjusted?.mode === "degraded";
+      if (degraded) notifyApiError();
       else toast.success(`${FEATURE_META[feature].label} run complete`);
     } catch {
       setDemo((d) => (d ? { ...d, running: false } : d));
-      toast.error("Run failed");
+      notifyApiError();
     } finally {
       setBusy(false);
     }
