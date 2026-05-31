@@ -13,7 +13,7 @@
     "etl": "tsx scripts/etl.ts",
     "seed:policies": "tsx scripts/seed-policies.ts",
     "db:reset": "rm -f .data/hackmpc.db .data/hackmpc.db-wal .data/hackmpc.db-shm && tsx scripts/etl.ts && tsx scripts/seed-receipts.ts && tsx scripts/seed-budgets.ts && tsx scripts/seed-policies.ts && tsx scripts/seed-approvals.ts && tsx scripts/seed-reports.ts",
-    "db:reset:deploy": "rm -f data/hackmpc.db data/hackmpc.db-wal data/hackmpc.db-shm && HACKMPC_DB_DIR=./data HACKMPC_DB_PATH=./data/hackmpc.db npm run etl && HACKMPC_DB_DIR=./data HACKMPC_DB_PATH=./data/hackmpc.db npm run seed:receipts && HACKMPC_DB_DIR=./data HACKMPC_DB_PATH=./data/hackmpc.db npm run seed:budgets && HACKMPC_DB_DIR=./data HACKMPC_DB_PATH=./data/hackmpc.db npm run seed:policies && HACKMPC_DB_DIR=./data HACKMPC_DB_PATH=./data/hackmpc.db npm run seed:approvals && HACKMPC_DB_DIR=./data HACKMPC_DB_PATH=./data/hackmpc.db npm run seed:reports",
+    "db:reset:deploy": "rm -f data/hackmpc.db data/hackmpc.db-wal data/hackmpc.db-shm && HACKMPC_DB_DIR=./data HACKMPC_DB_PATH=./data/hackmpc.db npm run etl && HACKMPC_DB_DIR=./data HACKMPC_DB_PATH=./data/hackmpc.db npm run seed:receipts && HACKMPC_DB_DIR=./data HACKMPC_DB_PATH=./data/hackmpc.db npm run seed:budgets && HACKMPC_DB_DIR=./data HACKMPC_DB_PATH=./data/hackmpc.db npm run seed:policies && HACKMPC_DB_DIR=./data HACKMPC_DB_PATH=./data/hackmpc.db npm run seed:approvals && HACKMPC_DB_DIR=./data HACKMPC_DB_PATH=./data/hackmpc.db npm run seed:reports && HACKMPC_DB_PATH=./data/hackmpc.db node scripts/checkpoint-db.cjs",
     "seed:approvals": "tsx scripts/seed-approvals.ts",
     "seed:reports": "tsx scripts/seed-reports.ts",
     "seed:receipts": "tsx scripts/seed-receipts.ts",
