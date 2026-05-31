@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useState, useEffect, type ReactNode } from "react";
+import { toast } from "sonner";
 import {
   TrendingUp,
   Store,
@@ -211,8 +212,40 @@ function AnomalyTab({ a }: { a: any }) {
 }
 
 /* ---------- Fraud Watch ---------- */
+const VERDICT_STYLE: Record<string, { cls: string; label: string }> = {
+  likely_fraud: { cls: "bg-destructive/15 text-destructive", label: "Likely fraud" },
+  suspicious: { cls: "bg-warning/15 text-warning", label: "Suspicious" },
+  benign: { cls: "bg-primary/15 text-primary", label: "Benign" },
+  unreviewed: { cls: "bg-secondary text-muted-foreground", label: "Unreviewed" },
+};
+
 function FraudTab({ f }: { f: any }) {
   const { summary, suspects } = f;
+  const [cases, setCases] = useState<Record<number, any>>({});
+  const [busy, setBusy] = useState(false);
+
+  // Load any existing case files so verdicts persist across visits.
+  useEffect(() => {
+    fetch("/api/fraud/investigate")
+      .then((r) => r.json())
+      .then((d) => setCases(Object.fromEntries((d.cases ?? []).map((c: any) => [c.transaction_id, c]))))
+      .catch(() => {});
+  }, []);
+
+  async function investigate() {
+    if (busy) return;
+    setBusy(true);
+    try {
+      const d = await fetch("/api/fraud/investigate", { method: "POST" }).then((r) => r.json());
+      setCases(Object.fromEntries((d.cases ?? []).map((c: any) => [c.transaction_id, c])));
+      if (d.mode === "degraded") toast.warning("Agent sidecar offline - showing deterministic signals only");
+      else toast.success(`Investigated ${d.investigated} suspect${d.investigated === 1 ? "" : "s"}`);
+    } catch {
+      toast.error("Investigation failed");
+    } finally {
+      setBusy(false);
+    }
+  }
 
   const metrics = [
     { label: "Flagged", value: String(summary.flagged), tone: "text-destructive" },
@@ -239,44 +272,81 @@ function FraudTab({ f }: { f: any }) {
         </div>
       ) : (
         <div className="space-y-4">
-          <div>
-            <h3 className="text-sm text-neutral-900">Ranked Suspects</h3>
-            <p className="mt-0.5 text-xs text-neutral-600">Scored by independent signals - duplicate charges, outlier amounts, round numbers, pre-auth patterns, and same-day repeats.</p>
+          <div className="flex items-end justify-between gap-3">
+            <div>
+              <h3 className="text-sm text-neutral-900">Ranked Suspects</h3>
+              <p className="mt-0.5 text-xs text-neutral-600">Scored by independent signals - duplicate charges, outlier amounts, round numbers, pre-auth patterns, and same-day repeats.</p>
+            </div>
+            <button
+              onClick={investigate}
+              disabled={busy}
+              className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs hover:bg-secondary disabled:opacity-50"
+            >
+              <Sparkles className={cn("h-3.5 w-3.5 text-primary", busy && "animate-pulse")} />
+              {busy ? "Investigating…" : "Investigate suspects"}
+            </button>
           </div>
           <div className="divide-y divide-border/60 rounded-lg border border-border/60">
-            {suspects.map((s: any, i: number) => (
-              <div key={s.id} className="flex flex-col gap-1.5 px-4 py-3 sm:flex-row sm:items-start sm:gap-3">
-                {/* Score badge */}
-                <span className={`inline-flex h-8 w-10 shrink-0 items-center justify-center rounded text-sm font-semibold tabular-nums ${tierBadgeClass(s.score)}`}>
-                  {s.score}
-                </span>
+            {suspects.map((s: any) => {
+              const c = cases[s.id];
+              const vstyle = c ? VERDICT_STYLE[c.verdict] ?? VERDICT_STYLE.unreviewed : null;
+              return (
+                <div key={s.id} className="px-4 py-3">
+                  <div className="flex flex-col gap-1.5 sm:flex-row sm:items-start sm:gap-3">
+                    {/* Score badge */}
+                    <span className={`inline-flex h-8 w-10 shrink-0 items-center justify-center rounded text-sm font-semibold tabular-nums ${tierBadgeClass(s.score)}`}>
+                      {s.score}
+                    </span>
 
-                {/* Main info */}
-                <div className="min-w-0 flex-1 space-y-1">
-                  <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-                    <span className="max-w-[220px] truncate font-medium text-neutral-900">{s.merchant_name}</span>
-                    <span className="text-xs text-muted-foreground">{s.category}</span>
-                    <span className="text-xs text-muted-foreground">·</span>
-                    <span className="text-xs text-muted-foreground">{s.txn_date}</span>
-                    <span className="text-xs text-muted-foreground">·</span>
-                    <span className="text-xs text-muted-foreground">{s.transaction_code}</span>
+                    {/* Main info */}
+                    <div className="min-w-0 flex-1 space-y-1">
+                      <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                        <span className="max-w-[220px] truncate font-medium text-neutral-900">{s.merchant_name}</span>
+                        <span className="text-xs text-muted-foreground">{s.category}</span>
+                        <span className="text-xs text-muted-foreground">·</span>
+                        <span className="text-xs text-muted-foreground">{s.txn_date}</span>
+                        <span className="text-xs text-muted-foreground">·</span>
+                        <span className="text-xs text-muted-foreground">{s.transaction_code}</span>
+                        {vstyle && (
+                          <span className={cn("rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide", vstyle.cls)}>
+                            {vstyle.label}
+                            {c.confidence != null && ` · ${Math.round(c.confidence * 100)}%`}
+                          </span>
+                        )}
+                      </div>
+                      {/* Reason chips */}
+                      <div className="flex flex-wrap gap-1">
+                        {s.reasons.map((reason: string, j: number) => (
+                          <span key={j} className="rounded bg-secondary px-1.5 py-0.5 text-[10px] text-muted-foreground">
+                            {reason}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Amount */}
+                    <span className="shrink-0 self-start text-sm font-semibold tabular-nums text-neutral-900 sm:self-center">
+                      {formatCAD(s.amount_cad)}
+                    </span>
                   </div>
-                  {/* Reason chips */}
-                  <div className="flex flex-wrap gap-1">
-                    {s.reasons.map((reason: string, j: number) => (
-                      <span key={j} className="rounded bg-secondary px-1.5 py-0.5 text-[10px] text-muted-foreground">
-                        {reason}
-                      </span>
-                    ))}
-                  </div>
+
+                  {/* Investigator case file */}
+                  {c && c.verdict !== "unreviewed" && (c.narrative || c.recommended_action) && (
+                    <div className="mt-2 rounded-lg border border-border/60 bg-secondary/30 p-2.5 sm:ml-[3.25rem]">
+                      <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-primary">
+                        <Sparkles className="h-3 w-3" /> Investigator
+                      </div>
+                      {c.narrative && <p className="mt-1 text-[13px] leading-relaxed text-neutral-700">{c.narrative}</p>}
+                      {c.recommended_action && (
+                        <p className="mt-1 text-[13px] text-neutral-900">
+                          <span className="font-medium">Action:</span> {c.recommended_action}
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
-
-                {/* Amount */}
-                <span className="shrink-0 self-start text-sm font-semibold tabular-nums text-neutral-900 sm:self-center">
-                  {formatCAD(s.amount_cad)}
-                </span>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
