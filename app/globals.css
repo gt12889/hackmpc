@@ -4,30 +4,30 @@
 
 @layer base {
   :root {
-    /* Light beige canvas with sky blue type. */
+    /* Light beige canvas · ribbon / brand blue #0093AF */
     --background: 40 33% 94%; /* light beige #F2EBE0 */
-    --foreground: 199 76% 46%; /* sky blue */
+    --foreground: 190 100% 34%; /* #0093AF */
     --card: 40 30% 97%;
-    --card-foreground: 199 76% 46%;
+    --card-foreground: 190 100% 34%;
     --popover: 40 30% 97%;
-    --popover-foreground: 199 76% 46%;
-    --primary: 199 85% 48%;
-    --primary-foreground: 40 33% 98%;
+    --popover-foreground: 190 100% 34%;
+    --primary: 190 100% 34%; /* #0093AF — nav ribbon & actions */
+    --primary-foreground: 0 0% 100%;
     --secondary: 40 25% 88%;
-    --secondary-foreground: 199 76% 42%;
+    --secondary-foreground: 190 85% 28%;
     --muted: 40 22% 90%;
-    --muted-foreground: 199 55% 58%;
-    --accent: 199 55% 88%;
-    --accent-foreground: 199 76% 40%;
+    --muted-foreground: 190 35% 42%;
+    --accent: 190 40% 88%;
+    --accent-foreground: 190 100% 28%;
     --destructive: 354 98% 41%;
     --destructive-foreground: 0 0% 100%;
     --success: 162 70% 34%;
     --success-foreground: 0 0% 100%;
     --warning: 36 96% 48%;
-    --warning-foreground: 199 76% 38%;
+    --warning-foreground: 190 85% 28%;
     --border: 40 20% 82%;
     --input: 40 20% 82%;
-    --ring: 199 76% 46%;
+    --ring: 190 100% 34%;
     --radius: 0.6rem;
     --chart-1: 205 100% 16%; /* Prussian #003153 */
     --chart-2: 210 100% 56%; /* Dodger #1E90FF */
@@ -47,8 +47,8 @@
     --card-foreground: 185 25% 96%;
     --popover: 195 36% 8%;
     --popover-foreground: 185 25% 96%;
-    --primary: 187 95% 44%; /* Brim cyan #00c1d5 — pops on dark */
-    --primary-foreground: 195 60% 7%;
+    --primary: 190 100% 38%; /* #0093AF — slightly lifted on dark */
+    --primary-foreground: 0 0% 100%;
     --secondary: 194 26% 15%;
     --secondary-foreground: 185 25% 96%;
     --muted: 194 24% 14%;
@@ -63,7 +63,7 @@
     --warning-foreground: 195 60% 7%;
     --border: 194 26% 18%;
     --input: 194 26% 21%;
-    --ring: 187 95% 44%;
+    --ring: 190 100% 38%;
     --chart-1: 210 100% 56%; /* Dodger #1E90FF */
     --chart-2: 219 79% 66%; /* Cornflower #6495ED */
     --chart-3: 197 71% 73%; /* Sky #87CEEB */
@@ -105,8 +105,8 @@
     font-feature-settings: "rlig" 1, "calt" 1, "tnum" 1;
     letter-spacing: -0.01em;
     background-image:
-      radial-gradient(60rem 40rem at 8% -8%, hsl(199 76% 46% / 0.08), transparent 60%),
-      radial-gradient(50rem 40rem at 100% 0%, hsl(197 65% 68% / 0.10), transparent 55%);
+      radial-gradient(60rem 40rem at 8% -8%, hsl(190 100% 34% / 0.08), transparent 60%),
+      radial-gradient(50rem 40rem at 100% 0%, hsl(190 60% 62% / 0.10), transparent 55%);
     background-attachment: fixed;
   }
   /* Tabular numbers everywhere money is shown keeps columns aligned. */

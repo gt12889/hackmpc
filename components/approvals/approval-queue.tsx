@@ -172,7 +172,7 @@ function ApprovalCard({ req, busy, onDecide }: { req: any; busy: boolean; onDeci
           <p className="mt-0.5 text-sm text-muted-foreground">{req.reason}</p>
         </div>
         <div className="text-right">
-          <div className="text-2xl font-semibold tabular-nums">{formatCAD(req.amount_cad)}</div>
+          <div className="text-2xl font-semibold tabular-nums text-primary">{formatCAD(req.amount_cad)}</div>
           <div className="text-[12px] text-muted-foreground">Card {req.transaction_code} · {ctx.month}</div>
         </div>
       </div>
