@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowDown } from "lucide-react";
 import { SplatSky } from "@/components/splat-sky";
-import { SplineSky } from "@/components/spline-sky";
 import { BrimWordmark } from "@/components/brim-wordmark";
 
 // "From noise to clarity" - a scroll-pinned cinematic brand overview (home page).
@@ -160,8 +159,6 @@ export function HeroReveal() {
               Fades out before the final reveal so the brand lands on a clean background. */}
           <div className="absolute inset-0" style={{ opacity: skyFade }}>
             <SplatSky progress={p} className="absolute inset-0 h-full w-full" />
-            {/* 3D Spline scene composited into the sky (drifts up slightly on scroll). */}
-            <SplineSky className="absolute inset-0 h-full w-full" />
           </div>
           {/* Optional parallax art - drop /public/hero/streams.png */}
           <div className="absolute inset-0 bg-cover bg-center opacity-35" style={{ backgroundImage: "url(/hero/streams.png)", transform: `translateY(${p * -50}px)` }} />

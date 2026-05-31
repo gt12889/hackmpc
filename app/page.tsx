@@ -1,8 +1,14 @@
-import { HeroReveal } from "@/components/hero-reveal";
+import Spline from "@splinetool/react-spline/next";
 
 export const dynamic = "force-dynamic";
 
-// Home is the cinematic scroll-reveal brand overview. The dashboard lives at /dashboard.
+// Landing page: the Spline 3D scene, full viewport. Uses the `/next` export, which is an
+// async Server Component — valid here because this page is a Server Component (it must NOT
+// carry "use client"). The old cinematic hero lives in components/hero-reveal.tsx if needed.
 export default function HomePage() {
-  return <HeroReveal />;
+  return (
+    <main className="h-screen w-full overflow-hidden">
+      <Spline scene="https://prod.spline.design/XD76ymrOUpojY1BV/scene.splinecode" />
+    </main>
+  );
 }
