@@ -18,16 +18,26 @@ import {
 } from "recharts";
 import { formatCAD } from "@/lib/utils";
 
+/** Blue spectrum for charts — ordered for contrast across pie slices, bars, and lines. */
 export const CHART_COLORS = [
-  "hsl(var(--chart-1))",
-  "hsl(var(--chart-2))",
-  "hsl(var(--chart-3))",
-  "hsl(var(--chart-4))",
-  "hsl(var(--chart-5))",
-  "hsl(var(--chart-6))",
-  "hsl(var(--chart-7))",
-  "hsl(var(--chart-8))",
-];
+  "#003153", // Prussian Blue
+  "#1E90FF", // Dodger Blue
+  "#0047AB", // Cobalt Blue
+  "#87CEEB", // Sky Blue
+  "#0F52BA", // Sapphire
+  "#40E0D0", // Turquoise
+  "#007BA7", // Cerulean
+  "#6495ED", // Cornflower Blue
+  "#000080", // Navy Blue
+  "#0095B6", // Bondi Blue
+  "#4169E1", // Royal Blue
+  "#008080", // Teal
+  "#191970", // Midnight Blue
+  "#00FFFF", // Cyan / Aqua
+  "#0000FF", // Pure Blue
+  "#87CEFA", // Light Sky Blue
+  "#B0E0E6", // Powder Blue
+] as const;
 
 const AXIS = { fontSize: 12, fill: "hsl(var(--muted-foreground))" };
 

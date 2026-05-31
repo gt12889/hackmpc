@@ -29,14 +29,14 @@
     --input: 40 20% 82%;
     --ring: 199 76% 46%;
     --radius: 0.6rem;
-    --chart-1: 200 90% 72%; /* pale sky */
-    --chart-2: 199 85% 62%; /* light blue */
-    --chart-3: 199 76% 46%; /* sky blue */
-    --chart-4: 205 70% 52%; /* medium blue */
-    --chart-5: 210 75% 42%; /* steel blue */
-    --chart-6: 215 80% 36%; /* deep blue */
-    --chart-7: 220 70% 30%; /* navy */
-    --chart-8: 225 65% 24%; /* dark navy */
+    --chart-1: 205 100% 16%; /* Prussian #003153 */
+    --chart-2: 210 100% 56%; /* Dodger #1E90FF */
+    --chart-3: 215 100% 33%; /* Cobalt #0047AB */
+    --chart-4: 197 71% 73%; /* Sky #87CEEB */
+    --chart-5: 215 85% 39%; /* Sapphire #0F52BA */
+    --chart-6: 174 72% 56%; /* Turquoise #40E0D0 */
+    --chart-7: 193 100% 33%; /* Cerulean #007BA7 */
+    --chart-8: 219 79% 66%; /* Cornflower #6495ED */
   }
 
   .dark {
@@ -64,14 +64,14 @@
     --border: 194 26% 18%;
     --input: 194 26% 21%;
     --ring: 187 95% 44%;
-    --chart-1: 187 95% 48%;  /* cyan #00c1d5 */
-    --chart-2: 189 80% 40%;  /* teal #007d93 */
-    --chart-3: 205 78% 52%;  /* blue */
-    --chart-4: 186 50% 62%;  /* light teal */
-    --chart-5: 36 96% 60%;   /* amber */
-    --chart-6: 244 80% 68%;  /* indigo */
-    --chart-7: 330 72% 62%;  /* pink */
-    --chart-8: 12 82% 62%;   /* coral */
+    --chart-1: 210 100% 56%; /* Dodger #1E90FF */
+    --chart-2: 219 79% 66%; /* Cornflower #6495ED */
+    --chart-3: 197 71% 73%; /* Sky #87CEEB */
+    --chart-4: 225 73% 57%; /* Royal #4169E1 */
+    --chart-5: 180 100% 50%; /* Cyan #00FFFF */
+    --chart-6: 174 72% 56%; /* Turquoise #40E0D0 */
+    --chart-7: 189 100% 36%; /* Bondi #0095B6 */
+    --chart-8: 204 94% 75%; /* Light Sky #87CEFA */
   }
 }
 
