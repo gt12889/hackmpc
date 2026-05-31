@@ -1,6 +1,7 @@
 import { getClient, generateWithFallback, hasApiKey as hasKey, hasOpenAIKey } from "./gemini";
 import { FUNCTION_DECLARATIONS, runTool, type ToolResult } from "./tools";
 import { getCategories, getDateBounds, aggregate } from "./queries";
+import { formatCad } from "./utils";
 
 const MAX_ITERS = 5;
 
@@ -156,6 +157,78 @@ HOW TO ANSWER:
 - Be specific with money: format as CAD. Round sensibly in prose (e.g. "$696K on fuel").`;
 }
 
+// ---- Deterministic fallback -------------------------------------------------
+// When the live model is unavailable (no key, quota exhausted, network error) we still
+// answer with REAL data: map the question to one read-only query, run it directly, and
+// summarize the result. Keeps "Ask AI" working in a demo without any model call.
+function fallbackPlan(message: string): { name: string; args: any } {
+  const m = message.toLowerCase();
+  const any = (...w: string[]) => w.some((s) => m.includes(s));
+  if (any("monthly", "over time", "trend") && m.includes("categor"))
+    return { name: "time_series", args: { interval: "month", group_by_category: true } };
+  if (m.includes("fuel") && any("vendor", "merchant", "concentr", "supplier"))
+    return { name: "top_merchants", args: { by: "spend", filters: { category: "Fuel" }, limit: 10 } };
+  if (any("average", "avg", "biggest") && any("transaction", "charge"))
+    return { name: "aggregate_spend", args: { group_by: "category", metric: "avg", limit: 10 } };
+  if (any("compare", " vs ", "versus") || (any("usa", "u.s", "united states") && m.includes("canada")))
+    return { name: "compare_periods", args: { group_by: "category", filters_a: { country: "USA" }, filters_b: { country: "CAN" }, label_a: "USA", label_b: "Canada" } };
+  if (m.includes("permit") && any("state", "province"))
+    return { name: "aggregate_spend", args: { group_by: "state_province", filters: { category: "Permits & Compliance" }, limit: 12 } };
+  if (any("top", "who are we paying") && any("vendor", "merchant"))
+    return { name: "top_merchants", args: { by: "spend", limit: 12 } };
+  if (any("monthly", "over time", "trend"))
+    return { name: "time_series", args: { interval: "month" } };
+  if (any("state", "province", "where"))
+    return { name: "aggregate_spend", args: { group_by: "state_province", limit: 12 } };
+  // Default: total spending by category - always useful, always has data.
+  return { name: "aggregate_spend", args: { group_by: "category", metric: "sum", limit: 10 } };
+}
+
+function fallbackText(name: string, res: ToolResult): string {
+  const rows = Array.isArray(res.data) ? res.data : res.data != null ? [res.data] : [];
+  if (!rows.length) return "I couldn't find matching data for that.";
+  const isMoney = res.meta?.money !== false;
+  const fmt = (v: any) => (isMoney ? formatCad(Number(v) || 0) : String(Math.round(Number(v) || 0)));
+  if (name === "time_series") {
+    // Single-line rows carry a `spend` key; multiline rows carry one key per category
+    // (listed in meta.series) - sum across whichever applies.
+    const series: string[] = Array.isArray(res.meta?.series) ? res.meta.series : ["spend"];
+    const rowTotal = (r: any) => series.reduce((s, k) => s + (Number(r[k]) || 0), 0);
+    const total = rows.reduce((s, r) => s + rowTotal(r), 0);
+    const peak = [...rows].sort((a, b) => rowTotal(b) - rowTotal(a))[0];
+    return `Spending totals ${fmt(total)} over the period${peak ? `, peaking around ${fmt(rowTotal(peak))} in ${peak.period}` : ""}.`;
+  }
+  if (name === "compare_periods") {
+    const la = res.meta?.label_a ?? "A", lb = res.meta?.label_b ?? "B";
+    const sa = rows.reduce((s, r) => s + (Number(r[la]) || 0), 0);
+    const sb = rows.reduce((s, r) => s + (Number(r[lb]) || 0), 0);
+    return `${la} totals ${fmt(sa)} vs ${lb} at ${fmt(sb)} - ${sa >= sb ? la : lb} leads, with the gap driven by the top categories.`;
+  }
+  const top: any = rows[0];
+  const total = typeof res.meta?.total === "number" ? res.meta.total : rows.reduce((s, r) => s + (Number(r.value) || 0), 0);
+  if (res.meta?.metric === "avg") return `${top.key} has the largest average transaction at ${fmt(top.value)}.`;
+  if (res.meta?.metric === "count") return `${top.key} leads by volume with ${Math.round(Number(top.value))} transactions.`;
+  return `${top.key} leads with ${fmt(top.value)}${total ? ` of ${fmt(total)} total` : ""}.`;
+}
+
+/** Answer from real data without any model call (used when the AI is unavailable). */
+export function chatFallback(userMessage: string): AgentResult {
+  const plan = fallbackPlan(userMessage);
+  const res = runTool(plan.name, plan.args);
+  const rowCount = Array.isArray(res.data) ? res.data.length : res.data == null ? 0 : 1;
+  const sample = Array.isArray(res.data) ? res.data.slice(0, 5) : res.data != null ? [res.data] : [];
+  const toolCalls: ToolCallTrace[] = [
+    { name: plan.name, args: plan.args, ok: res.ok, rowCount, total: typeof res.meta?.total === "number" ? res.meta.total : undefined, error: res.error, sample, meta: res.meta },
+  ];
+  const viz: VizPayload | null = res.ok ? { tool: plan.name, suggested_viz: res.suggested_viz, data: res.data, meta: res.meta } : null;
+  return {
+    text: res.ok ? fallbackText(plan.name, res) : "I couldn't produce an answer for that right now.",
+    viz,
+    toolCalls,
+    followUps: suggestFollowUps(toolCalls),
+  };
+}
+
 export function hasApiKey(): boolean {
   return hasKey();
 }
@@ -167,12 +240,8 @@ export async function runAgent(
 ): Promise<AgentResult> {
   const ai = getClient();
   if (!ai && !hasOpenAIKey()) {
-    return {
-      text: "⚠️ No AI key configured. Add `GEMINI_API_KEY=...` (or `OPENAI_API_KEY=...`) to `.env.local` and restart the dev server to enable conversational analytics.",
-      viz: null,
-      toolCalls: [],
-      followUps: [],
-    };
+    // No model available - answer from real data deterministically.
+    return chatFallback(userMessage);
   }
 
   // Cross-session memory recalled from Supermemory (if any) — appended to the
@@ -191,6 +260,7 @@ export async function runAgent(
   // the request (INVALID_ARGUMENT), which would drop the answer + chart.
   let pinnedModel: string | undefined;
 
+  try {
   for (let iter = 0; iter < MAX_ITERS; iter++) {
     const { resp, model } = await generateWithFallback(
       ai,
@@ -268,6 +338,10 @@ export async function runAgent(
       followUps = suggestFollowUps(toolCalls);
     }
     return { text: answer, viz: lastViz, toolCalls, followUps };
+  }
+  } catch {
+    // The model failed mid-flight (quota / network) - answer from real data instead.
+    return chatFallback(userMessage);
   }
 
   return {
