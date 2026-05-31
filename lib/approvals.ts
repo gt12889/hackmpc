@@ -63,9 +63,9 @@ export function synthesizeRequests(): number {
     .all() as any[];
 
   const reasons: Record<string, string> = {
-    "Maintenance & Repair": "Fleet maintenance / parts purchase requiring pre-authorization.",
-    Telecom: "Recurring telecom/connectivity service for fleet units.",
-    "Permits & Compliance": "Oversize/overweight permit for an upcoming haul.",
+    "Maintenance & Repair": "Maintenance / equipment purchase requiring pre-authorization.",
+    Telecom: "Recurring telecom / connectivity service.",
+    "Permits & Compliance": "Operating permit / compliance fee for upcoming work.",
     Fuel: "Bulk fuel purchase above the approval threshold.",
     "Office & Admin": "Operational supplies / services above threshold.",
   };
@@ -121,7 +121,7 @@ export async function generateRecommendations(): Promise<number> {
   const ai = new GoogleGenAI({ apiKey });
   const prompt = `${POLICY_SUMMARY}
 
-You are the finance approver for a cross-border trucking fleet. For each pre-approval request below, decide a recommendation: "approve", "deny", or "review" (needs more info). Weigh: policy compliance, whether the amount fits the card's history and the category budget, and whether the merchant is an established/legitimate vendor. Established vendors with consistent history and budget headroom → approve. Over-budget or unusual merchant/amount → review or deny.
+You are the finance approver for a small/medium business. For each pre-approval request below, decide a recommendation: "approve", "deny", or "review" (needs more info). Weigh: policy compliance, whether the amount fits the card's history and the category budget, and whether the merchant is an established/legitimate vendor. Established vendors with consistent history and budget headroom → approve. Over-budget or unusual merchant/amount → review or deny.
 
 Return ONLY a JSON array: [{"id": <number>, "recommendation": "approve|deny|review", "confidence": <0..1>, "reasoning": "<2 sentences citing the history/budget numbers>"}].
 

@@ -8,8 +8,8 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" });
 
 export const metadata: Metadata = {
-  title: "FleetLedger — Expense Intelligence",
-  description: "AI-powered expense intelligence for an SMB fleet. Brim × MPC Hacks.",
+  title: "Brim It — AI Expense Intelligence",
+  description: "AI-powered expense intelligence for SMB card spending. Brim × MPC Hacks.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

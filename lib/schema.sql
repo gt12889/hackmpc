@@ -1,4 +1,4 @@
--- FleetLedger schema. SQLite (better-sqlite3), WAL, foreign_keys ON.
+-- Brim It schema. SQLite (better-sqlite3), WAL, foreign_keys ON.
 -- Read-mostly: transactions, mcc_category_map, cards.
 -- Writable: policy_rules, violations, requests, expense_reports, report_line_items, chat_*.
 
@@ -109,7 +109,7 @@ CREATE TABLE IF NOT EXISTS requests (
 );
 CREATE INDEX IF NOT EXISTS idx_req_status ON requests(status);
 
--- ============ EXPENSE REPORTS (TRIP / HAUL grouping) ============
+-- ============ EXPENSE REPORTS (location + month grouping) ============
 CREATE TABLE IF NOT EXISTS expense_reports (
   id                INTEGER PRIMARY KEY,
   title             TEXT,

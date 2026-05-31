@@ -2,13 +2,13 @@ import { getDb } from "./db";
 
 // Vendor consolidation analysis: where spend is fragmented across many vendors
 // in the same category, estimate the savings from consolidating to a primary
-// network (volume discount). Fuel is the prime candidate for a trucking fleet.
+// network (volume discount). Fuel is often the prime consolidation candidate.
 
 const NON_OP = `category NOT IN ('Payments & Settlements') AND direction='Debit'`;
 
 // Assumed negotiated discount from consolidating each category's volume.
 const DISCOUNT: Record<string, number> = {
-  Fuel: 0.06, // fleet fuel-card network discount (cents/gallon ~ 5-8%)
+  Fuel: 0.06, // fuel-card network discount (~5-8%)
   "Maintenance & Repair": 0.05,
   Telecom: 0.1,
   "Office & Admin": 0.08,

@@ -29,15 +29,15 @@ export default function DashboardPage() {
   return (
     <div>
       <PageHeader
-        title="Fleet Spend Overview"
-        description={`${kpis.dateStart} → ${kpis.dateEnd} · ${kpis.txnCount.toLocaleString()} operational transactions`}
+        title="Spend Overview"
+        description={`${kpis.dateStart} → ${kpis.dateEnd} · ${kpis.txnCount.toLocaleString()} card transactions`}
       />
 
       <div className="space-y-6 p-8">
         {/* KPIs */}
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
           <KpiCard label="Operational Spend" value={formatCAD(kpis.operationalSpend, { compact: true })} sub={`Avg ${formatCAD(kpis.avgTxn)} / txn`} icon={DollarSign} />
-          <KpiCard label="Transactions" value={kpis.txnCount.toLocaleString()} sub={`${kpis.cardCount} fleet cards`} icon={Receipt} />
+          <KpiCard label="Transactions" value={kpis.txnCount.toLocaleString()} sub={`${kpis.cardCount} company cards`} icon={Receipt} />
           <KpiCard label="Cross-Border" value={`${kpis.crossBorderPct}%`} sub="of spend is US/foreign" icon={Globe} accent="warning" />
           <KpiCard label="Card Payments" value={formatCAD(kpis.settlementsSpend, { compact: true })} sub={`${kpis.settlementsCount} settlements (excl. from spend)`} icon={CreditCard} accent="muted" />
         </div>
@@ -54,16 +54,16 @@ export default function DashboardPage() {
 
         {/* State + Card */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <SectionCard title="Spend by State / Province" description="Top 10 jurisdictions — trucking corridors">
+          <SectionCard title="Spend by State / Province" description="Top 10 regions by spend">
             <SpendBar data={byState} horizontal />
           </SectionCard>
-          <SectionCard title="Spend by Card (Cost Center)" description="Primary fleet card carries most volume">
+          <SectionCard title="Spend by Card (Cost Center)" description="Primary company card carries most volume">
             <SpendBar data={byCard} horizontal />
           </SectionCard>
         </div>
 
         {/* Merchants */}
-        <SectionCard title="Top Merchants" description="Where the money goes — permits, fuel, scales">
+        <SectionCard title="Top Merchants" description="Where the money goes">
           <SpendBar data={merchants.map((m) => ({ key: m.merchant, value: m.spend, count: m.count }))} horizontal />
         </SectionCard>
       </div>

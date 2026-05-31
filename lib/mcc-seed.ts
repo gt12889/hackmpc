@@ -1,4 +1,4 @@
-// MCC -> human spend category, tuned for a cross-border trucking fleet.
+// MCC -> human spend category for SMB company-card transactions.
 // The dataset's coded "Transaction Category" column is useless (99% one value),
 // so MCC is the real category signal. Covers the ~30 MCCs that are >98% of rows
 // plus common standard codes; unknown MCCs fall back to range-based bucketing.

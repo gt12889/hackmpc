@@ -9,7 +9,7 @@ import {
   CheckSquare,
   FileText,
   Sparkles,
-  Truck,
+  CreditCard,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -28,13 +28,11 @@ export function SidebarNav() {
     <aside className="sticky top-0 flex h-screen w-60 shrink-0 flex-col border-r border-border bg-card/40">
       <div className="flex items-center gap-2.5 px-5 py-5">
         <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-[hsl(189_100%_29%)] to-[hsl(187_95%_45%)] shadow-lg shadow-primary/25">
-          <Truck className="h-5 w-5 text-white" />
+          <CreditCard className="h-5 w-5 text-white" />
         </div>
         <div className="leading-tight">
-          <div className="text-sm font-semibold tracking-tight">FleetLedger</div>
-          <div className="text-[11px] text-muted-foreground">
-            Expense Intelligence · <span className="text-primary">Brim</span>
-          </div>
+          <div className="text-sm font-semibold tracking-tight">Brim It</div>
+          <div className="text-[11px] text-muted-foreground">AI Expense Intelligence</div>
         </div>
       </div>
 
@@ -62,7 +60,7 @@ export function SidebarNav() {
       <div className="border-t border-border px-5 py-4">
         <div className="text-[11px] text-muted-foreground">
           Brim × MPC Hacks
-          <div className="mt-0.5 text-muted-foreground/70">Cross-border trucking fleet</div>
+          <div className="mt-0.5 text-muted-foreground/70">SMB card spend intelligence</div>
         </div>
       </div>
     </aside>

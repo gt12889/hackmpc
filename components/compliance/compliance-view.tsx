@@ -124,7 +124,7 @@ export function ComplianceView({ initial }: { initial: any }) {
         <SectionCard title="Flagged Violations" description="Ranked by severity · AI-adjusted for context" className="lg:col-span-2">
           {violations.length === 0 ? (
             <div className="flex items-center gap-2 py-8 text-sm text-muted-foreground">
-              <ShieldCheck className="h-5 w-5 text-primary" /> No open violations — fleet is compliant.
+              <ShieldCheck className="h-5 w-5 text-primary" /> No open violations — spend is compliant.
             </div>
           ) : (
             <div className="space-y-2">

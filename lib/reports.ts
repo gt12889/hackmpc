@@ -1,12 +1,11 @@
 import { getDb } from "./db";
 import { GoogleGenAI } from "@google/genai";
 
-// Automated Expense Report Generation. The provided card data is a SHARED fleet
-// card (10-50 states transact on it per day → no single-truck trips exist), so
-// reports are grouped by JURISDICTION + MONTH — exactly how a trucking fleet
-// reconciles fuel-tax (IFTA), permits (IRP) and operating spend per state. Each
-// report bundles line items by category, counts policy flags, and gets an AI
-// summary, ready for CFO approval.
+// Automated Expense Report Generation. The card data is shared company spend
+// across many locations, so reports are grouped by LOCATION (state/province) +
+// MONTH — a natural way for a business to review where and when money was spent.
+// Each report bundles line items by category, counts policy flags, and gets an
+// AI summary, ready for CFO approval.
 
 const NON_OP = `category NOT IN ('Payments & Settlements') AND direction='Debit'`;
 
@@ -20,7 +19,7 @@ function monthBounds(m: string): { start: string; end: string } {
   return { start: `${m}-01`, end };
 }
 
-/** (Re)generate the top jurisdiction-period expense reports. */
+/** (Re)generate the top location-period expense reports. */
 export function generateReports(limit = 12): number {
   const db = getDb();
   db.prepare(`DELETE FROM report_line_items`).run();
@@ -87,7 +86,7 @@ export async function summarizeReports(): Promise<number> {
 
   const payload = reports.map((r) => ({
     id: r.id,
-    jurisdiction: r.corridor,
+    location: r.corridor,
     period: r.title,
     total_cad: r.total_cad,
     transactions: r.txn_count,
@@ -96,7 +95,7 @@ export async function summarizeReports(): Promise<number> {
   }));
 
   const ai = new GoogleGenAI({ apiKey });
-  const prompt = `You write concise CFO-facing expense-report summaries for a cross-border trucking fleet. Each report bundles one US state / Canadian province for one month. For each, write a 1-2 sentence summary naming the dominant spend categories and their drivers (permits, fuel, scales, maintenance), and noting any policy flags. Be specific with the dominant CAD figures.
+  const prompt = `You write concise CFO-facing expense-report summaries for a small/medium business. Each report bundles one US state / Canadian province for one month. For each, write a 1-2 sentence summary naming the dominant spend categories and their drivers, and noting any policy flags. Be specific with the dominant CAD figures.
 
 Return ONLY a JSON array: [{"id": <number>, "summary": "<text>"}].
 

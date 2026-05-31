@@ -13,7 +13,7 @@ export const POLICY_SUMMARY = `Brim Expense Policy (key controls):
 - Tolls are reimbursed; mileage at Canada Revenue Agency rates.
 - No alcohol unless dining with a customer; guest names + purpose required.
 - Tips up to 15% (services/porterage); meal tips not reimbursed above 20%.
-This is a cross-border trucking fleet: government permits (oversize/overweight), fuel, tolls, and truck scales are normal, expected, high-volume spend. Multiple permit charges to the same DOT on the same day are often legitimate per-load/per-axle permits, not evasion.`;
+Context: this is a small/medium business operating across Canada and the US. Recurring operational spend (e.g. permits, fuel, tolls, services) is normal and expected. Multiple charges to the same operational vendor on the same day are often legitimate (per-item fees), not evasion — judge by amount shape and merchant type.`;
 
 const SEVERITY_RANK: Record<string, number> = { critical: 4, high: 3, medium: 2, low: 1 };
 
@@ -231,7 +231,7 @@ export function getRepeatOffenders(): { by_merchant: any[]; by_card: any[] } {
 
 /**
  * AI contextual review: for the top violations, ask Gemini to confirm/adjust
- * severity using the real policy + trucking context. Bounded to one API call.
+ * severity using the real policy + business context. Bounded to one API call.
  */
 export async function adjustSeverityWithAI(limit = 18): Promise<number> {
   const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
@@ -256,10 +256,10 @@ export async function adjustSeverityWithAI(limit = 18): Promise<number> {
   const ai = new GoogleGenAI({ apiKey });
   const prompt = `${POLICY_SUMMARY}
 
-You are a fleet finance compliance reviewer. Below are flagged transactions. For each, decide the TRUE severity (critical|high|medium|low) using CONTEXT, and give a one-sentence reason. Key judgments:
-- Multiple permit charges to the same government DOT on the same day are usually LEGITIMATE per-load permits → lower severity unless amounts look engineered to sit just under a threshold.
-- Split charges at fuel stops (e.g. multiple pumps/fills same day) are usually legitimate → low/medium.
-- A large single charge from a known vendor (e.g. tires from Michelin) is legitimate but should be HIGH for pre-authorization visibility, not critical.
+You are a finance compliance reviewer for a small/medium business. Below are flagged transactions. For each, decide the TRUE severity (critical|high|medium|low) using CONTEXT, and give a one-sentence reason. Key judgments:
+- Multiple charges to the same operational/government vendor on the same day are usually LEGITIMATE per-item fees → lower severity unless amounts look engineered to sit just under a threshold.
+- Split charges at fuel/retail vendors (e.g. multiple fills/items same day) are usually legitimate → low/medium.
+- A large single charge from a known, established vendor is legitimate but should be HIGH for pre-authorization visibility, not critical.
 - Genuine threshold-ducking (amounts suspiciously just under the limit, non-routine merchant) → critical/high.
 
 Return ONLY a JSON array: [{"key": "...", "severity": "...", "reason": "..."}].
