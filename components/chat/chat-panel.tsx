@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
-import { Send, Sparkles, User } from "lucide-react";
+import { Send, Sparkles, User, Upload, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { ChartRenderer } from "./chart-renderer";
@@ -31,7 +31,9 @@ export function ChatPanel({ compact = false }: { compact?: boolean }) {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -58,6 +60,29 @@ export function ChatPanel({ compact = false }: { compact?: boolean }) {
       notifyApiError();
     } finally {
       setLoading(false);
+    }
+  }
+
+  // Upload a CSV/XLSX straight into the dataset (append + dedup via /api/import),
+  // then report the result inline so you can immediately query the new data.
+  async function uploadFile(file: File) {
+    if (uploading || loading) return;
+    setUploading(true);
+    setMessages((m) => [...m, { role: "user", text: `Uploading ${file.name}…` }]);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("/api/import", { method: "POST", body: fd });
+      const d = await res.json();
+      if (!res.ok) throw new Error(d?.error || "Import failed");
+      const n = (v: number) => (v ?? 0).toLocaleString();
+      const txt = `Imported **${d.fileName || file.name}** — added **${n(d.added)}** new transaction${d.added === 1 ? "" : "s"}${d.skipped ? `, skipped ${n(d.skipped)} duplicate${d.skipped === 1 ? "" : "s"}` : ""}. The dataset now has **${n(d.count)}** transactions. Ask away — I'm querying the updated data.`;
+      setMessages((m) => [...m, { role: "model", text: txt }]);
+    } catch (e: any) {
+      setMessages((m) => [...m, { role: "model", text: `⚠️ Upload failed: ${e.message}` }]);
+      notifyApiError();
+    } finally {
+      setUploading(false);
     }
   }
 
@@ -102,6 +127,27 @@ export function ChatPanel({ compact = false }: { compact?: boolean }) {
           }}
           className={cn("mx-auto flex items-center gap-2", compact ? "max-w-none" : "max-w-3xl")}
         >
+          <input
+            ref={fileRef}
+            type="file"
+            accept=".csv,.xlsx,.xls"
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) uploadFile(f);
+              e.target.value = "";
+            }}
+          />
+          <button
+            type="button"
+            onClick={() => fileRef.current?.click()}
+            disabled={uploading || loading}
+            title="Upload a CSV/XLSX to add transactions to the dataset"
+            aria-label="Upload data file"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-border text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground disabled:opacity-40"
+          >
+            {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+          </button>
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
