@@ -66,6 +66,17 @@ npm run dev                        # http://localhost:3000
 
 Deeper dives in [`docs/`](docs/).
 
+## Phone-call alerts (optional)
+
+High/critical compliance alerts can call your phone via an ElevenLabs Conversational AI agent over Twilio.
+
+1. Create a Conversational AI agent in ElevenLabs; copy its **Agent ID**.
+2. Import your Twilio number into ElevenLabs; copy the **phone number ID**.
+3. Set `ELEVENLABS_API_KEY`, `ELEVENLABS_AGENT_ID`, `ELEVENLABS_AGENT_PHONE_NUMBER_ID`, `ALERT_PHONE_NUMBER` in `.env.local`.
+4. On the **Compliance** page, flip **Phone alerts** on and hit **Test call**.
+
+Alerts always appear in the in-app notification bell regardless of phone config. Calls are deduped (one per distinct alert) and capped at 3 per scan; the rest stay in the feed. Twilio trial accounts can only call verified numbers.
+
 ## Deploy
 
 `better-sqlite3` needs a persistent filesystem. Deploy to a host with a volume (Render / Railway / Fly) and run `npm run db:reset` on first boot — see `Dockerfile` and `render.yaml`. For a serverless target (Vercel), swap the client in `lib/db.ts` to Turso/libSQL (SQLite-compatible). Full instructions in [Setup & Deploy](docs/SETUP-AND-DEPLOY.md).
