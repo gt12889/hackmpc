@@ -220,7 +220,7 @@ All of these are deterministic-first; AI is an optional enrichment layer on top.
 | Anomaly | `anomaly.ts` | Duplicates, round numbers, outliers, settlement-context flag | - |
 | Fraud | `fraud.ts` | Per-transaction explainable fraud score with reason chips (unit-tested) | - |
 | Vendors | `vendors.ts` | Per-category vendor fragmentation, consolidation savings | - |
-| Forecast | `forecast.ts` | Linear burn-rate projection, budget-overrun alerts | - |
+| Forecast | `forecast.ts`, `forecast-mc.ts`, `stats.ts` | Linear burn-rate baseline + **Monte Carlo** distribution (p10/p50/p90 + overrun probability), what-if multipliers, risk factors | numpy sidecar `/forecast/montecarlo`, TS fallback |
 | Recurring | `recurring.ts` | Cadence detection across months | - |
 | FX | `fx.ts` | USD/CAD split, estimated cross-border FX cost | - |
 | Profiles | `profiles.ts` | Per-category/card benchmarking vs baseline | - |
@@ -296,7 +296,8 @@ POST `/api/policies/scan` -> `runScan()` (deterministic rules + split detection)
 | `compliance.ts` | Rule scanner, split-charge detection, repeat offenders, AI severity triage |
 | `approvals.ts` | Request synthesis, per-card context, AI approve/deny recs |
 | `reports.ts` | Jurisdiction-period grouping, line items, AI CFO summaries |
-| `anomaly.ts` / `fraud.ts` / `vendors.ts` / `forecast.ts` / `recurring.ts` / `fx.ts` / `profiles.ts` | Insights engines (deterministic) |
+| `anomaly.ts` / `fraud.ts` / `vendors.ts` / `forecast.ts` / `recurring.ts` / `fx.ts` / `profiles.ts` | Insights engines (deterministic). `profiles.ts` also computes per-category/card volatility (cv) |
+| `forecast-mc.ts` / `stats.ts` | In-process Monte Carlo fallback + risk factors; shared stats (quantile, percentiles, cv) |
 | `insights-agent.ts` | AI insights feed (batched) |
 | `receipts.ts` / `budgets.ts` | Receipt OCR matching; budget burn-down |
 | `notifications.ts` / `voice-alert.ts` / `settings.ts` | Alert ledger, ElevenLabs/Twilio calls, feature toggles |
@@ -311,9 +312,9 @@ POST `/api/policies/scan` -> `runScan()` (deterministic rules + split detection)
 
 **Pages**: `/` (cinematic hero) + four nav surfaces with sub-tabs - **`/overview`** (Spending · Budgets), **`/insights`**, **`/governance`** (Violations · Receipts · Audit), **`/workflow`** (Approvals · Reports · Agents) - plus a floating **Ask AI** chat. The earlier per-feature routes (`/dashboard`, `/chat`, `/compliance`, `/approvals`, `/reports`, `/receipts`, `/budgets`, `/audit`) still exist and redirect into the surfaces above.
 
-**API**: `chat`, `import`, `insights` (+`/feed`), `policies` (+`/[id]`, `/scan`), `requests` (+`/[id]`), `reports` (+`/[id]`, `/generate`), `receipts`, `budgets`, `fraud/investigate`, `agents`, `notifications` (+`/[id]`, `/read-all`, `/test-call`), `settings/alerts`, `anchor`, `auth/{login,logout,session}`.
+**API**: `chat`, `import`, `insights` (+`/feed`), `policies` (+`/[id]`, `/scan`), `requests` (+`/[id]`), `reports` (+`/[id]`, `/generate`), `receipts`, `budgets`, `forecast/montecarlo`, `fraud/investigate`, `agents`, `notifications` (+`/[id]`, `/read-all`, `/test-call`), `settings/alerts`, `anchor`, `auth/{login,logout,session}`.
 
-**Sidecar API** (Python, :8200): `health`, `debate`, `fraud/investigate`, `compliance/review`, `insights/sweep`.
+**Sidecar API** (Python, :8200): `health`, `debate`, `fraud/investigate`, `compliance/review`, `insights/sweep`, `forecast/montecarlo` (non-agentic numpy).
 
 ---
 

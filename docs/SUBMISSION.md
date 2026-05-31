@@ -36,11 +36,14 @@ A finance manager can:
    category breakdown, policy-flag count, and an AI-written summary, ready for one-click sign-off.
 
 On top of the four required features it adds: anomaly & fraud detection, vendor-consolidation
-savings, burn-rate forecasting, receipt matching (AI Vision OCR), per-category budgets,
-recurring-spend detection, cross-border FX exposure, spend profiles, and an AI insights feed -
-all on an animated bento dashboard. Two things set it apart: a **multi-agent reasoning layer**
-(a Python LangGraph swarm) and **on-chain tamper-proof audit anchoring** (Solana). Critical
-compliance alerts can even place an **interactive phone call** (ElevenLabs + Twilio).
+savings, **probabilistic Monte Carlo forecasting** (p10/p50/p90 + budget-overrun probability with
+an interactive what-if slider), per-category/card **volatility** scores, receipt matching (AI
+Vision OCR), per-category budgets, recurring-spend detection, cross-border FX exposure, spend
+profiles, and an AI insights feed - all on an animated bento dashboard. The chat also gives
+**honest disambiguation** when you reference a value that isn't in the data (no fabricated
+confidence). Two things set it apart: a **multi-agent reasoning layer** (a Python LangGraph swarm)
+and **on-chain tamper-proof audit anchoring** (Solana). Critical compliance alerts can even place
+an **interactive phone call** (ElevenLabs + Twilio).
 
 ## How we built it
 
@@ -136,7 +139,7 @@ ingest; `zod` for validation.
 **OpenAI** (`gpt-4o-mini`, via the sidecar).
 
 **Multi-agent sidecar (Python):** FastAPI, Uvicorn, **LangGraph**, `langchain-google-genai`,
-`langchain-openai`, Pydantic; `uv` for env/deps; pytest.
+`langchain-openai`, Pydantic, **numpy** (Monte Carlo forecast simulation); `uv` for env/deps; pytest.
 
 **Blockchain:** **Solana** `@solana/web3.js` + `@solana/spl-memo` (devnet Memo anchoring, Node
 `crypto` for hashing).

@@ -37,7 +37,9 @@ client → TS route → gather context (existing TS query fns) → POST to sidec
 | `POST /compliance/review` | domain Reviewers (Send fan-out) → false-positive Challenger | `/api/policies/scan` | `violations.severity/ai_severity/ai_reasoning` |
 | `POST /insights/sweep` | 4 lens agents (Savings/Risk/Forecast/Coverage) → Ranker | `/api/insights/feed` POST | insights cache (`setCachedFeed`) |
 
-Every endpoint also returns `traces: [{ feature, role, subject_key, ok, model,
+There is also a fifth, **non-agentic** endpoint — `POST /forecast/montecarlo` (`agents/app/montecarlo.py`): a pure numpy Monte Carlo (20k iterations) returning per-category `p10/p25/p50/p75/p90 + overrun_probability + volatility`, wired into `/api/forecast/montecarlo`. It's not a LangGraph/LLM flow, but lives in the sidecar for the heavy simulation; the TS route falls back to an in-process Monte Carlo (`lib/forecast-mc.ts`, same shape) when the sidecar is down, so the probabilistic forecast works everywhere.
+
+Every agent endpoint also returns `traces: [{ feature, role, subject_key, ok, model,
 summary, payload }]` — one per role-agent — which the TS side writes to the
 `agent_runs` table.
 

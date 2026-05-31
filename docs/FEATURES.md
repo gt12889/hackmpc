@@ -7,7 +7,7 @@ The four required capabilities, three optional ones, plus data import. Each list
 ### 1. Talk to Your Data - `/chat`
 Conversational analytics over company-card spend.
 - **Files:** `lib/agent.ts`, `lib/tools.ts`, `lib/queries.ts`, `app/api/chat/route.ts`, `components/chat/*`
-- **How:** Gemini runs a **function-calling loop** over 5 read-only tools (`aggregate_spend`, `time_series`, `top_merchants`, `list_transactions`, `compare_periods`). The server tags each result with a `suggested_viz`; the client auto-renders bar/line/pie/table/stat. Multi-turn follow-ups replay full history, so "now just Texas, monthly" reuses prior filters. The model never invents numbers and reframes "which department?" to real dimensions. The chat shows a **data-lineage** trail of which tools were called.
+- **How:** Gemini runs a **function-calling loop** over 5 read-only tools (`aggregate_spend`, `time_series`, `top_merchants`, `list_transactions`, `compare_periods`). The server tags each result with a `suggested_viz`; the client auto-renders bar/line/pie/table/stat. Multi-turn follow-ups replay full history, so "now just Texas, monthly" reuses prior filters. The model never invents numbers and reframes "which department?" to real dimensions. The chat shows a **data-lineage** trail of which tools were called. When a filter references a value that isn't in the data (e.g. a non-existent category), the tool layer attaches an honest **disambiguation** hint ("no category 'Travel' — did you mean Fuel?") with the closest real values — never a fabricated confidence score (`knownValues`/`suggestValue` in `lib/queries.ts`).
 
 ### 2. Policy Compliance Engine - `/compliance`
 Digitized policy + automatic violation scanning.
@@ -28,10 +28,10 @@ Grouped, policy-checked, CFO-ready.
 
 - **Anomaly & fraud** (`lib/anomaly.ts`): duplicate/recurring charges, round-number patterns, largest outliers, and a settlement-vs-spend context flag.
 - **Vendor consolidation** (`lib/vendors.ts`): per-category vendor fragmentation → estimated savings (e.g. fuel across hundreds of vendors).
-- **Forecasting** (`lib/forecast.ts`): linear burn-rate projection per category with budget-overrun alerts.
+- **Probabilistic forecasting** (`lib/forecast.ts`, `lib/forecast-mc.ts`, `lib/stats.ts`, `agents/app/montecarlo.py`, `app/api/forecast/montecarlo`): a **Monte Carlo** simulation projects each category's next month as a distribution — **p10/p50/p90 + budget-overrun probability** — instead of a single linear estimate. Runs in the numpy sidecar (20k iterations); if it's unreachable an in-process **TypeScript Monte Carlo** (`monteCarloLocal`, ~10k samples) returns the same shape, so the feature works everywhere (incl. Vercel), and the deterministic `categoryForecasts()` remains the final fallback. The Forecast tab adds an interactive **what-if slider** (−50…+50%) that re-runs the simulation live, and each category is enriched with the top "why is this at risk?" factors (`analyzeSpendFactors`, deterministic).
 - **Receipts** (`/receipts`, `lib/receipts.ts`): image upload + AI Vision OCR matched to transactions.
 - **Budgets** (`/budgets`, `lib/budgets.ts`): per-category/card monthly limits with burn-down and projected overrun.
-- **Recurring spend, Cross-border FX, Spend profiles, AI insights feed** (`lib/recurring.ts`, `lib/fx.ts`, `lib/profiles.ts`, `lib/insights-agent.ts`): additional `/insights` tabs.
+- **Recurring spend, Cross-border FX, Spend profiles, AI insights feed** (`lib/recurring.ts`, `lib/fx.ts`, `lib/profiles.ts`, `lib/insights-agent.ts`): additional `/insights` tabs. Profiles now also carry a **volatility score** (coefficient of variation of monthly spend) per category and per card (`monthlyCv`/`cardVolatility`), surfaced as a chip and fed into the pre-approval context ("this card's spend is 2.3× its baseline volatility").
 
 ## On-Chain Audit Anchor - `/audit`
 Tamper-evident notarization of financial decisions on Solana.

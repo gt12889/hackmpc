@@ -42,7 +42,7 @@ The dataset is **4,235 anonymized company-card transactions** (Aug 2025–Mar 20
 
 - **Anomaly & fraud** - duplicate/recurring charges, round-number patterns, outliers (plus the settlement-vs-spend context flag).
 - **Vendor consolidation** - fragmented spend (e.g. fuel across 218 vendors, top one only 22%) → estimated **~$85K** annual savings.
-- **Forecasting** - linear burn-rate projection per category with **budget-overrun alerts**.
+- **Probabilistic forecasting** - a **Monte Carlo** simulation (numpy sidecar, with an in-process TS fallback) projects each category's next month as a distribution: **p10/p50/p90 + budget-overrun probability**, plus an interactive **what-if slider** and per-category/card **volatility** scores.
 - **Receipts, Budgets, Recurring spend, Cross-border FX, Spend profiles, and an AI insights feed** round out the `/insights`, `/receipts`, and `/budgets` surfaces.
 
 ## Multi-agent layer — Brim Agents (`/workflow` → Agents)
