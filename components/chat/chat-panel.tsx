@@ -18,11 +18,11 @@ type Msg = {
 };
 
 const SUGGESTIONS = [
-  "What did we spend on permits by state?",
-  "Show monthly fuel spend as a trend",
-  "Top 10 merchants by spend",
+  "Show monthly spend by category",
+  "Top fuel vendors - how concentrated is our fuel spend?",
+  "Which merchants have the highest average charge?",
   "Compare USA vs Canada spend by category",
-  "Which card spent the most on maintenance?",
+  "What did we spend on permits by state?",
 ];
 
 export function ChatPanel({ compact = false }: { compact?: boolean }) {
