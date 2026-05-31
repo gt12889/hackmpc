@@ -118,7 +118,7 @@ export const FUNCTION_DECLARATIONS = [
   {
     name: "compare_periods",
     description:
-      "Compare two filter sets side by side (e.g. two date ranges, two states, two categories) grouped by a dimension. Use for 'compare X vs Y', 'how does this quarter compare'.",
+      "Compare two filter sets side by side (e.g. two date ranges, two states, two categories) grouped by a dimension. Use for 'compare X vs Y', 'how does this quarter compare'. ALWAYS set label_a and label_b to short human labels for each side (e.g. 'USA' and 'Canada', or 'Q3' and 'Q4') so the chart is readable.",
     parameters: {
       type: Type.OBJECT,
       properties: {
@@ -143,8 +143,26 @@ export type ToolResult = {
 
 function vizForGroups(rows: any[]): ToolResult["suggested_viz"] {
   if (rows.length <= 1) return "stat";
-  if (rows.length <= 6) return "pie";
+  // Pie only reads well for a few, reasonably-balanced slices. If one slice
+  // dominates (e.g. 99% on a single card), a pie is useless - use a bar instead.
+  const total = rows.reduce((s, r) => s + (Number(r.value) || 0), 0);
+  const top = Math.max(...rows.map((r) => Number(r.value) || 0));
+  const dominated = total > 0 && top / total > 0.7;
+  if (rows.length <= 6 && !dominated) return "pie";
   return "bar";
+}
+
+/** Derive a short human label from a filter set (for compare_periods axes/legend). */
+function labelFromFilters(f: any): string | null {
+  if (!f) return null;
+  if (f.country) return String(f.country);
+  if (f.state) return String(f.state);
+  if (f.category) return String(f.category);
+  if (f.card) return `Card ${f.card}`;
+  if (f.merchant) return String(f.merchant);
+  if (f.direction) return String(f.direction);
+  if (f.date_from || f.date_to) return [f.date_from, f.date_to].filter(Boolean).join(" - ");
+  return null;
 }
 
 /** Validate + execute a tool call. Errors are returned (not thrown) so the model can recover. */
@@ -207,8 +225,13 @@ export function runTool(name: string, rawArgs: any): ToolResult {
             label_b: z.string().default("B"),
           })
           .parse(rawArgs);
-        const rows = compareGroups(args.group_by as GroupDim, args.filters_a as Filters, args.filters_b as Filters, args.label_a, args.label_b);
-        return { ok: true, suggested_viz: "bar", data: rows, meta: { compare: true, label_a: args.label_a, label_b: args.label_b, money: true } };
+        // The model often omits labels (defaulting to "A"/"B"); derive meaningful
+        // ones from each side's filters so the chart legend/axes are readable.
+        let la = args.label_a !== "A" ? args.label_a : labelFromFilters(args.filters_a) ?? "A";
+        let lb = args.label_b !== "B" ? args.label_b : labelFromFilters(args.filters_b) ?? "B";
+        if (la === lb) { la = `${la} (A)`; lb = `${lb} (B)`; }
+        const rows = compareGroups(args.group_by as GroupDim, args.filters_a as Filters, args.filters_b as Filters, la, lb);
+        return { ok: true, suggested_viz: "bar", data: rows, meta: { compare: true, label_a: la, label_b: lb, money: true } };
       }
       default:
         return { ok: false, suggested_viz: "stat", data: null, error: `Unknown tool: ${name}` };

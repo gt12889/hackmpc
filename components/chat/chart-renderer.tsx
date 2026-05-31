@@ -1,6 +1,6 @@
 "use client";
 
-import { SpendBar, TrendLine, CategoryPie } from "@/components/charts";
+import { SpendBar, TrendLine, CategoryPie, GroupedBar } from "@/components/charts";
 import { formatCAD } from "@/lib/utils";
 import type { VizPayload } from "@/lib/agent";
 
@@ -30,6 +30,20 @@ export function ChartRenderer({ viz }: { viz: VizPayload }) {
     case "pie":
       return <CategoryPie data={data} money={money} />;
     case "bar":
+      // compare_periods returns two value columns per row ({key, [labelA], [labelB]}),
+      // which SpendBar (single `value` field) can't render — use a grouped bar.
+      if (meta?.compare && meta.label_a && meta.label_b) {
+        return (
+          <GroupedBar
+            data={data}
+            series={[
+              { key: meta.label_a, label: meta.label_a },
+              { key: meta.label_b, label: meta.label_b },
+            ]}
+            money={money}
+          />
+        );
+      }
       return <SpendBar data={data} money={money} horizontal={data.length > 6} />;
     case "line":
       return <TrendLine data={data} series={[{ key: "spend", label: "Spend" }]} money={money} />;

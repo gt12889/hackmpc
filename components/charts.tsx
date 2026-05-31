@@ -131,6 +131,52 @@ export function SpendBar({
   );
 }
 
+// Grouped bar for side-by-side comparisons (two series per category). Used by the
+// chat's compare_periods result, where each row is { key, [labelA]: n, [labelB]: n }.
+export function GroupedBar({
+  data,
+  series,
+  money = true,
+  height,
+}: {
+  data: any[];
+  series: { key: string; label: string }[];
+  money?: boolean;
+  height?: number;
+}) {
+  const horizontal = data.length > 6;
+  const chartHeight = height ?? Math.max(240, horizontal ? data.length * 44 : 280);
+  const colors = ["#1E90FF", "#40E0D0"];
+  return (
+    <ResponsiveContainer width="100%" height={chartHeight}>
+      <BarChart
+        data={data}
+        layout={horizontal ? "vertical" : "horizontal"}
+        margin={{ top: 8, right: 20, bottom: 8, left: horizontal ? 4 : 0 }}
+        barCategoryGap={horizontal ? "22%" : "26%"}
+      >
+        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.35} vertical={!horizontal} horizontal={horizontal} />
+        {horizontal ? (
+          <>
+            <XAxis type="number" tick={AXIS} tickLine={false} axisLine={false} tickFormatter={(v) => (money ? formatCAD(v, { compact: true }) : v)} />
+            <YAxis type="category" dataKey="key" tick={AXIS} tickLine={false} axisLine={false} width={140} />
+          </>
+        ) : (
+          <>
+            <XAxis dataKey="key" tick={AXIS} tickLine={false} axisLine={false} interval={0} angle={data.length > 4 ? -25 : 0} textAnchor={data.length > 4 ? "end" : "middle"} height={data.length > 4 ? 56 : 30} />
+            <YAxis tick={AXIS} tickLine={false} axisLine={false} tickFormatter={(v) => (money ? formatCAD(v, { compact: true }) : v)} width={56} />
+          </>
+        )}
+        <Tooltip content={<MoneyTooltip money={money} />} cursor={{ fill: "hsl(var(--accent))", opacity: 0.2 }} />
+        <Legend wrapperStyle={{ fontSize: 12 }} />
+        {series.map((s, i) => (
+          <Bar key={s.key} dataKey={s.key} name={s.label} fill={colors[i % colors.length]} radius={horizontal ? [0, 4, 4, 0] : [4, 4, 0, 0]} maxBarSize={horizontal ? 16 : 34} />
+        ))}
+      </BarChart>
+    </ResponsiveContainer>
+  );
+}
+
 export function TrendLine({
   data,
   series,
