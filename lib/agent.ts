@@ -1,4 +1,4 @@
-import { getClient, generateWithFallback, hasApiKey as hasKey } from "./gemini";
+import { getClient, generateWithFallback, hasApiKey as hasKey, hasOpenAIKey } from "./gemini";
 import { FUNCTION_DECLARATIONS, runTool, type ToolResult } from "./tools";
 import { getCategories, getDateBounds, aggregate } from "./queries";
 
@@ -166,9 +166,9 @@ export async function runAgent(
   opts: { recall?: string[] } = {}
 ): Promise<AgentResult> {
   const ai = getClient();
-  if (!ai) {
+  if (!ai && !hasOpenAIKey()) {
     return {
-      text: "⚠️ No Gemini API key configured. Add `GEMINI_API_KEY=...` to `.env.local` and restart the dev server to enable conversational analytics.",
+      text: "⚠️ No AI key configured. Add `GEMINI_API_KEY=...` (or `OPENAI_API_KEY=...`) to `.env.local` and restart the dev server to enable conversational analytics.",
       viz: null,
       toolCalls: [],
       followUps: [],

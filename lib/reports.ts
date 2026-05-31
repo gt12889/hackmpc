@@ -1,5 +1,5 @@
 import { getDb } from "./db";
-import { getClient, generateWithFallback } from "./gemini";
+import { getClient, generateWithFallback, hasOpenAIKey } from "./gemini";
 
 // Automated Expense Report Generation. The card data is shared company spend
 // across many locations, so reports are grouped by LOCATION (state/province) +
@@ -79,7 +79,7 @@ export function generateReports(limit = 12): number {
 /** One Gemini call → a CFO-ready summary for each report. */
 export async function summarizeReports(): Promise<number> {
   const ai = getClient();
-  if (!ai) return 0;
+  if (!ai && !hasOpenAIKey()) return 0;
   const db = getDb();
   const reports = db.prepare(`SELECT * FROM expense_reports WHERE ai_summary IS NULL`).all() as any[];
   if (!reports.length) return 0;

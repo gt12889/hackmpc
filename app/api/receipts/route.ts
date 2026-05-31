@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getClient, generateWithFallback } from "@/lib/gemini";
+import { getClient, generateWithFallback, hasOpenAIKey } from "@/lib/gemini";
 import { matchReceipt, insertReceipt, receiptSummary, recentReceipts, unmatchedRequiredCharges } from "@/lib/receipts";
 import { getDb } from "@/lib/db";
 
@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     if (!file) return NextResponse.json({ error: "No file provided" }, { status: 400 });
 
     const ai = getClient();
-    if (!ai) return NextResponse.json({ error: "No Gemini API key configured for OCR" }, { status: 503 });
+    if (!ai && !hasOpenAIKey()) return NextResponse.json({ error: "No AI key configured for OCR" }, { status: 503 });
 
     const buf = Buffer.from(await file.arrayBuffer());
     const base64 = buf.toString("base64");

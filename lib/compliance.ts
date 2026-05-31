@@ -1,5 +1,5 @@
 import { getDb } from "./db";
-import { getClient, generateWithFallback } from "./gemini";
+import { getClient, generateWithFallback, hasOpenAIKey } from "./gemini";
 
 // Policy Compliance Engine. Scans transactions against configurable rules seeded
 // from the REAL Brim expense policy (decoded from the PDF), flags violations,
@@ -253,7 +253,7 @@ export function getRepeatOffenders(): { by_merchant: any[]; by_card: any[] } {
  */
 export async function adjustSeverityWithAI(limit = 18): Promise<number> {
   const ai = getClient();
-  if (!ai) return 0;
+  if (!ai && !hasOpenAIKey()) return 0;
   const db = getDb();
   const candidates = getViolations().slice(0, limit);
   if (!candidates.length) return 0;

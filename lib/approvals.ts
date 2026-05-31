@@ -1,5 +1,5 @@
 import { getDb } from "./db";
-import { getClient, generateWithFallback } from "./gemini";
+import { getClient, generateWithFallback, hasOpenAIKey } from "./gemini";
 import { POLICY_SUMMARY } from "./compliance";
 import { cardVolatility } from "./profiles";
 
@@ -183,7 +183,7 @@ export function buildRequestPayload(db: import("better-sqlite3").Database, r: an
 /** One Gemini call → approve/deny/review recommendation + reasoning for all pending requests. */
 export async function generateRecommendations(): Promise<number> {
   const ai = getClient();
-  if (!ai) return 0;
+  if (!ai && !hasOpenAIKey()) return 0;
   const db = getDb();
   const pending = db.prepare(`SELECT * FROM requests WHERE status='pending'`).all() as any[];
   if (!pending.length) return 0;
