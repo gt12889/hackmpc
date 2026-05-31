@@ -14,7 +14,7 @@ import {
 import { cn, formatCAD } from "@/lib/utils";
 import { Reveal } from "@/components/reveal";
 import { CHART_COLORS } from "@/components/charts";
-import { ShowMore } from "@/components/show-more";
+import { SectionBadge } from "@/components/ui/section-badge";
 
 const fetcher = (u: string) => fetch(u).then((r) => r.json());
 
@@ -22,6 +22,8 @@ export function ReportsView({ initial }: { initial: any }) {
   const { data, mutate } = useSWR("/api/reports", fetcher, { fallbackData: initial });
   const [openId, setOpenId] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(6);
+  const BATCH = 6;
 
   const reports = data?.reports ?? [];
   const summary = data?.summary ?? initial.summary;
@@ -78,15 +80,22 @@ export function ReportsView({ initial }: { initial: any }) {
       </div>
 
       <Reveal>
-        <ShowMore
-          items={reports}
-          initial={6}
-          noun="reports"
-          className="grid grid-cols-1 gap-4 lg:grid-cols-2"
-          render={(r: any) => (
+        <div className="mb-3">
+          <SectionBadge>Expense Reports</SectionBadge>
+        </div>
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          {reports.slice(0, visibleCount).map((r: any) => (
             <ReportCard key={r.id} report={r} open={openId === r.id} onToggle={() => setOpenId(openId === r.id ? null : r.id)} onApprove={() => approve(r.id)} />
-          )}
-        />
+          ))}
+        </div>
+        {visibleCount < reports.length && (
+          <button
+            onClick={() => setVisibleCount((c) => Math.min(c + BATCH, reports.length))}
+            className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg border border-border/60 bg-foreground/[0.02] py-2 text-xs text-muted-foreground transition-colors hover:border-primary/30 hover:text-primary"
+          >
+            Load {Math.min(BATCH, reports.length - visibleCount)} more reports
+          </button>
+        )}
       </Reveal>
     </div>
   );
