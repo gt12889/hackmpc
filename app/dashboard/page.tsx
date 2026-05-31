@@ -5,6 +5,7 @@ import { PageHeader } from "@/components/page-header";
 import { SpendBar, TrendLine, CategoryPie } from "@/components/charts";
 import { ExpandSection } from "@/components/show-more";
 import { ImportDialog } from "@/components/import-dialog";
+import { SectionBadge } from "@/components/ui/section-badge";
 import { formatCAD } from "@/lib/utils";
 import { getKpis, aggregate, timeSeries, topMerchants } from "@/lib/queries";
 
@@ -34,36 +35,43 @@ export default function DashboardPage() {
       <PageHeader
         title="Spend Overview"
         description={`${kpis.dateStart} → ${kpis.dateEnd} · ${kpis.txnCount.toLocaleString()} card transactions`}
+        blur
       />
 
       <div className="space-y-6 p-8">
         {/* KPIs */}
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
           <Reveal delay={0}>
-            <KpiCard label="Operational Spend" countTo={kpis.operationalSpend} format="cad" sub={`Avg ${formatCAD(kpis.avgTxn)} / txn`} icon={DollarSign} />
+            <KpiCard label="Operational Spend" countTo={kpis.operationalSpend} format="cad" sub={`Avg ${formatCAD(kpis.avgTxn)} / txn`} icon={DollarSign} brackets />
           </Reveal>
           <Reveal delay={70}>
-            <KpiCard label="Transactions" countTo={kpis.txnCount} format="int" sub={`${kpis.cardCount} company cards`} icon={Receipt} />
+            <KpiCard label="Transactions" countTo={kpis.txnCount} format="int" sub={`${kpis.cardCount} company cards`} icon={Receipt} brackets />
           </Reveal>
           <Reveal delay={140}>
-            <KpiCard label="Cross-Border" countTo={kpis.crossBorderPct} format="pct" sub="of spend is US/foreign" icon={Globe} accent="warning" />
+            <KpiCard label="Cross-Border" countTo={kpis.crossBorderPct} format="pct" sub="of spend is US/foreign" icon={Globe} accent="warning" brackets />
           </Reveal>
           <Reveal delay={210}>
-            <KpiCard label="Card Payments" countTo={kpis.settlementsSpend} format="cad" sub={`${kpis.settlementsCount} settlements (excl. from spend)`} icon={CreditCard} accent="muted" />
+            <KpiCard label="Card Payments" countTo={kpis.settlementsSpend} format="cad" sub={`${kpis.settlementsCount} settlements (excl. from spend)`} icon={CreditCard} accent="muted" brackets />
           </Reveal>
         </div>
 
         {/* Category + Trend */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
           <Reveal delay={0} className="lg:col-span-2">
-            <SectionCard title="Spend by Category" description="Operational spend, settlements excluded" className="h-full">
-              <CategoryPie data={byCategory} height={320} showTotal />
-            </SectionCard>
+            <div className="flex h-full flex-col gap-2">
+              <SectionBadge>Spend by Category</SectionBadge>
+              <SectionCard title="Spend by Category" description="Operational spend, settlements excluded" className="h-full flex-1">
+                <CategoryPie data={byCategory} height={320} showTotal />
+              </SectionCard>
+            </div>
           </Reveal>
           <Reveal delay={70} className="lg:col-span-3">
-            <SectionCard title="Monthly Spend Trend" description="Total operational spend per month" className="h-full">
-              <TrendLine data={monthData} series={[{ key: "spend", label: "Spend" }]} height={320} />
-            </SectionCard>
+            <div className="flex h-full flex-col gap-2">
+              <SectionBadge>Monthly Spend Trend</SectionBadge>
+              <SectionCard title="Monthly Spend Trend" description="Total operational spend per month" className="h-full flex-1">
+                <TrendLine data={monthData} series={[{ key: "spend", label: "Spend" }]} height={320} />
+              </SectionCard>
+            </div>
           </Reveal>
         </div>
 
@@ -71,20 +79,29 @@ export default function DashboardPage() {
         <ExpandSection label="More breakdowns — by state, card & merchant">
           <div className="space-y-6">
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-              <SectionCard title="Spend by State / Province" description="Top 10 regions by spend">
-                <SpendBar data={byState} horizontal height={Math.max(280, byState.length * 36)} />
-              </SectionCard>
-              <SectionCard title="Spend by Card (Cost Center)" description="Primary company card carries most volume">
-                <SpendBar data={byCard} horizontal height={Math.max(280, byCard.length * 36)} />
+              <div className="flex flex-col gap-2">
+                <SectionBadge>Spend by State / Province</SectionBadge>
+                <SectionCard title="Spend by State / Province" description="Top 10 regions by spend">
+                  <SpendBar data={byState} horizontal height={Math.max(280, byState.length * 36)} />
+                </SectionCard>
+              </div>
+              <div className="flex flex-col gap-2">
+                <SectionBadge>Spend by Card</SectionBadge>
+                <SectionCard title="Spend by Card (Cost Center)" description="Primary company card carries most volume">
+                  <SpendBar data={byCard} horizontal height={Math.max(280, byCard.length * 36)} />
+                </SectionCard>
+              </div>
+            </div>
+            <div className="flex flex-col gap-2">
+              <SectionBadge>Top Merchants</SectionBadge>
+              <SectionCard title="Top Merchants" description="Where the money goes">
+                <SpendBar
+                  data={merchants.map((m) => ({ key: m.merchant, value: m.spend, count: m.count }))}
+                  horizontal
+                  height={Math.max(320, merchants.length * 36)}
+                />
               </SectionCard>
             </div>
-            <SectionCard title="Top Merchants" description="Where the money goes">
-              <SpendBar
-                data={merchants.map((m) => ({ key: m.merchant, value: m.spend, count: m.count }))}
-                horizontal
-                height={Math.max(320, merchants.length * 36)}
-              />
-            </SectionCard>
           </div>
         </ExpandSection>
       </div>
