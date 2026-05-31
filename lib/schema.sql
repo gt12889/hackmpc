@@ -236,3 +236,16 @@ CREATE TABLE IF NOT EXISTS agent_runs (
   created_at  TEXT DEFAULT (datetime('now'))
 );
 CREATE INDEX IF NOT EXISTS idx_agent_runs_feature ON agent_runs(feature, created_at);
+
+-- Fraud investigator case files: the agent swarm's verdict on top of the
+-- deterministic fraudScan score. One row per investigated transaction.
+CREATE TABLE IF NOT EXISTS fraud_cases (
+  id                 INTEGER PRIMARY KEY AUTOINCREMENT,
+  transaction_id     INTEGER UNIQUE,
+  score              INTEGER,
+  verdict            TEXT,          -- 'likely_fraud' | 'suspicious' | 'benign' | 'unreviewed'
+  confidence         REAL,
+  narrative          TEXT,
+  recommended_action TEXT,
+  created_at         TEXT DEFAULT (datetime('now'))
+);
