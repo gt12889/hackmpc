@@ -13,7 +13,7 @@ import { getBudgetStatus } from "./budgets";
 
 export type Insight = { title: string; detail: string; severity: "high" | "medium" | "low"; metric?: string; link?: string };
 
-function gatherSignals() {
+export function gatherSignals() {
   const anomaly = anomalySummary();
   const dups = duplicateCharges(3).map((d: any) => ({ merchant: d.merchant_name, amount: d.amount_cad, times: d.occurrences }));
   const vendors = vendorSummary();
@@ -28,7 +28,7 @@ function gatherSignals() {
 }
 
 /** Deterministic fallback insights (no AI) - also the input the model ranks. */
-function ruleBasedInsights(s: ReturnType<typeof gatherSignals>): Insight[] {
+export function ruleBasedInsights(s: ReturnType<typeof gatherSignals>): Insight[] {
   const out: Insight[] = [];
   if (s.fx.usdShare > 50) out.push({ title: `${s.fx.usdShare}% of spend is cross-border USD`, detail: `$${Math.round(s.fx.usdValue).toLocaleString()} in USD-origin charges; estimated FX cost ~$${Math.round(s.fx.estFxCost).toLocaleString()}.`, severity: "high", metric: `$${Math.round(s.fx.estFxCost).toLocaleString()} FX cost`, link: "/insights" });
   if (s.topConsolidation[0]) { const c = s.topConsolidation[0]; out.push({ title: `${c.category} is fragmented across ${c.vendors} vendors`, detail: `Top vendor is only ${c.topShare}% of spend - consolidating could save ~$${Math.round(c.savings).toLocaleString()}/yr.`, severity: "medium", metric: `$${Math.round(c.savings).toLocaleString()} savings` }); }
@@ -44,6 +44,11 @@ let cache: Insight[] | null = null;
 
 export function getCachedFeed(): Insight[] {
   return cache ?? ruleBasedInsights(gatherSignals());
+}
+
+/** Let the multi-agent sweep populate the same cache the GET feed reads. */
+export function setCachedFeed(feed: Insight[]): void {
+  cache = feed;
 }
 
 export async function generateFeed(): Promise<Insight[]> {
