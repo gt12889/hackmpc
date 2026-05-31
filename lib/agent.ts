@@ -125,8 +125,8 @@ Return ONLY JSON: {"followUps":["...","...","..."]}`;
     { startModel: model }
   );
   const parsed = JSON.parse(resp.text || "{}");
-  const arr = Array.isArray(parsed?.followUps) ? parsed.followUps : [];
-  const clean = [...new Set(arr.map((s: any) => String(s).trim()).filter(Boolean))].slice(0, 3);
+  const arr: unknown[] = Array.isArray(parsed?.followUps) ? parsed.followUps : [];
+  const clean: string[] = [...new Set(arr.map((s) => String(s).trim()).filter(Boolean))].slice(0, 3);
   return clean.length ? clean : suggestFollowUps(toolCalls);
 }
 
