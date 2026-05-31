@@ -60,10 +60,19 @@ function shouldTryNextModel(e: any): boolean {
  */
 export async function generateWithFallback(
   ai: GoogleGenAI,
-  params: Omit<GenerateContentParameters, "model">
+  params: Omit<GenerateContentParameters, "model">,
+  opts: { startModel?: string } = {}
 ): Promise<{ resp: any; model: string }> {
+  // When a caller pins a model (e.g. a multi-turn tool loop), try it FIRST so the
+  // whole conversation stays on one model. Gemini 2.5+ rejects a request whose
+  // history carries a functionCall `thoughtSignature` from a *different* model
+  // ("missing a thought_signature ... INVALID_ARGUMENT"), so switching models
+  // mid-conversation breaks tool use. Pinning keeps signatures valid.
+  const chain = opts.startModel
+    ? [opts.startModel, ...MODEL_CHAIN.filter((m) => m !== opts.startModel)]
+    : MODEL_CHAIN;
   let lastErr: any;
-  for (const model of MODEL_CHAIN) {
+  for (const model of chain) {
     try {
       const resp = await ai.models.generateContent({ ...params, model });
       return { resp, model };

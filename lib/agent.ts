@@ -83,16 +83,25 @@ export async function runAgent(history: ChatTurn[], userMessage: string): Promis
 
   const toolCalls: ToolCallTrace[] = [];
   let lastViz: VizPayload | null = null;
+  // Pin the conversation to the first model that serves it. Switching models
+  // mid-loop invalidates functionCall thoughtSignatures and Gemini 2.5+ rejects
+  // the request (INVALID_ARGUMENT), which would drop the answer + chart.
+  let pinnedModel: string | undefined;
 
   for (let iter = 0; iter < MAX_ITERS; iter++) {
-    const { resp } = await generateWithFallback(ai, {
-      contents,
-      config: {
-        systemInstruction: buildSystemInstruction(),
-        tools: [{ functionDeclarations: FUNCTION_DECLARATIONS as any }],
-        temperature: 0.2,
+    const { resp, model } = await generateWithFallback(
+      ai,
+      {
+        contents,
+        config: {
+          systemInstruction: buildSystemInstruction(),
+          tools: [{ functionDeclarations: FUNCTION_DECLARATIONS as any }],
+          temperature: 0.2,
+        },
       },
-    });
+      { startModel: pinnedModel }
+    );
+    pinnedModel = model;
 
     const calls = resp.functionCalls;
     const modelContent = resp.candidates?.[0]?.content;
