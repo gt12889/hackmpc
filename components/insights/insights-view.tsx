@@ -1,13 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import {
-  Copy,
-  Hash,
   TrendingUp,
   Store,
   AlertTriangle,
-  Banknote,
   ArrowUpRight,
   ArrowDownRight,
   Minus,
@@ -19,7 +16,7 @@ import {
 } from "lucide-react";
 import { cn, formatCAD } from "@/lib/utils";
 import { SectionCard } from "@/components/kpi-card";
-import { TrendLine, SpendBar, CategoryPie, CHART_COLORS } from "@/components/charts";
+import { TrendLine, CategoryPie, CHART_COLORS } from "@/components/charts";
 import {
   Table,
   TableBody,
@@ -30,7 +27,7 @@ import {
 } from "@/components/ui/table";
 
 const TABS = [
-  { key: "feed", label: "AI Insights", icon: Sparkles },
+  { key: "feed", label: "AI Summary", icon: Sparkles },
   { key: "anomaly", label: "Anomaly", icon: AlertTriangle },
   { key: "vendors", label: "Vendors", icon: Store },
   { key: "forecast", label: "Forecast", icon: TrendingUp },
@@ -73,24 +70,58 @@ export function InsightsView({ data }: { data: any }) {
   );
 }
 
+function MetricsBar({
+  metrics,
+  cols = 4,
+  footer,
+}: {
+  metrics: readonly { label: string; value: string; tone?: string }[];
+  cols?: 3 | 4;
+  footer?: ReactNode;
+}) {
+  const gridClass =
+    cols === 3
+      ? "grid-cols-1 divide-y sm:grid-cols-3 sm:divide-x sm:divide-y-0"
+      : "grid-cols-2 divide-x divide-y sm:grid-cols-4 sm:divide-y-0";
+
+  return (
+    <div className="overflow-hidden rounded-lg border border-border/60">
+      <dl className={cn("grid divide-border/60", gridClass)}>
+        {metrics.map((m) => (
+          <div key={m.label} className="px-4 py-3">
+            <dt className="text-[11px] font-medium uppercase tracking-wide text-neutral-500">{m.label}</dt>
+            <dd className={cn("mt-0.5 text-base font-semibold tabular-nums", m.tone ?? "text-neutral-900")}>{m.value}</dd>
+          </div>
+        ))}
+      </dl>
+      {footer}
+    </div>
+  );
+}
+
 function AnomalyTab({ a }: { a: any }) {
+  const metrics = [
+    { label: "Duplicate groups", value: String(a.summary.duplicateGroups), tone: "text-warning" },
+    { label: "Duplicate exposure", value: formatCAD(a.summary.duplicateExposure, { compact: true }), tone: "text-destructive" },
+    { label: "Round-number charges", value: String(a.summary.roundNumberCount), tone: "text-warning" },
+    { label: "Settlements (not spend)", value: formatCAD(a.summary.settlements.total, { compact: true }), tone: "text-neutral-600" },
+  ] as const;
+
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <Stat label="Duplicate Groups" value={String(a.summary.duplicateGroups)} icon={Copy} tone="warning" />
-        <Stat label="Duplicate Exposure" value={formatCAD(a.summary.duplicateExposure, { compact: true })} icon={Banknote} tone="destructive" />
-        <Stat label="Round-Number Charges" value={String(a.summary.roundNumberCount)} icon={Hash} tone="warning" />
-        <Stat label="Settlements (not spend)" value={formatCAD(a.summary.settlements.total, { compact: true })} icon={Banknote} tone="muted" />
-      </div>
-
-      <p className="text-sm text-neutral-600">
-        <span className="font-medium text-warning">Context flag:</span>{" "}
-        The single largest line in the data is a {formatCAD(a.summary.settlements.largest)} card-balance payment — correctly classified as a settlement, not operational spend or fraud. {a.summary.settlements.count} such payments total {formatCAD(a.summary.settlements.total)}.
-      </p>
+      <MetricsBar
+        metrics={metrics}
+        footer={
+          <p className="border-t border-border/60 px-4 py-2.5 text-sm text-neutral-600">
+            <span className="font-medium text-warning">Context:</span>{" "}
+            The single largest line in the data is a {formatCAD(a.summary.settlements.largest)} card-balance payment — correctly classified as a settlement, not operational spend or fraud. {a.summary.settlements.count} such payments total {formatCAD(a.summary.settlements.total)}.
+          </p>
+        }
+      />
 
       <div className="space-y-8">
         <div>
-          <h3 className="text-sm text-neutral-900">Duplicate / Recurring Charges</h3>
+          <h3 className="text-sm text-neutral-900">Duplicate Charges</h3>
           <p className="mt-0.5 text-xs text-neutral-600">Same card + merchant + exact amount, 2+ times</p>
           <div className="mt-3 rounded-lg border border-border/60">
             <Table>
@@ -154,11 +185,14 @@ function AnomalyTab({ a }: { a: any }) {
 function VendorTab({ v }: { v: any }) {
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
-        <Stat label="Distinct Vendors" value={String(v.summary.totalVendors)} icon={Store} />
-        <Stat label="Fragmented Categories" value={String(v.summary.fragmentedCategories)} icon={AlertTriangle} tone="warning" />
-        <Stat label="Est. Annual Savings" value={formatCAD(v.summary.estimatedAnnualSavings, { compact: true })} icon={Banknote} tone="primary" />
-      </div>
+      <MetricsBar
+        cols={3}
+        metrics={[
+          { label: "Distinct vendors", value: String(v.summary.totalVendors) },
+          { label: "Fragmented categories", value: String(v.summary.fragmentedCategories), tone: "text-warning" },
+          { label: "Est. annual savings", value: formatCAD(v.summary.estimatedAnnualSavings, { compact: true }), tone: "text-primary" },
+        ]}
+      />
 
       <div className="space-y-4">
         {v.opportunities.slice(0, 6).map((o: any, i: number) => (
@@ -196,12 +230,14 @@ function ForecastTab({ f }: { f: any }) {
   const trendTone = { rising: "text-warning", falling: "text-primary", flat: "text-muted-foreground" };
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <Stat label="Categories Modeled" value={String(f.summary.categories)} icon={TrendingUp} />
-        <Stat label="Overrun Risk" value={String(f.summary.atRisk)} icon={AlertTriangle} tone="destructive" />
-        <Stat label="Projected Overrun" value={formatCAD(f.summary.projectedOverrun, { compact: true })} icon={Banknote} tone="warning" />
-        <Stat label="Rising Trends" value={String(f.summary.risingCount)} icon={ArrowUpRight} tone="warning" />
-      </div>
+      <MetricsBar
+        metrics={[
+          { label: "Categories modeled", value: String(f.summary.categories) },
+          { label: "Overrun risk", value: String(f.summary.atRisk), tone: "text-destructive" },
+          { label: "Projected overrun", value: formatCAD(f.summary.projectedOverrun, { compact: true }), tone: "text-warning" },
+          { label: "Rising trends", value: String(f.summary.risingCount), tone: "text-warning" },
+        ]}
+      />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {f.categories.map((c: any, i: number) => {
@@ -237,28 +273,10 @@ function ForecastTab({ f }: { f: any }) {
   );
 }
 
-function Stat({ label, value, icon: Icon, tone }: any) {
-  const t = { destructive: "text-destructive", warning: "text-warning", primary: "text-primary", muted: "text-muted-foreground" }[tone as string] || "text-foreground";
-  return (
-    <div className="rounded-xl border border-border bg-card p-5">
-      <div className="flex items-center justify-between">
-        <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</span>
-        {Icon && <Icon className={cn("h-4 w-4", t)} />}
-      </div>
-      <div className={cn("mt-2 text-2xl font-semibold tabular-nums", t)}>{value}</div>
-    </div>
-  );
-}
-
-/* ---------- AI Insights Feed ---------- */
+/* ---------- AI Summary ---------- */
 function FeedTab({ initial }: { initial: any[] }) {
   const [feed, setFeed] = useState<any[]>(initial || []);
   const [busy, setBusy] = useState(false);
-  const sevTone: Record<string, string> = {
-    high: "border-destructive/30 bg-destructive/5",
-    medium: "border-warning/30 bg-warning/5",
-    low: "border-border bg-card",
-  };
   async function regen() {
     setBusy(true);
     try {
@@ -268,24 +286,30 @@ function FeedTab({ initial }: { initial: any[] }) {
   }
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-3">
-        <p className="text-sm text-muted-foreground">AI-ranked findings across every analysis — what's worth your attention.</p>
-        <button onClick={regen} disabled={busy} className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs hover:bg-secondary disabled:opacity-50">
+      <div className="relative flex min-h-7 items-center justify-center">
+        <p className="text-center text-sm text-muted-foreground">Most important highlights based on recently uploaded file.</p>
+        <button onClick={regen} disabled={busy} className="absolute right-0 inline-flex shrink-0 items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs hover:bg-secondary disabled:opacity-50">
           <RefreshCw className={cn("h-3.5 w-3.5", busy && "animate-spin")} /> Regenerate
         </button>
       </div>
-      <div className="grid gap-3 md:grid-cols-2">
-        {feed.map((i, idx) => (
-          <a key={idx} href={i.link || "#"} className={cn("block rounded-xl border p-4 transition-colors hover:border-primary/40", sevTone[i.severity] || sevTone.low)}>
-            <div className="flex items-start justify-between gap-2">
-              <div className="flex items-center gap-2"><Sparkles className="h-4 w-4 shrink-0 text-primary" /><span className="text-sm font-semibold">{i.title}</span></div>
-              {i.metric && <span className="shrink-0 rounded bg-secondary px-2 py-0.5 text-[11px] font-medium">{i.metric}</span>}
-            </div>
-            <p className="mt-1.5 text-sm text-muted-foreground">{i.detail}</p>
-          </a>
-        ))}
-        {feed.length === 0 && <div className="text-sm text-muted-foreground">No insights yet — click Regenerate.</div>}
-      </div>
+      {feed.length === 0 ? (
+        <div className="text-sm text-muted-foreground">No summary yet — click Regenerate.</div>
+      ) : (
+        <ol className="list-decimal space-y-4 pl-5">
+          {feed.map((i, idx) => (
+            <li key={idx} className="text-sm text-neutral-900 marker:font-medium marker:text-neutral-500">
+              {i.link ? (
+                <a href={i.link} className="font-semibold hover:text-primary">
+                  {i.title}
+                </a>
+              ) : (
+                <span className="font-semibold">{i.title}</span>
+              )}
+              <p className="mt-1 text-muted-foreground">{i.detail}</p>
+            </li>
+          ))}
+        </ol>
+      )}
     </div>
   );
 }
@@ -294,30 +318,46 @@ function FeedTab({ initial }: { initial: any[] }) {
 function RecurringTab({ r }: { r: any }) {
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <Stat label="Recurring Charges" value={String(r.summary.count)} icon={Repeat} tone="primary" />
-        <Stat label="Committed / Month" value={formatCAD(r.summary.monthlyCommitted, { compact: true })} icon={Banknote} tone="warning" />
-        <Stat label="Annualized" value={formatCAD(r.summary.annualized, { compact: true })} icon={Banknote} tone="muted" />
-        <Stat label="Top Category" value={r.summary.topCategory || "—"} icon={Store} tone="muted" />
-      </div>
-      <SectionCard title="Detected Subscriptions & Recurring Spend" description="Consistent amounts on a regular cadence — committed spend you may not realize is on autopilot">
-        <div className="space-y-1.5">
-          {r.charges.map((c: any, i: number) => (
-            <div key={i} className="flex items-center justify-between border-b border-border/50 py-2 text-sm last:border-0">
-              <div className="flex items-center gap-2">
-                <Repeat className="h-4 w-4 text-primary" />
-                <span>{c.merchant}</span>
-                <span className="rounded bg-secondary px-1.5 py-0.5 text-[10px] uppercase text-muted-foreground">{c.cadence}</span>
-                <span className="text-xs text-muted-foreground">· {c.category} · {c.occurrences}×</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className="text-xs text-muted-foreground">avg {formatCAD(c.avg_amount)}</span>
-                <span className="font-semibold tabular-nums">{formatCAD(c.monthlyCommitted)}/mo</span>
-              </div>
-            </div>
-          ))}
+      <MetricsBar
+        metrics={[
+          { label: "Recurring charges", value: String(r.summary.count), tone: "text-primary" },
+          { label: "Committed / month", value: formatCAD(r.summary.monthlyCommitted, { compact: true }), tone: "text-warning" },
+          { label: "Annualized", value: formatCAD(r.summary.annualized, { compact: true }), tone: "text-neutral-600" },
+          { label: "Top category", value: r.summary.topCategory || "—", tone: "text-neutral-600" },
+        ]}
+      />
+      <div>
+        <h3 className="text-sm text-neutral-900">Detected Subscriptions & Recurring Spend</h3>
+        <p className="mt-0.5 text-xs text-neutral-600">Consistent amounts on a regular cadence — committed spend you may not realize is on autopilot</p>
+        <div className="mt-3 rounded-lg border border-border/60">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Merchant</TableHead>
+                <TableHead>Category</TableHead>
+                <TableHead>Cadence</TableHead>
+                <TableHead className="text-right">Occurrences</TableHead>
+                <TableHead className="text-right">Avg Amount</TableHead>
+                <TableHead className="text-right">Committed / Mo</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {r.charges.map((c: any, i: number) => (
+                <TableRow key={i}>
+                  <TableCell className="max-w-[200px] truncate font-medium text-neutral-900">{c.merchant}</TableCell>
+                  <TableCell className="text-neutral-600">{c.category}</TableCell>
+                  <TableCell>
+                    <span className="rounded bg-secondary px-1.5 py-0.5 text-[10px] uppercase text-muted-foreground">{c.cadence}</span>
+                  </TableCell>
+                  <TableCell className="text-right text-neutral-600">{c.occurrences}×</TableCell>
+                  <TableCell className="text-right tabular-nums text-neutral-600">{formatCAD(c.avg_amount)}</TableCell>
+                  <TableCell className="text-right tabular-nums font-medium text-neutral-900">{formatCAD(c.monthlyCommitted)}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </div>
-      </SectionCard>
+      </div>
     </div>
   );
 }
@@ -328,24 +368,31 @@ function FxTab({ x }: { x: any }) {
   const monthData = x.byMonth.map((m: any) => ({ period: fmtMonth(m.period), USD: m.usd, CAD: m.cad }));
   const pie = [{ key: "USD (cross-border)", value: x.summary.usdValue }, { key: "CAD (domestic)", value: x.summary.cadValue }];
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <Stat label="Cross-Border Share" value={`${x.summary.usdShare}%`} icon={Globe} tone="warning" />
-        <Stat label="USD Spend" value={formatCAD(x.summary.usdValue, { compact: true })} icon={Banknote} tone="primary" />
-        <Stat label="Est. FX Cost" value={formatCAD(x.summary.estFxCost, { compact: true })} icon={Banknote} tone="destructive" />
-        <Stat label="Avg FX Rate" value={String(x.summary.avgRate)} icon={TrendingUp} tone="muted" />
+    <div className="space-y-4">
+      <MetricsBar
+        metrics={[
+          { label: "Cross-border share", value: `${x.summary.usdShare}%`, tone: "text-warning" },
+          { label: "USD spend", value: formatCAD(x.summary.usdValue, { compact: true }), tone: "text-primary" },
+          { label: "Est. FX cost", value: formatCAD(x.summary.estFxCost, { compact: true }), tone: "text-destructive" },
+          { label: "Avg FX rate", value: String(x.summary.avgRate), tone: "text-neutral-600" },
+        ]}
+      />
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <div>
+          <h3 className="text-sm text-neutral-900">USD vs CAD Spend</h3>
+          <p className="mt-0.5 text-xs text-neutral-600">{x.summary.usdShare}% of spend crosses the border</p>
+          <div className="mt-2 rounded-lg border border-border/60 p-2">
+            <CategoryPie data={pie} height={180} />
+          </div>
+        </div>
+        <div className="lg:col-span-2">
+          <h3 className="text-sm text-neutral-900">Cross-Border Spend by Month</h3>
+          <p className="mt-0.5 text-xs text-neutral-600">USD vs CAD origin</p>
+          <div className="mt-2 rounded-lg border border-border/60 p-2">
+            <TrendLine data={monthData} series={[{ key: "USD", label: "USD" }, { key: "CAD", label: "CAD" }]} height={180} />
+          </div>
+        </div>
       </div>
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
-        <SectionCard title="USD vs CAD Spend" description="72% of spend crosses the border" className="lg:col-span-2">
-          <CategoryPie data={pie} />
-        </SectionCard>
-        <SectionCard title="Cross-Border Spend by Month" description="USD vs CAD origin" className="lg:col-span-3">
-          <TrendLine data={monthData} series={[{ key: "USD", label: "USD" }, { key: "CAD", label: "CAD" }]} />
-        </SectionCard>
-      </div>
-      <SectionCard title="USD Exposure by State" description="Where the cross-border spend happens">
-        <SpendBar data={x.byState} horizontal />
-      </SectionCard>
     </div>
   );
 }
@@ -357,12 +404,14 @@ function ProfilesTab({ p }: { p: any }) {
   const trendTone: any = { rising: "text-warning", falling: "text-primary", flat: "text-muted-foreground" };
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <Stat label="Categories" value={String(p.summary.categories)} icon={BarChart3} />
-        <Stat label="Company Avg Txn" value={formatCAD(p.summary.baselineAvg)} icon={Banknote} tone="muted" />
-        <Stat label="Biggest Riser" value={p.summary.biggestRiser || "—"} icon={ArrowUpRight} tone="warning" />
-        <Stat label="Top Share" value={p.summary.topShare || "—"} icon={Store} tone="primary" />
-      </div>
+      <MetricsBar
+        metrics={[
+          { label: "Categories", value: String(p.summary.categories) },
+          { label: "Company avg txn", value: formatCAD(p.summary.baselineAvg), tone: "text-neutral-600" },
+          { label: "Biggest riser", value: p.summary.biggestRiser || "—", tone: "text-warning" },
+          { label: "Top share", value: p.summary.topShare || "—", tone: "text-primary" },
+        ]}
+      />
       <SectionCard title="Category Profiles vs Company Baseline" description="Average-transaction size relative to the company average (1.0×) — and month-over-month trend">
         <div className="space-y-2.5">
           {p.categories.map((c: any, i: number) => {

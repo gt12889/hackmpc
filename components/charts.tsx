@@ -50,9 +50,10 @@ function MoneyTooltip({ active, payload, label, money = true }: any) {
 
 export type SeriesPoint = { key: string; value: number; count?: number };
 
-export function SpendBar({ data, money = true, horizontal = false }: { data: SeriesPoint[]; money?: boolean; horizontal?: boolean }) {
+export function SpendBar({ data, money = true, horizontal = false, height }: { data: SeriesPoint[]; money?: boolean; horizontal?: boolean; height?: number }) {
+  const chartHeight = height ?? Math.max(220, horizontal ? data.length * 34 : 260);
   return (
-    <ResponsiveContainer width="100%" height={Math.max(220, horizontal ? data.length * 34 : 260)}>
+    <ResponsiveContainer width="100%" height={chartHeight}>
       <BarChart data={data} layout={horizontal ? "vertical" : "horizontal"} margin={{ top: 8, right: 16, bottom: 8, left: horizontal ? 8 : 0 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.4} vertical={!horizontal} horizontal={horizontal} />
         {horizontal ? (
@@ -77,9 +78,9 @@ export function SpendBar({ data, money = true, horizontal = false }: { data: Ser
   );
 }
 
-export function TrendLine({ data, series, money = true }: { data: any[]; series: { key: string; label?: string }[]; money?: boolean }) {
+export function TrendLine({ data, series, money = true, height = 280 }: { data: any[]; series: { key: string; label?: string }[]; money?: boolean; height?: number }) {
   return (
-    <ResponsiveContainer width="100%" height={280}>
+    <ResponsiveContainer width="100%" height={height}>
       <LineChart data={data} margin={{ top: 8, right: 16, bottom: 8, left: 0 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.4} />
         <XAxis dataKey="period" tick={AXIS} tickLine={false} axisLine={false} />
@@ -94,11 +95,12 @@ export function TrendLine({ data, series, money = true }: { data: any[]; series:
   );
 }
 
-export function CategoryPie({ data, money = true }: { data: SeriesPoint[]; money?: boolean }) {
+export function CategoryPie({ data, money = true, height = 280 }: { data: SeriesPoint[]; money?: boolean; height?: number }) {
+  const scale = height / 280;
   return (
-    <ResponsiveContainer width="100%" height={280}>
+    <ResponsiveContainer width="100%" height={height}>
       <PieChart>
-        <Pie data={data} dataKey="value" nameKey="key" cx="50%" cy="50%" innerRadius={60} outerRadius={100} paddingAngle={2}>
+        <Pie data={data} dataKey="value" nameKey="key" cx="50%" cy="50%" innerRadius={60 * scale} outerRadius={100 * scale} paddingAngle={2}>
           {data.map((_, i) => (
             <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} stroke="hsl(var(--background))" strokeWidth={2} />
           ))}
