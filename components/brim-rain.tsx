@@ -11,10 +11,10 @@ export function BrimRain({ word = "BRIM", className = "" }: { word?: string; cla
     const canvas = canvasRef.current!;
     const ctx = canvas.getContext("2d")!;
     const CHARS = "01ABX+=#@29".split("");
-    const COLS = 90, ROWS = 50, CELL = 7; // wide for a 4-letter word
+    const COLS = 96, ROWS = 52, CELL = 9; // wide for a 4-letter word
     canvas.width = COLS * CELL;
     canvas.height = ROWS * CELL;
-    ctx.font = "900 8px ui-monospace, Menlo, monospace";
+    ctx.font = "900 11px ui-monospace, Menlo, monospace";
     ctx.textBaseline = "top";
 
     const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
