@@ -169,13 +169,13 @@ export function HeroReveal() {
 
         {/* Text stack */}
         <div className="relative z-10 flex h-full flex-col items-center justify-center px-6 text-center">
-          {/* Animated BRIM ASCII rain — the opening of the intro, centered + large, fades on scroll */}
+          {/* Animated BRIM ASCII rain — full-width, flows in/out at the screen borders, fades on scroll */}
           <div
             aria-hidden
-            className="pointer-events-none absolute left-1/2 top-1/2 w-[min(92vw,860px)]"
-            style={{ opacity: introArt, transform: `translate(-50%, calc(-50% + ${-(1 - introArt) * 24}px)) scale(${0.94 + introArt * 0.06})` }}
+            className="pointer-events-none absolute inset-x-0 top-1/2 h-[46vh] -translate-y-1/2"
+            style={{ opacity: introArt }}
           >
-            <BrimRain className="w-full" />
+            <BrimRain className="h-full w-full" />
           </div>
 
           <div className="relative flex h-44 items-center justify-center">
