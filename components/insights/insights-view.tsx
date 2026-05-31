@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { cn, formatCAD } from "@/lib/utils";
 import { SectionCard } from "@/components/kpi-card";
+import { Reveal } from "@/components/reveal";
 import { TrendLine, CategoryPie, CHART_COLORS } from "@/components/charts";
 import {
   Table,
@@ -196,8 +197,8 @@ function VendorTab({ v }: { v: any }) {
 
       <div className="space-y-4">
         {v.opportunities.slice(0, 6).map((o: any, i: number) => (
+          <Reveal key={i} delay={i * 70}>
           <SectionCard
-            key={i}
             title={`${o.category} — ${o.vendors} vendors`}
             description={`${formatCAD(o.spend)} across ${o.txns} transactions · top vendor only ${o.topVendorShare}% of spend`}
             action={
@@ -219,6 +220,7 @@ function VendorTab({ v }: { v: any }) {
               ))}
             </div>
           </SectionCard>
+          </Reveal>
         ))}
       </div>
     </div>
@@ -244,8 +246,8 @@ function ForecastTab({ f }: { f: any }) {
           const TI = (trendIcon as any)[c.trend];
           const projData = [...c.history, { period: c.projectedMonth, spend: c.projected, projected: true }];
           return (
+            <Reveal key={i} delay={i * 70}>
             <SectionCard
-              key={i}
               title={c.category}
               description={`Avg ${formatCAD(c.avgMonthly, { compact: true })}/mo · budget ${formatCAD(c.budget, { compact: true })}`}
               action={
@@ -266,6 +268,7 @@ function ForecastTab({ f }: { f: any }) {
                 )}
               </div>
             </SectionCard>
+            </Reveal>
           );
         })}
       </div>
@@ -288,7 +291,7 @@ function FeedTab({ initial }: { initial: any[] }) {
     <div className="space-y-4">
       <div className="relative flex min-h-7 items-center justify-center">
         <p className="text-center text-sm text-muted-foreground">Most important highlights based on recently uploaded file.</p>
-        <button onClick={regen} disabled={busy} className="absolute right-0 inline-flex shrink-0 items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs hover:bg-secondary disabled:opacity-50">
+        <button onClick={regen} disabled={busy} className="absolute right-0 inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border px-5 py-1.5 text-xs hover:bg-secondary disabled:opacity-50">
           <RefreshCw className={cn("h-3.5 w-3.5", busy && "animate-spin")} /> Regenerate
         </button>
       </div>
@@ -412,6 +415,7 @@ function ProfilesTab({ p }: { p: any }) {
           { label: "Top share", value: p.summary.topShare || "—", tone: "text-primary" },
         ]}
       />
+      <Reveal>
       <SectionCard title="Category Profiles vs Company Baseline" description="Average-transaction size relative to the company average (1.0×) — and month-over-month trend">
         <div className="space-y-2.5">
           {p.categories.map((c: any, i: number) => {
@@ -430,6 +434,7 @@ function ProfilesTab({ p }: { p: any }) {
           })}
         </div>
       </SectionCard>
+      </Reveal>
     </div>
   );
 }

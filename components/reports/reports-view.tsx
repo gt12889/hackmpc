@@ -12,6 +12,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { cn, formatCAD } from "@/lib/utils";
+import { Reveal } from "@/components/reveal";
 import { CHART_COLORS } from "@/components/charts";
 import { ShowMore } from "@/components/show-more";
 
@@ -71,20 +72,22 @@ export function ReportsView({ initial }: { initial: any }) {
         <p className="text-sm text-muted-foreground">
           Grouped by location &amp; month — a clear view of where and when company spend happened, ready for review.
         </p>
-        <button onClick={regenerate} disabled={busy} className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs hover:bg-secondary disabled:opacity-50">
+        <button onClick={regenerate} disabled={busy} className="inline-flex items-center gap-1.5 rounded-full border border-border px-5 py-1.5 text-xs hover:bg-secondary disabled:opacity-50">
           <RefreshCw className={cn("h-3.5 w-3.5", busy && "animate-spin")} /> Regenerate
         </button>
       </div>
 
-      <ShowMore
-        items={reports}
-        initial={6}
-        noun="reports"
-        className="grid grid-cols-1 gap-4 lg:grid-cols-2"
-        render={(r: any) => (
-          <ReportCard key={r.id} report={r} open={openId === r.id} onToggle={() => setOpenId(openId === r.id ? null : r.id)} onApprove={() => approve(r.id)} />
-        )}
-      />
+      <Reveal>
+        <ShowMore
+          items={reports}
+          initial={6}
+          noun="reports"
+          className="grid grid-cols-1 gap-4 lg:grid-cols-2"
+          render={(r: any) => (
+            <ReportCard key={r.id} report={r} open={openId === r.id} onToggle={() => setOpenId(openId === r.id ? null : r.id)} onApprove={() => approve(r.id)} />
+          )}
+        />
+      </Reveal>
     </div>
   );
 }
@@ -164,7 +167,7 @@ function ReportCard({ report, open, onToggle, onApprove }: any) {
           </div>
           {!approved && (
             <div className="mt-4 flex justify-end">
-              <button onClick={onApprove} className="inline-flex items-center gap-1.5 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90">
+              <button onClick={onApprove} className="inline-flex items-center gap-1.5 rounded-full bg-primary px-5 py-2 text-sm font-medium text-primary-foreground hover:opacity-90">
                 <Check className="h-4 w-4" /> Approve as CFO
               </button>
             </div>

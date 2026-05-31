@@ -5,6 +5,7 @@ import useSWR from "swr";
 import { toast } from "sonner";
 import { Loader2, CheckCircle2, AlertTriangle, ScanLine, Link2, Link2Off } from "lucide-react";
 import { cn, formatCAD } from "@/lib/utils";
+import { Reveal } from "@/components/reveal";
 import {
   Table,
   TableBody,
@@ -67,6 +68,7 @@ export function ReceiptsView({ initial }: { initial: any }) {
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <Reveal delay={0}>
       <div className="rounded-lg border border-border/60 p-4">
         <h3 className="text-sm font-medium text-neutral-900">Scan a receipt</h3>
         <p className="mt-0.5 text-xs text-neutral-600">Upload a photo — AI Vision reads it and matches it to a transaction</p>
@@ -114,7 +116,9 @@ export function ReceiptsView({ initial }: { initial: any }) {
           </div>
         )}
       </div>
+      </Reveal>
 
+      <Reveal delay={70}>
       <div className="rounded-lg border border-border/60 p-4">
         <h3 className="text-sm font-medium text-neutral-900">Receipt compliance</h3>
         <p className="mt-0.5 text-xs text-neutral-600">Policy: receipts are required before reimbursement</p>
@@ -132,8 +136,10 @@ export function ReceiptsView({ initial }: { initial: any }) {
           <span><b>{s.missing}</b> charges totaling <b>{formatCAD(s.missingValue)}</b> have no receipt on file. High-value gaps are flagged in Compliance.</span>
         </div>
       </div>
+      </Reveal>
       </div>
 
+      <Reveal>
       <div>
         <h3 className="text-sm text-neutral-900">Charges missing a receipt</h3>
         <p className="mt-0.5 text-xs text-neutral-600">Highest-value operational charges over $50 with no receipt</p>
@@ -166,6 +172,7 @@ export function ReceiptsView({ initial }: { initial: any }) {
           )}
         </div>
       </div>
+      </Reveal>
     </div>
   );
 }

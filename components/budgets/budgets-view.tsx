@@ -5,6 +5,7 @@ import useSWR from "swr";
 import { toast } from "sonner";
 import { AlertTriangle, Pencil, Plus } from "lucide-react";
 import { cn, formatCAD } from "@/lib/utils";
+import { Reveal } from "@/components/reveal";
 import {
   Table,
   TableBody,
@@ -121,6 +122,7 @@ export function BudgetsView({ initial }: { initial: any }) {
         </p>
       </div>
 
+      <Reveal delay={0}>
       <div className="rounded-lg border border-border/60 p-4">
         <h3 className="text-sm font-medium text-neutral-900">Set a budget</h3>
         <p className="mt-0.5 text-xs text-neutral-600">Monthly limit per spend category</p>
@@ -161,7 +163,7 @@ export function BudgetsView({ initial }: { initial: any }) {
           <button
             type="submit"
             disabled={busy}
-            className="inline-flex items-center gap-1.5 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-full bg-primary px-5 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
           >
             <Plus className="h-4 w-4" />
             {selectedBudget ? "Update budget" : "Set budget"}
@@ -176,7 +178,9 @@ export function BudgetsView({ initial }: { initial: any }) {
           </p>
         )}
       </div>
+      </Reveal>
 
+      <Reveal delay={70}>
       <div>
         <h3 className="text-sm text-neutral-900">Category budgets</h3>
         <p className="mt-0.5 text-xs text-neutral-600">Spend vs limit for {summary.month} — click a limit to edit</p>
@@ -254,6 +258,7 @@ export function BudgetsView({ initial }: { initial: any }) {
           )}
         </div>
       </div>
+      </Reveal>
     </div>
   );
 }

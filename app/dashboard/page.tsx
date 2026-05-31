@@ -1,5 +1,6 @@
 import { DollarSign, Receipt, Globe, CreditCard } from "lucide-react";
 import { KpiCard, SectionCard } from "@/components/kpi-card";
+import { Reveal } from "@/components/reveal";
 import { PageHeader } from "@/components/page-header";
 import { SpendBar, TrendLine, CategoryPie } from "@/components/charts";
 import { ExpandSection } from "@/components/show-more";
@@ -38,20 +39,32 @@ export default function DashboardPage() {
       <div className="space-y-6 p-8">
         {/* KPIs */}
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-          <KpiCard label="Operational Spend" value={formatCAD(kpis.operationalSpend, { compact: true })} sub={`Avg ${formatCAD(kpis.avgTxn)} / txn`} icon={DollarSign} />
-          <KpiCard label="Transactions" value={kpis.txnCount.toLocaleString()} sub={`${kpis.cardCount} company cards`} icon={Receipt} />
-          <KpiCard label="Cross-Border" value={`${kpis.crossBorderPct}%`} sub="of spend is US/foreign" icon={Globe} accent="warning" />
-          <KpiCard label="Card Payments" value={formatCAD(kpis.settlementsSpend, { compact: true })} sub={`${kpis.settlementsCount} settlements (excl. from spend)`} icon={CreditCard} accent="muted" />
+          <Reveal delay={0}>
+            <KpiCard label="Operational Spend" countTo={kpis.operationalSpend} format="cad" sub={`Avg ${formatCAD(kpis.avgTxn)} / txn`} icon={DollarSign} />
+          </Reveal>
+          <Reveal delay={70}>
+            <KpiCard label="Transactions" countTo={kpis.txnCount} format="int" sub={`${kpis.cardCount} company cards`} icon={Receipt} />
+          </Reveal>
+          <Reveal delay={140}>
+            <KpiCard label="Cross-Border" countTo={kpis.crossBorderPct} format="pct" sub="of spend is US/foreign" icon={Globe} accent="warning" />
+          </Reveal>
+          <Reveal delay={210}>
+            <KpiCard label="Card Payments" countTo={kpis.settlementsSpend} format="cad" sub={`${kpis.settlementsCount} settlements (excl. from spend)`} icon={CreditCard} accent="muted" />
+          </Reveal>
         </div>
 
         {/* Category + Trend */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
-          <SectionCard title="Spend by Category" description="Operational spend, settlements excluded" className="lg:col-span-2">
-            <CategoryPie data={byCategory} height={320} showTotal />
-          </SectionCard>
-          <SectionCard title="Monthly Spend Trend" description="Total operational spend per month" className="lg:col-span-3">
-            <TrendLine data={monthData} series={[{ key: "spend", label: "Spend" }]} height={320} />
-          </SectionCard>
+          <Reveal delay={0} className="lg:col-span-2">
+            <SectionCard title="Spend by Category" description="Operational spend, settlements excluded" className="h-full">
+              <CategoryPie data={byCategory} height={320} showTotal />
+            </SectionCard>
+          </Reveal>
+          <Reveal delay={70} className="lg:col-span-3">
+            <SectionCard title="Monthly Spend Trend" description="Total operational spend per month" className="h-full">
+              <TrendLine data={monthData} series={[{ key: "spend", label: "Spend" }]} height={320} />
+            </SectionCard>
+          </Reveal>
         </div>
 
         {/* Secondary breakdowns — collapsed by default to keep the view minimal */}

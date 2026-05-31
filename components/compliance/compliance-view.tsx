@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { cn, formatCAD } from "@/lib/utils";
 import { SectionCard } from "@/components/kpi-card";
+import { Reveal } from "@/components/reveal";
 import { ShowMore } from "@/components/show-more";
 import { AlertSettings } from "@/components/compliance/alert-settings";
 
@@ -99,12 +100,12 @@ export function ComplianceView({ initial }: { initial: any }) {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Rules */}
+        <Reveal delay={0} className="lg:col-span-1">
         <SectionCard
           title="Policy Rules"
           description="Digitized from the Brim expense policy"
-          className="lg:col-span-1"
           action={
-            <button onClick={rescan} disabled={busy || isValidating} className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs hover:bg-secondary disabled:opacity-50">
+            <button onClick={rescan} disabled={busy || isValidating} className="inline-flex items-center gap-1.5 rounded-full border border-border px-5 py-1.5 text-xs hover:bg-secondary disabled:opacity-50">
               <RefreshCw className={cn("h-3.5 w-3.5", busy && "animate-spin")} />
               Re-scan
             </button>
@@ -135,9 +136,11 @@ export function ComplianceView({ initial }: { initial: any }) {
             ))}
           </div>
         </SectionCard>
+        </Reveal>
 
         {/* Violations */}
-        <SectionCard title="Flagged Violations" description="Ranked by severity · AI-adjusted for context" className="lg:col-span-2">
+        <Reveal delay={70} className="lg:col-span-2">
+        <SectionCard title="Flagged Violations" description="Ranked by severity · AI-adjusted for context" className="h-full">
           {violations.length === 0 ? (
             <div className="flex items-center gap-2 py-8 text-sm text-muted-foreground">
               <ShieldCheck className="h-5 w-5 text-primary" /> No open violations — spend is compliant.
@@ -174,16 +177,21 @@ export function ComplianceView({ initial }: { initial: any }) {
             )} />
           )}
         </SectionCard>
+        </Reveal>
       </div>
 
       {/* Repeat offenders */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <SectionCard title="Repeat Offenders — Merchants" description="Most-flagged vendors">
-          <OffenderTable rows={offenders.by_merchant} keyField="merchant_name" />
-        </SectionCard>
-        <SectionCard title="Repeat Offenders — Cards" description="Most-flagged cost centers">
-          <OffenderTable rows={offenders.by_card} keyField="transaction_code" prefix="Card " />
-        </SectionCard>
+        <Reveal delay={0}>
+          <SectionCard title="Repeat Offenders — Merchants" description="Most-flagged vendors" className="h-full">
+            <OffenderTable rows={offenders.by_merchant} keyField="merchant_name" />
+          </SectionCard>
+        </Reveal>
+        <Reveal delay={70}>
+          <SectionCard title="Repeat Offenders — Cards" description="Most-flagged cost centers" className="h-full">
+            <OffenderTable rows={offenders.by_card} keyField="transaction_code" prefix="Card " />
+          </SectionCard>
+        </Reveal>
       </div>
     </div>
   );
