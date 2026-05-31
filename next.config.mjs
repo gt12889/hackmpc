@@ -2,6 +2,9 @@
 const nextConfig = {
   // better-sqlite3 is a native module - keep it server-only, never bundled
   serverExternalPackages: ["better-sqlite3"],
+  // Spline ships an ESM-only `exports` map (import condition only); transpile it through
+  // Next's pipeline so webpack resolves the root export instead of "path . is not exported".
+  transpilePackages: ["@splinetool/react-spline", "@splinetool/runtime"],
   typescript: {
     // Hackathon velocity: don't let a stray type error block the dev server.
     ignoreBuildErrors: true,
