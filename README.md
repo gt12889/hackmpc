@@ -43,6 +43,8 @@ npm run dev                        # http://localhost:3000
 
 `npm run db:reset` rebuilds the SQLite DB from `data/transactions.xlsx`: normalizes dates, CAD amounts, and MCC→category mapping (`scripts/etl.ts`), then seeds policy rules, the approval queue, and expense reports. Without a Gemini key the app still runs — the rule-based engines populate; only the AI reasoning/summaries are skipped.
 
+**Upload your own data:** the **Import** button (top bar) accepts a `.csv` or `.xlsx` card export. It runs the same ingest pipeline (`lib/ingest.ts`, shared with the ETL script) — tolerant of common column-name variants (Date/Merchant/Amount/MCC/Card…) and of either Excel-serial or real date strings — then re-scans compliance, rebuilds the approval queue, and regenerates reports.
+
 ## Architecture notes
 
 - **No raw SQL from the model.** The agent calls parameterized, whitelisted, zod-validated query tools (`lib/tools.ts` → `lib/queries.ts`). The same query layer backs the dashboard.
