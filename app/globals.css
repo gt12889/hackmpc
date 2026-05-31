@@ -77,8 +77,8 @@
 
 @layer base {
   :root {
-    --font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
-    --font-mono: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --font-sans: var(--font-helv), "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --font-mono: var(--font-helv), "Helvetica Neue", Helvetica, Arial, sans-serif;
   }
   * {
     @apply border-border;
@@ -95,7 +95,7 @@
   }
   * {
     font-weight: 700 !important;
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif !important;
+    font-family: var(--font-helv), "Helvetica Neue", Helvetica, Arial, sans-serif !important;
   }
   body {
     @apply bg-background text-foreground;
