@@ -654,6 +654,41 @@ function ForecastTab({ f }: { f: any }) {
                   <div className="mt-1 text-[11px] tabular-nums text-muted-foreground">
                     p10 {formatCAD(m.p10, { compact: true })} · p50 {formatCAD(m.p50, { compact: true })} · p90 {formatCAD(m.p90, { compact: true })}
                   </div>
+
+                  {/* Percentile band: p10–p90 range, p50 marker, and the budget line */}
+                  {(() => {
+                    const lo = Math.min(m.p10, c.budget) * 0.92;
+                    const hi = Math.max(m.p90, c.budget) * 1.06;
+                    const span = hi - lo || 1;
+                    const pct = (x: number) => Math.min(100, Math.max(0, ((x - lo) / span) * 100));
+                    return (
+                      <div className="mt-2">
+                        <div className="relative h-2.5 rounded-full bg-secondary">
+                          <div className="absolute inset-y-0 rounded-full bg-primary/35" style={{ left: `${pct(m.p10)}%`, right: `${100 - pct(m.p90)}%` }} />
+                          <div className="absolute inset-y-0 w-0.5 bg-primary" style={{ left: `${pct(m.p50)}%` }} title={`p50 ${formatCAD(m.p50)}`} />
+                          <div className="absolute -inset-y-1 w-0.5 bg-destructive" style={{ left: `${pct(c.budget)}%` }} title={`Budget ${formatCAD(c.budget)}`} />
+                        </div>
+                        <div className="mt-1 flex justify-between text-[10px] text-muted-foreground">
+                          <span>p10–p90 range</span>
+                          <span className="text-destructive">| budget {formatCAD(c.budget, { compact: true })}</span>
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                  {/* Why at risk — explainable variance drivers from the simulation */}
+                  {Array.isArray(m.factors) && m.factors.length > 0 && (
+                    <div className="mt-2 space-y-1">
+                      <div className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Why at risk</div>
+                      {m.factors.slice(0, 2).map((fac: any, fi: number) => (
+                        <div key={fi} className="flex items-start gap-2 text-[11px]">
+                          <span className="mt-1 h-1.5 shrink-0 rounded-full bg-primary" style={{ width: Math.max(8, (fac.impact || 0) * 36) }} aria-hidden />
+                          <span className="text-muted-foreground"><span className="font-medium text-foreground">{fac.factor}</span> — {fac.description}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
                   <div className="mt-2">
                     <div className="flex items-center justify-between text-[11px] text-muted-foreground">
                       <span>What-if: {mult === 1 ? "baseline" : `${mult > 1 ? "+" : ""}${Math.round((mult - 1) * 100)}%`}</span>
