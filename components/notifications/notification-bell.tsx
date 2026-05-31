@@ -44,10 +44,34 @@ export function NotificationBell() {
     return () => document.removeEventListener("mousedown", onClick);
   }, []);
 
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false);
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, []);
+
   async function markAll() {
-    await fetch("/api/notifications/read-all", { method: "POST" });
     setUnread(0);
     setItems((xs) => xs.map((x) => ({ ...x, read: 1 })));
+    try {
+      await fetch("/api/notifications/read-all", { method: "POST" });
+    } catch {
+      /* optimistic; the next poll reconciles if the request failed */
+    }
+  }
+
+  async function markOne(n: Notif) {
+    if (!n.read) {
+      setItems((xs) => xs.map((x) => (x.id === n.id ? { ...x, read: 1 } : x)));
+      setUnread((u) => Math.max(0, u - 1));
+    }
+    try {
+      await fetch(`/api/notifications/${n.id}`, { method: "PATCH" });
+    } catch {
+      /* optimistic; the next poll reconciles */
+    }
   }
 
   return (
@@ -56,6 +80,8 @@ export function NotificationBell() {
         onClick={() => { setOpen((o) => !o); }}
         className="relative flex h-9 w-9 items-center justify-center rounded-full text-primary transition-colors hover:bg-primary/10"
         aria-label="Notifications"
+        aria-haspopup="menu"
+        aria-expanded={open}
       >
         <Bell className="h-5 w-5" />
         {unread > 0 && (
@@ -79,7 +105,7 @@ export function NotificationBell() {
               <a
                 key={n.id}
                 href="/compliance"
-                onClick={() => { fetch(`/api/notifications/${n.id}`, { method: "PATCH" }); }}
+                onClick={() => markOne(n)}
                 className={cn("block border-b border-border/60 px-3 py-2.5 transition-colors hover:bg-secondary/50", !n.read && "bg-primary/5")}
               >
                 <div className="flex items-center gap-2">
