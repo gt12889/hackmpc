@@ -49,28 +49,20 @@
   var grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
   grad.addColorStop(0, "#007d93"); grad.addColorStop(0.55, "#0ba3b8"); grad.addColorStop(1, "#00c1d5");
 
-  // ---- build the silhouette directly on a canvas (no image -> cannot fail to load) ----
+  // ---- draw the word "BRIM" as the mask (no image -> cannot fail to load) ----
+  var WORD = "BRIM";
   function buildActive() {
     var W = 320, H = 240;
     var s = document.createElement("canvas"); s.width = W; s.height = H;
     var o = s.getContext("2d");
     o.fillStyle = "#fff"; o.fillRect(0, 0, W, H);
-    o.fillStyle = "#000"; o.beginPath();
-    o.moveTo(160, 20);
-    o.bezierCurveTo(120, 20, 100, 54, 100, 98);
-    o.bezierCurveTo(100, 124, 96, 152, 92, 178);
-    o.bezierCurveTo(112, 182, 120, 170, 126, 156);
-    o.bezierCurveTo(130, 164, 134, 170, 144, 172);
-    o.lineTo(144, 184);
-    o.bezierCurveTo(100, 188, 36, 198, 28, 240);
-    o.lineTo(292, 240);
-    o.bezierCurveTo(284, 198, 220, 188, 176, 184);
-    o.lineTo(176, 172);
-    o.bezierCurveTo(186, 170, 190, 164, 194, 156);
-    o.bezierCurveTo(200, 170, 208, 182, 228, 178);
-    o.bezierCurveTo(224, 152, 220, 124, 220, 98);
-    o.bezierCurveTo(220, 54, 200, 20, 160, 20);
-    o.closePath(); o.fill();
+    o.fillStyle = "#000";
+    o.textAlign = "center"; o.textBaseline = "middle";
+    var fontPx = 200;
+    o.font = "900 " + fontPx + "px Arial, sans-serif";
+    fontPx = fontPx * ((W * 0.9) / o.measureText(WORD).width);   // fit to ~90% width
+    o.font = "900 " + fontPx + "px Arial, sans-serif";
+    o.fillText(WORD, W / 2, H / 2 + 2);
     // downsample to the grid
     var g = document.createElement("canvas"); g.width = COLS; g.height = ROWS;
     var gc = g.getContext("2d"); gc.drawImage(s, 0, 0, COLS, ROWS);
