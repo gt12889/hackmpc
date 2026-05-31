@@ -95,6 +95,41 @@ function suggestFollowUps(toolCalls: ToolCallTrace[]): string[] {
   return [...new Set(fu)].slice(0, 3);
 }
 
+/** AI-generated follow-ups: ask the model for 3 fresh, non-repeating drill-downs
+ *  grounded in the question + answer + the data just queried. Falls back to the
+ *  templated suggestions on any error/quota so the chips never disappear. */
+async function generateFollowUps(
+  ai: any,
+  model: string | undefined,
+  userMessage: string,
+  answer: string,
+  toolCalls: ToolCallTrace[]
+): Promise<string[]> {
+  const last = [...toolCalls].reverse().find((t) => t.ok);
+  const ctx = last
+    ? `Tool used: ${last.name}${last.meta?.group_by ? ` by ${last.meta.group_by}` : ""}. Top results: ${(last.sample || [])
+        .slice(0, 3)
+        .map((r: any) => `${r.key ?? ""}=${r.value ?? ""}`)
+        .join(", ")}.`
+    : "No data tool was used.";
+  const prompt = `A finance manager is exploring a company's card-spend data (dimensions: category, merchant, US state / Canadian province, country, card, month; metrics: total / average / count; views: totals, trends over time, comparisons, top merchants, transaction lists).
+They asked: "${userMessage}"
+Answer given: "${answer}"
+${ctx}
+Propose exactly 3 SHORT follow-up questions (each <= 10 words) that drill deeper or branch to a related, NON-REPEATING angle, each answerable from this spend data. Reference concrete categories / merchants / places from the results when useful. Avoid repeating the question already asked.
+Return ONLY JSON: {"followUps":["...","...","..."]}`;
+
+  const { resp } = await generateWithFallback(
+    ai,
+    { contents: [{ role: "user", parts: [{ text: prompt }] }], config: { responseMimeType: "application/json", temperature: 0.8 } },
+    { startModel: model }
+  );
+  const parsed = JSON.parse(resp.text || "{}");
+  const arr = Array.isArray(parsed?.followUps) ? parsed.followUps : [];
+  const clean = [...new Set(arr.map((s: any) => String(s).trim()).filter(Boolean))].slice(0, 3);
+  return clean.length ? clean : suggestFollowUps(toolCalls);
+}
+
 /** Reality primer + live schema facts. Identical each turn (cache-friendly). */
 function buildSystemInstruction(): string {
   const cats = getCategories();
@@ -204,8 +239,16 @@ export async function runAgent(history: ChatTurn[], userMessage: string): Promis
       continue; // let the model read the results and either call more tools or answer
     }
 
-    // No tool calls → final answer.
-    return { text: resp.text?.trim() || "I couldn't produce an answer for that.", viz: lastViz, toolCalls, followUps: suggestFollowUps(toolCalls) };
+    // No tool calls → final answer. Generate fresh, non-repeating follow-ups via
+    // the model (templated suggestions as a fallback so chips never vanish).
+    const answer = resp.text?.trim() || "I couldn't produce an answer for that.";
+    let followUps: string[];
+    try {
+      followUps = await generateFollowUps(ai, pinnedModel, userMessage, answer, toolCalls);
+    } catch {
+      followUps = suggestFollowUps(toolCalls);
+    }
+    return { text: answer, viz: lastViz, toolCalls, followUps };
   }
 
   return {
