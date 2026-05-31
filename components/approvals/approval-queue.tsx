@@ -20,6 +20,8 @@ import {
   AlertTriangle,
   Tag,
   ChevronRight,
+  Scale,
+  Gavel,
 } from "lucide-react";
 import { cn, formatCAD } from "@/lib/utils";
 import { SectionCard } from "@/components/kpi-card";
@@ -311,8 +313,8 @@ function ApprovalCard({ req, busy, onDecide }: { req: any; busy: boolean; onDeci
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              <Sparkles className="h-3.5 w-3.5 text-primary" />
-              <span className="text-xs font-semibold uppercase tracking-wide">AI recommendation</span>
+              {ctx.prosecutorCase ? <Gavel className="h-3.5 w-3.5 text-primary" /> : <Sparkles className="h-3.5 w-3.5 text-primary" />}
+              <span className="text-xs font-semibold uppercase tracking-wide">{ctx.prosecutorCase ? "Agent debate verdict" : "AI recommendation"}</span>
               <span className={cn("text-xs font-bold uppercase", rec.cls)}>{rec.label}</span>
               {req.ai_confidence != null && (
                 <span className="text-[13px] text-muted-foreground">({Math.round(req.ai_confidence * 100)}% confidence)</span>
@@ -322,7 +324,31 @@ function ApprovalCard({ req, busy, onDecide }: { req: any; busy: boolean; onDeci
           </div>
         </div>
 
-        {(ctx.approveCase || ctx.denyCase) && (
+        {ctx.prosecutorCase || ctx.defenderCase ? (
+          <div className="mt-4">
+            <div className="mb-2 flex items-center gap-1.5 text-[13px] font-medium uppercase tracking-wide text-neutral-500">
+              <Scale className="h-3.5 w-3.5 text-primary" /> Agents debated this
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {ctx.prosecutorCase && (
+                <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-3">
+                  <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-destructive">
+                    <CircleX className="h-3.5 w-3.5" /> Prosecutor · argues deny
+                  </div>
+                  <p className="mt-1.5 text-sm leading-relaxed text-neutral-700">{ctx.prosecutorCase}</p>
+                </div>
+              )}
+              {ctx.defenderCase && (
+                <div className="rounded-lg border border-primary/20 bg-primary/5 p-3">
+                  <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-primary">
+                    <CircleCheck className="h-3.5 w-3.5" /> Defender · argues approve
+                  </div>
+                  <p className="mt-1.5 text-sm leading-relaxed text-neutral-700">{ctx.defenderCase}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        ) : (ctx.approveCase || ctx.denyCase) ? (
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             {ctx.approveCase && (
               <div className="rounded-lg border border-primary/20 bg-primary/5 p-3">
@@ -341,7 +367,7 @@ function ApprovalCard({ req, busy, onDecide }: { req: any; busy: boolean; onDeci
               </div>
             )}
           </div>
-        )}
+        ) : null}
       </div>
 
       {/* Actions */}
