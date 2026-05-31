@@ -7,6 +7,7 @@ import { recurringCharges, recurringSummary } from "@/lib/recurring";
 import { fxSummary, fxByMonth, fxByCategory, topUsdStates } from "@/lib/fx";
 import { categoryProfiles, profilesSummary } from "@/lib/profiles";
 import { getCachedFeed } from "@/lib/insights-agent";
+import { fraudScan, fraudSummary } from "@/lib/fraud";
 
 export const dynamic = "force-dynamic";
 
@@ -24,6 +25,7 @@ export default function InsightsPage() {
     recurring: { summary: recurringSummary(), charges: recurringCharges(20) },
     fx: { summary: fxSummary(), byMonth: fxByMonth(), byCategory: fxByCategory(8), byState: topUsdStates(8) },
     profiles: { summary: profilesSummary(), categories: categoryProfiles() },
+    fraud: { summary: fraudSummary(), suspects: fraudScan(20) },
   };
   return (
     <div>
