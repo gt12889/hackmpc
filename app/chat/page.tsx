@@ -1,15 +1,5 @@
-import { PageHeader } from "@/components/page-header";
-import { ChatPanel } from "@/components/chat/chat-panel";
-
-export const dynamic = "force-dynamic";
+import { redirect } from "next/navigation";
 
 export default function ChatPage() {
-  return (
-    <div className="flex h-[calc(100vh-3.5rem)] flex-col">
-      <PageHeader title="Talk to Your Data" description="ChatGPT for your company's spending — charts and follow-ups included" />
-      <div className="flex-1 overflow-hidden">
-        <ChatPanel />
-      </div>
-    </div>
-  );
+  redirect("/dashboard");
 }

@@ -23,7 +23,7 @@ const SUGGESTIONS = [
   "Which card spent the most on maintenance?",
 ];
 
-export function ChatPanel() {
+export function ChatPanel({ compact = false }: { compact?: boolean }) {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -58,7 +58,7 @@ export function ChatPanel() {
 
   return (
     <div className="flex h-full flex-col">
-      <div ref={scrollRef} className="flex-1 space-y-6 overflow-y-auto px-8 py-6">
+      <div ref={scrollRef} className={cn("flex-1 space-y-6 overflow-y-auto py-6", compact ? "px-4" : "px-8")}>
         {messages.length === 0 && (
           <div className="mx-auto mt-10 max-w-2xl text-center">
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-primary/15 ring-1 ring-primary/30">
@@ -94,13 +94,13 @@ export function ChatPanel() {
         )}
       </div>
 
-      <div className="border-t border-border bg-background/80 px-8 py-4 backdrop-blur">
+      <div className={cn("border-t border-border bg-background/80 py-4 backdrop-blur", compact ? "px-4" : "px-8")}>
         <form
           onSubmit={(e) => {
             e.preventDefault();
             send(input);
           }}
-          className="mx-auto flex max-w-3xl items-center gap-2"
+          className={cn("mx-auto flex items-center gap-2", compact ? "max-w-none" : "max-w-3xl")}
         >
           <input
             value={input}

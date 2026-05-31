@@ -5,12 +5,10 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import {
   LayoutDashboard,
-  MessagesSquare,
   ShieldCheck,
   CheckSquare,
   FileText,
   Sparkles,
-  CreditCard,
   ChevronDown,
   LayoutGrid,
 } from "lucide-react";
@@ -18,10 +16,7 @@ import { cn } from "@/lib/utils";
 
 type Item = { href: string; label: string; icon: any; desc?: string };
 
-const PRIMARY: Item[] = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/chat", label: "Ask AI", icon: MessagesSquare },
-];
+const PRIMARY: Item[] = [{ href: "/dashboard", label: "Dashboard", icon: LayoutDashboard }];
 
 const GROUPS: { label: string; icon: any; items: Item[] }[] = [
   {
@@ -40,17 +35,9 @@ export function TopNav() {
   const pathname = usePathname();
   return (
     <header className="sticky top-0 z-50 border-b border-border/60 bg-background/60 backdrop-blur-xl">
-      <div className="flex h-14 items-center gap-1 px-5">
-        {/* Brand */}
-        <Link href="/" className="mr-3 flex shrink-0 items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[hsl(189_100%_29%)] to-[hsl(187_95%_45%)] shadow-lg shadow-primary/25">
-            <CreditCard className="h-[18px] w-[18px] text-white" />
-          </div>
-          <span className="text-[15px] tracking-tight">Brim It</span>
-        </Link>
-
-        {/* Primary links */}
-        <nav className="flex flex-1 items-center gap-1">
+      <div className="grid h-14 grid-cols-[1fr_auto_1fr] items-center gap-2 px-5">
+        {/* Left nav */}
+        <nav className="flex items-center gap-1 justify-self-start">
           {PRIMARY.map(({ href, label, icon: Icon }) => {
             const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
             return (
@@ -65,8 +52,13 @@ export function TopNav() {
           ))}
         </nav>
 
+        {/* Center title */}
+        <Link href="/" className="justify-self-center text-[17px] tracking-tight text-foreground transition-opacity hover:opacity-80">
+          Brim It
+        </Link>
+
         {/* Right badge */}
-        <div className="hidden shrink-0 items-center gap-2 rounded-full border border-border/60 bg-foreground/[0.03] px-3 py-1.5 lg:flex">
+        <div className="hidden shrink-0 items-center gap-2 justify-self-end rounded-full border border-border/60 bg-foreground/[0.03] px-3 py-1.5 lg:flex">
           <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />
           <span className="text-[11px] text-muted-foreground">Brim × MPC Hacks</span>
         </div>

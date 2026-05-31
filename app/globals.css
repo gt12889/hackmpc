@@ -4,38 +4,37 @@
 
 @layer base {
   :root {
-    /* Brim aesthetic: teal #007d93 primary + cyan #00c1d5 accent on #1d1d1d/#fff.
-       Light tokens defined; app ships dark-first. */
-    --background: 0 0% 100%;
-    --foreground: 0 0% 11%; /* #1d1d1d */
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 11%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 11%;
-    --primary: 189 100% 29%; /* Brim teal #007d93 */
-    --primary-foreground: 0 0% 100%;
-    --secondary: 192 30% 95%;
-    --secondary-foreground: 0 0% 11%;
-    --muted: 192 24% 95%;
-    --muted-foreground: 0 0% 40%;
-    --accent: 187 80% 94%;
-    --accent-foreground: 189 100% 24%;
-    --destructive: 354 98% 41%; /* Brim red #d0021b */
+    /* Light beige canvas with sky blue type. */
+    --background: 40 33% 94%; /* light beige #F2EBE0 */
+    --foreground: 199 76% 46%; /* sky blue */
+    --card: 40 30% 97%;
+    --card-foreground: 199 76% 46%;
+    --popover: 40 30% 97%;
+    --popover-foreground: 199 76% 46%;
+    --primary: 199 85% 48%;
+    --primary-foreground: 40 33% 98%;
+    --secondary: 40 25% 88%;
+    --secondary-foreground: 199 76% 42%;
+    --muted: 40 22% 90%;
+    --muted-foreground: 199 55% 58%;
+    --accent: 199 55% 88%;
+    --accent-foreground: 199 76% 40%;
+    --destructive: 354 98% 41%;
     --destructive-foreground: 0 0% 100%;
     --success: 162 70% 34%;
     --success-foreground: 0 0% 100%;
     --warning: 36 96% 48%;
-    --warning-foreground: 0 0% 11%;
-    --border: 192 18% 88%;
-    --input: 192 18% 88%;
-    --ring: 189 100% 29%;
+    --warning-foreground: 199 76% 38%;
+    --border: 40 20% 82%;
+    --input: 40 20% 82%;
+    --ring: 199 76% 46%;
     --radius: 0.6rem;
-    --chart-1: 187 100% 42%; /* cyan #00c1d5 */
-    --chart-2: 189 100% 29%; /* teal #007d93 */
-    --chart-3: 205 100% 22%; /* deep blue #004070 */
-    --chart-4: 186 50% 59%;  /* light teal #65c8ce */
+    --chart-1: 199 85% 55%;
+    --chart-2: 199 76% 46%;
+    --chart-3: 205 70% 52%;
+    --chart-4: 197 65% 68%;
     --chart-5: 36 96% 50%;
-    --chart-6: 244 100% 36%; /* indigo #0800b9 */
+    --chart-6: 244 70% 58%;
     --chart-7: 330 70% 52%;
     --chart-8: 12 78% 52%;
   }
@@ -102,12 +101,9 @@
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1, "tnum" 1;
     letter-spacing: -0.01em;
-  }
-  /* Brim ambiance: faint teal/cyan glow anchored top corners, fixed. */
-  .dark body {
     background-image:
-      radial-gradient(60rem 40rem at 8% -8%, hsl(187 95% 44% / 0.10), transparent 60%),
-      radial-gradient(50rem 40rem at 100% 0%, hsl(189 100% 36% / 0.08), transparent 55%);
+      radial-gradient(60rem 40rem at 8% -8%, hsl(199 76% 46% / 0.08), transparent 60%),
+      radial-gradient(50rem 40rem at 100% 0%, hsl(197 65% 68% / 0.10), transparent 55%);
     background-attachment: fixed;
   }
   /* Tabular numbers everywhere money is shown keeps columns aligned. */

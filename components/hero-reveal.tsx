@@ -104,7 +104,7 @@ export function HeroReveal() {
           y = ccy + (y - ccy) * zoom;
           const alpha = 0.28 + 0.55 * e + 0.1 * Math.sin(t + pt.ph);
           ctx.beginPath();
-          ctx.fillStyle = pt.teal ? `hsla(189,100%,40%,${clamp(alpha)})` : `hsla(187,95%,54%,${clamp(alpha)})`;
+          ctx.fillStyle = pt.teal ? `hsla(199,76%,46%,${clamp(alpha)})` : `hsla(197,65%,68%,${clamp(alpha)})`;
           ctx.arc(x, y, pt.r * (0.9 + 0.6 * e) * zoom, 0, Math.PI * 2);
           ctx.fill();
         }
@@ -129,14 +129,14 @@ export function HeroReveal() {
           {/* Optional parallax art — drop /public/hero/streams.png */}
           <div className="absolute inset-0 bg-cover bg-center opacity-35" style={{ backgroundImage: "url(/hero/streams.png)", transform: `translateY(${p * -50}px)` }} />
           <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />
-          {/* Ambient teal glows */}
+          {/* Ambient sky-blue glows */}
           <div className="pointer-events-none absolute inset-0" style={{
             backgroundImage:
-              "radial-gradient(42rem 30rem at 50% 40%, hsl(189 100% 32% / 0.20), transparent 62%), radial-gradient(38rem 28rem at 64% 56%, hsl(187 95% 46% / 0.12), transparent 60%)",
+              "radial-gradient(42rem 30rem at 50% 40%, hsl(199 76% 46% / 0.14), transparent 62%), radial-gradient(38rem 28rem at 64% 56%, hsl(197 65% 68% / 0.12), transparent 60%)",
           }} />
-          {/* Tighter, more focused vignette */}
+          {/* Soft beige vignette */}
           <div className="pointer-events-none absolute inset-0" style={{
-            background: "radial-gradient(95% 78% at 50% 50%, transparent 26%, hsl(195 42% 6% / 0.78) 66%, hsl(195 42% 4%) 100%)",
+            background: "radial-gradient(95% 78% at 50% 50%, transparent 26%, hsl(40 33% 94% / 0.65) 66%, hsl(40 28% 88%) 100%)",
           }} />
         </div>
 
@@ -153,7 +153,7 @@ export function HeroReveal() {
             })}
 
             <div className="absolute flex flex-col items-center" style={{ opacity: brand, transform: `translateY(${(1 - brand) * 32}px) scale(${0.92 + brand * 0.08})` }}>
-              <h1 className="bg-gradient-to-b from-white via-cyan-100 to-cyan-300/70 bg-clip-text text-8xl tracking-tight text-transparent md:text-[10rem]">
+              <h1 className="bg-gradient-to-b from-[hsl(199_76%_46%)] via-[hsl(199_85%_55%)] to-[hsl(197_65%_68%)] bg-clip-text text-8xl tracking-tight text-transparent md:text-[10rem]">
                 Brim It
               </h1>
               <p className="mt-2 text-lg text-muted-foreground md:text-2xl" style={{ opacity: tagline }}>
