@@ -57,7 +57,7 @@ export function ChatPanel() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-81px)] flex-col">
+    <div className="flex h-full flex-col">
       <div ref={scrollRef} className="flex-1 space-y-6 overflow-y-auto px-8 py-6">
         {messages.length === 0 && (
           <div className="mx-auto mt-10 max-w-2xl text-center">

@@ -77,12 +77,31 @@
 }
 
 @layer base {
+  :root {
+    --font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --font-mono: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  }
   * {
     @apply border-border;
+  }
+  /* All type: Helvetica, bold, across the whole app (per design direction). */
+  html,
+  body,
+  button,
+  input,
+  textarea,
+  select,
+  th {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  }
+  * {
+    font-weight: 700 !important;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif !important;
   }
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1, "tnum" 1;
+    letter-spacing: -0.01em;
   }
   /* Brim ambiance: faint teal/cyan glow anchored top corners, fixed. */
   .dark body {

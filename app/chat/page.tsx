@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 
 export default function ChatPage() {
   return (
-    <div className="flex h-screen flex-col">
+    <div className="flex h-[calc(100vh-3.5rem)] flex-col">
       <PageHeader title="Talk to Your Data" description="ChatGPT for your company's spending — charts and follow-ups included" />
       <div className="flex-1 overflow-hidden">
         <ChatPanel />
