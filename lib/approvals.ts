@@ -132,6 +132,50 @@ export function synthesizeRequests(): number {
   return candidates.length;
 }
 
+/** Build the rich per-request payload (card history, budget status, policy flags,
+ *  merchant history) the AI/agents reason over. Shared by the single-call path and
+ *  the multi-agent debate so the two never drift. */
+export function buildRequestPayload(db: import("better-sqlite3").Database, r: any) {
+  const ctx = JSON.parse(r.ai_context || "{}");
+  const violations = db
+    .prepare(`SELECT rule_name, severity FROM violations WHERE transaction_id=? AND status='open'`)
+    .all(r.transaction_id) as RequestViolation[];
+  const merchantHistory = db
+    .prepare(
+      `SELECT txn_date, amount_cad, category, merchant_name FROM transactions
+       WHERE category NOT IN ('Payments & Settlements') AND direction='Debit'
+         AND transaction_code=? AND merchant_name LIKE ? AND id != ?
+       ORDER BY txn_date DESC LIMIT 5`
+    )
+    .all(r.transaction_code, `%${(r.merchant_name || "").slice(0, 12)}%`, r.transaction_id ?? 0) as MerchantHistoryRow[];
+  const card = db.prepare(`SELECT label, cardholder_alias FROM cards WHERE transaction_code=?`).get(r.transaction_code) as any;
+
+  return {
+    id: r.id,
+    card: r.transaction_code,
+    cardholder: card?.cardholder_alias ?? card?.label,
+    merchant: r.merchant_name,
+    category: r.category,
+    amount_cad: r.amount_cad,
+    reason: r.reason,
+    txn_date: ctx.txnDate,
+    location: [ctx.merchantCity, ctx.state, ctx.country].filter(Boolean).join(", "),
+    description: ctx.description,
+    mcc: ctx.mcc,
+    cross_border: ctx.isCrossBorder,
+    card_total_spend: ctx.cardTotalSpend,
+    card_txn_count: ctx.cardTxnCount,
+    card_category_spend: ctx.cardCategorySpend,
+    prior_txns_with_merchant: ctx.cardMerchantCount,
+    category_budget: ctx.categoryBudget,
+    category_monthly_avg: ctx.categoryMonthlyAvg,
+    category_spent_this_month: ctx.categoryThisMonth,
+    category_remaining: ctx.categoryRemaining,
+    policy_flags: violations,
+    prior_merchant_txns: merchantHistory,
+  };
+}
+
 /** One Gemini call → approve/deny/review recommendation + reasoning for all pending requests. */
 export async function generateRecommendations(): Promise<number> {
   const ai = getClient();
@@ -140,46 +184,7 @@ export async function generateRecommendations(): Promise<number> {
   const pending = db.prepare(`SELECT * FROM requests WHERE status='pending'`).all() as any[];
   if (!pending.length) return 0;
 
-  const payload = pending.map((r) => {
-    const ctx = JSON.parse(r.ai_context || "{}");
-    const violations = db
-      .prepare(`SELECT rule_name, severity FROM violations WHERE transaction_id=? AND status='open'`)
-      .all(r.transaction_id) as RequestViolation[];
-    const merchantHistory = db
-      .prepare(
-        `SELECT txn_date, amount_cad, category, merchant_name FROM transactions
-         WHERE category NOT IN ('Payments & Settlements') AND direction='Debit'
-           AND transaction_code=? AND merchant_name LIKE ? AND id != ?
-         ORDER BY txn_date DESC LIMIT 5`
-      )
-      .all(r.transaction_code, `%${(r.merchant_name || "").slice(0, 12)}%`, r.transaction_id ?? 0) as MerchantHistoryRow[];
-    const card = db.prepare(`SELECT label, cardholder_alias FROM cards WHERE transaction_code=?`).get(r.transaction_code) as any;
-
-    return {
-      id: r.id,
-      card: r.transaction_code,
-      cardholder: card?.cardholder_alias ?? card?.label,
-      merchant: r.merchant_name,
-      category: r.category,
-      amount_cad: r.amount_cad,
-      reason: r.reason,
-      txn_date: ctx.txnDate,
-      location: [ctx.merchantCity, ctx.state, ctx.country].filter(Boolean).join(", "),
-      description: ctx.description,
-      mcc: ctx.mcc,
-      cross_border: ctx.isCrossBorder,
-      card_total_spend: ctx.cardTotalSpend,
-      card_txn_count: ctx.cardTxnCount,
-      card_category_spend: ctx.cardCategorySpend,
-      prior_txns_with_merchant: ctx.cardMerchantCount,
-      category_budget: ctx.categoryBudget,
-      category_monthly_avg: ctx.categoryMonthlyAvg,
-      category_spent_this_month: ctx.categoryThisMonth,
-      category_remaining: ctx.categoryRemaining,
-      policy_flags: violations,
-      prior_merchant_txns: merchantHistory,
-    };
-  });
+  const payload = pending.map((r) => buildRequestPayload(db, r));
 
   const prompt = `${POLICY_SUMMARY}
 
