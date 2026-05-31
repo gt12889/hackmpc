@@ -47,15 +47,15 @@ export function HeroReveal() {
       canvas.height = Math.floor(h * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-      const count = Math.min(240, Math.floor(w / 6));
+      const count = Math.min(520, Math.floor(w / 3.5));
       const bars = BAR_H.length;
-      // Tighter, more focal chart footprint.
-      const chartW = Math.min(w * 0.46, 520);
+      // Wide chart footprint so the organized state fills the frame.
+      const chartW = Math.min(w * 0.7, 860);
       const x0 = (w - chartW) / 2;
       const gap = chartW / bars;
-      const barW = gap * 0.62;
-      const baseline = h * 0.64;
-      const maxH = h * 0.34;
+      const barW = gap * 0.7;
+      const baseline = h * 0.72;
+      const maxH = h * 0.46;
 
       particles = Array.from({ length: count }, (_, i) => {
         const b = i % bars;
@@ -103,8 +103,8 @@ export function HeroReveal() {
       if (visible) {
         ctx.clearRect(0, 0, w, h);
         ctx.globalCompositeOperation = "lighter";
-        // Zoom toward the focal centre as it organizes (the "zoom in" feel).
-        const zoom = 1 + e * 0.42;
+        // Gentle zoom toward centre as it organizes (kept low so it stays spread out).
+        const zoom = 1 + e * 0.18;
         const ccx = w / 2, ccy = h * 0.55;
         for (const pt of particles) {
           const drift = (1 - e) * 12;
