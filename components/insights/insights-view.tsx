@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, type ReactNode } from "react";
+import { useState, useEffect, useRef, type ReactNode } from "react";
 import { toast } from "sonner";
 import {
   TrendingUp,
@@ -108,6 +108,14 @@ function DetailPanel({ tile, onClose }: { tile: Tile; onClose: () => void }) {
 
 export function InsightsView({ data }: { data: any }) {
   const [open, setOpen] = useState<string | null>(null);
+  const detailRef = useRef<HTMLDivElement>(null);
+
+  // When a tile is expanded, scroll the revealed panel into view so the data is visible.
+  useEffect(() => {
+    if (!open || !detailRef.current) return;
+    const el = detailRef.current;
+    requestAnimationFrame(() => el.scrollIntoView({ behavior: "smooth", block: "start" }));
+  }, [open]);
 
   // Mini-visual data derived from the summaries.
   const fc0 = data.forecast?.categories?.[0];
@@ -256,7 +264,11 @@ export function InsightsView({ data }: { data: any }) {
         ))}
       </div>
 
-      {openTile && <DetailPanel key={openTile.id} tile={openTile} onClose={() => setOpen(null)} />}
+      {openTile && (
+        <div ref={detailRef} className="scroll-mt-28">
+          <DetailPanel key={openTile.id} tile={openTile} onClose={() => setOpen(null)} />
+        </div>
+      )}
     </div>
   );
 }
