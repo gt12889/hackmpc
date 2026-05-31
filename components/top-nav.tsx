@@ -8,7 +8,7 @@ import {
   CheckSquare,
   FileText,
   Sparkles,
-  Home,
+
   ReceiptText,
   Wallet,
   type LucideIcon,
@@ -18,7 +18,6 @@ import { cn } from "@/lib/utils";
 type Item = { href: string; label: string; icon: LucideIcon };
 
 const NAV_ITEMS: Item[] = [
-  { href: "/", label: "Home", icon: Home },
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/compliance", label: "Compliance", icon: ShieldCheck },
   { href: "/approvals", label: "Approvals", icon: CheckSquare },
