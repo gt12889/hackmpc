@@ -19,9 +19,14 @@ _PRIMARY = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
 
 
 def model_chain() -> list[str]:
-    override = os.environ.get("GEMINI_MODELS")
+    override = os.environ.get("LLM_MODELS") or os.environ.get("GEMINI_MODELS")
     if override:
         chain = [m.strip() for m in override.split(",") if m.strip()]
+    elif os.environ.get("OPENAI_API_KEY"):
+        # OpenAI: real per-key limits (not free-tier-per-model), so one capable
+        # model plus a larger backstop is plenty - no quota juggling needed.
+        primary = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
+        chain = [primary, "gpt-4o-mini", "gpt-4o"]
     else:
         chain = [
             _PRIMARY,
@@ -66,9 +71,18 @@ def should_try_next(exc: Exception) -> bool:
 
 
 def make_llm(model: str):
-    """Construct a Gemini chat model. Imported lazily so tests that inject a
-    fake `llm_factory` never require the langchain_google_genai dependency at
-    import time and never need an API key."""
+    """Construct a chat model for the given model id. OpenAI (gpt-*/o*) and Gemini
+    are both supported; imported lazily so tests that inject a fake `llm_factory`
+    never require a provider SDK at import time or need an API key."""
+    if model.startswith(("gpt", "o1", "o3", "o4", "chatgpt")):
+        from langchain_openai import ChatOpenAI
+
+        return ChatOpenAI(
+            model=model,
+            api_key=os.environ.get("OPENAI_API_KEY"),
+            temperature=0.3,
+        )
+
     from langchain_google_genai import ChatGoogleGenerativeAI
 
     return ChatGoogleGenerativeAI(

@@ -10,6 +10,7 @@ dependencies = [
     "langgraph>=0.2.50",
     "langchain-google-genai>=2.0.7",
     "pydantic>=2.9",
+    "langchain-openai>=1.2.2",
 ]
 
 [dependency-groups]
