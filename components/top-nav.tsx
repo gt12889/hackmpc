@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { NotificationBell } from "@/components/notifications/notification-bell";
+import { ProfileMenu } from "@/components/profile-menu";
 import { BrimCardIcon } from "@/components/brim-card-icon";
 
 type Item = { href: string; label: string; icon: LucideIcon };
@@ -43,8 +44,9 @@ export function TopNav() {
           <img src="/brim-it-logo.png" alt="Brim It" width={435} height={87} className="h-[26px] w-auto max-w-none md:h-[30px]" />
           <BrimCardIcon className="mt-6 h-9 w-auto shrink-0 overflow-visible text-primary md:mt-4 md:h-10" />
         </Link>
-        <div className="absolute right-4 top-1/2 -translate-y-1/2">
+        <div className="absolute right-4 top-1/2 flex -translate-y-1/2 items-center gap-3 md:gap-4">
           <NotificationBell />
+          <ProfileMenu />
         </div>
       </div>
 

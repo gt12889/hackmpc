@@ -78,14 +78,14 @@ export function NotificationBell() {
     <div ref={ref} className="relative">
       <button
         onClick={() => { setOpen((o) => !o); }}
-        className="relative flex h-9 w-9 items-center justify-center rounded-full text-primary transition-colors hover:bg-primary/10"
+        className="relative flex h-11 w-11 items-center justify-center rounded-full text-primary transition-colors hover:bg-primary/10"
         aria-label="Notifications"
         aria-haspopup="menu"
         aria-expanded={open}
       >
-        <Bell className="h-5 w-5" />
+        <Bell className="h-6 w-6" />
         {unread > 0 && (
-          <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-red-500 px-1 text-[12px] font-semibold text-white">
+          <span className="absolute -right-0.5 -top-0.5 flex h-[1.125rem] min-w-[1.125rem] items-center justify-center rounded-full bg-red-500 px-1 text-[12px] font-semibold text-white">
             {unread > 9 ? "9+" : unread}
           </span>
         )}
