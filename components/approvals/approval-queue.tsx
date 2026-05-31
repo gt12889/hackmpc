@@ -14,6 +14,11 @@ import {
   CircleCheck,
   CircleX,
   CircleHelp,
+  MapPin,
+  Calendar,
+  FileText,
+  AlertTriangle,
+  Tag,
 } from "lucide-react";
 import { cn, formatCAD } from "@/lib/utils";
 import { SectionCard } from "@/components/kpi-card";
@@ -24,6 +29,13 @@ const REC_STYLE: Record<string, { cls: string; icon: any; label: string }> = {
   approve: { cls: "text-primary", icon: CircleCheck, label: "Approve" },
   deny: { cls: "text-destructive", icon: CircleX, label: "Deny" },
   review: { cls: "text-warning", icon: CircleHelp, label: "Review" },
+};
+
+const SEV_DOT: Record<string, string> = {
+  critical: "bg-red-600",
+  high: "bg-orange-500",
+  medium: "bg-amber-500",
+  low: "bg-slate-400",
 };
 
 export function ApprovalQueue({ initial }: { initial: any }) {
@@ -40,7 +52,6 @@ export function ApprovalQueue({ initial }: { initial: any }) {
     if (busy) return;
     setBusy(id);
     setExit({ id, dir: decision === "approved" ? "right" : "left" });
-    // let the card slide out before the queue advances
     await new Promise((r) => setTimeout(r, 320));
     try {
       await fetch(`/api/requests/${id}`, {
@@ -103,15 +114,13 @@ export function ApprovalQueue({ initial }: { initial: any }) {
       </div>
 
       {pending.length > 0 ? (
-        <div className="relative mx-auto max-w-2xl pb-6">
-          {/* deck behind, implying more in the queue */}
+        <div className="relative mx-auto max-w-4xl pb-6">
           {pending.length > 2 && (
             <div className="absolute inset-x-8 top-0 -z-20 h-full translate-y-6 scale-[0.92] rounded-2xl border border-border/50 bg-card/40" />
           )}
           {pending.length > 1 && (
             <div className="absolute inset-x-4 top-0 -z-10 h-full translate-y-3 scale-[0.96] rounded-2xl border border-border/60 bg-card/60" />
           )}
-          {/* active card slides out on decision, next slides up */}
           <div
             key={pending[0].id}
             className="relative transition-all duration-300 ease-out"
@@ -160,58 +169,161 @@ function ApprovalCard({ req, busy, onDecide }: { req: any; busy: boolean; onDeci
   const rec = REC_STYLE[req.ai_recommendation] || REC_STYLE.review;
   const RecIcon = rec.icon;
   const overBudget = ctx.categoryRemaining < 0;
+  const location = [ctx.merchantCity, ctx.state, ctx.country].filter(Boolean).join(", ");
+  const history: any[] = req.merchantHistory ?? [];
+  const flags: any[] = req.violations ?? [];
 
   return (
-    <div className="rounded-xl border border-border bg-card p-5">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="text-base font-semibold">{req.merchant_name}</span>
+    <div className="rounded-xl border border-border bg-card p-6">
+      {/* Header */}
+      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-border/60 pb-5">
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xl font-semibold">{req.merchant_name}</span>
             <span className="rounded-md bg-secondary px-2 py-0.5 text-[13px] text-muted-foreground">{req.category}</span>
+            {ctx.subcategory && (
+              <span className="rounded-md bg-secondary/60 px-2 py-0.5 text-[13px] text-muted-foreground">{ctx.subcategory}</span>
+            )}
           </div>
-          <p className="mt-0.5 text-sm text-muted-foreground">{req.reason}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{req.reason}</p>
+          {ctx.description && (
+            <p className="mt-1.5 flex items-start gap-1.5 text-sm text-neutral-700">
+              <FileText className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+              {ctx.description}
+            </p>
+          )}
         </div>
         <div className="text-right">
-          <div className="text-2xl font-semibold tabular-nums text-primary">{formatCAD(req.amount_cad)}</div>
-          <div className="text-[13px] text-muted-foreground">Card {req.transaction_code} · {ctx.month}</div>
+          <div className="text-3xl font-semibold tabular-nums text-primary">{formatCAD(req.amount_cad)}</div>
+          {ctx.currency && ctx.currency !== "CAD" && (
+            <div className="text-[13px] text-muted-foreground">{ctx.currency} · converted to CAD</div>
+          )}
         </div>
       </div>
 
-      {/* Context grid */}
-      <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <Ctx icon={CreditCard} label="Card total spend" value={formatCAD(ctx.cardTotalSpend || 0, { compact: true })} />
-        <Ctx icon={History} label={`Prior ${req.category} (card)`} value={formatCAD(ctx.cardCategorySpend || 0, { compact: true })} />
-        <Ctx icon={History} label="Prior txns w/ vendor" value={String(ctx.cardMerchantCount ?? 0)} />
-        <Ctx
-          icon={Wallet}
-          label="Category budget left"
-          value={formatCAD(ctx.categoryRemaining || 0, { compact: true })}
-          tone={overBudget ? "destructive" : "primary"}
-        />
+      {/* Transaction details */}
+      <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <Detail icon={CreditCard} label="Card / holder" value={`${req.transaction_code}${req.cardholder ? ` · ${req.cardholder}` : ""}`} />
+        <Detail icon={Calendar} label="Transaction date" value={ctx.txnDate ? formatDate(ctx.txnDate) : "—"} sub={ctx.postingDate && ctx.postingDate !== ctx.txnDate ? `Posted ${formatDate(ctx.postingDate)}` : undefined} />
+        {location && <Detail icon={MapPin} label="Location" value={location} sub={ctx.isCrossBorder ? "Cross-border charge" : undefined} />}
+        {ctx.mcc && <Detail icon={Tag} label="MCC" value={ctx.mcc} />}
       </div>
+
+      {/* Policy flags */}
+      {flags.length > 0 && (
+        <div className="mt-5 rounded-lg border border-warning/40 bg-warning/5 p-4">
+          <div className="flex items-center gap-2 text-sm font-semibold text-warning">
+            <AlertTriangle className="h-4 w-4" />
+            Policy flags on this transaction
+          </div>
+          <ul className="mt-2 space-y-2">
+            {flags.map((v: any, i: number) => (
+              <li key={i} className="flex items-start gap-2 text-sm">
+                <span className={cn("mt-1.5 h-2 w-2 shrink-0 rounded-full", SEV_DOT[v.severity] ?? "bg-slate-400")} />
+                <div>
+                  <span className="font-medium">{v.rule_name}</span>
+                  <span className="ml-1.5 text-[13px] uppercase text-muted-foreground">{v.severity}</span>
+                  {v.ai_reasoning && <p className="mt-0.5 text-[13px] text-muted-foreground">{v.ai_reasoning}</p>}
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Spend context */}
+      <div className="mt-5">
+        <h3 className="text-[13px] font-medium uppercase tracking-wide text-neutral-500">Spend context</h3>
+        <div className="mt-2 grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <Ctx icon={CreditCard} label="Card total spend" value={formatCAD(ctx.cardTotalSpend || 0, { compact: true })} sub={`${ctx.cardTxnCount ?? 0} transactions`} />
+          <Ctx icon={History} label={`Prior ${req.category} (card)`} value={formatCAD(ctx.cardCategorySpend || 0, { compact: true })} />
+          <Ctx icon={History} label="Prior txns w/ vendor" value={String(ctx.cardMerchantCount ?? 0)} sub={ctx.cardMerchantCount > 0 ? "Established vendor" : "First-time vendor"} />
+          <Ctx
+            icon={Wallet}
+            label="Category budget left"
+            value={formatCAD(ctx.categoryRemaining || 0, { compact: true })}
+            sub={`${formatCAD(ctx.categoryThisMonth || 0, { compact: true })} of ${formatCAD(ctx.categoryBudget || 0, { compact: true })} used in ${ctx.month}`}
+            tone={overBudget ? "destructive" : "primary"}
+          />
+        </div>
+      </div>
+
+      {/* Merchant history */}
+      {history.length > 0 && (
+        <div className="mt-5">
+          <h3 className="text-[13px] font-medium uppercase tracking-wide text-neutral-500">Prior charges with this vendor (same card)</h3>
+          <div className="mt-2 overflow-hidden rounded-lg border border-border/60">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border/60 bg-secondary/30 text-left text-[13px] text-muted-foreground">
+                  <th className="px-3 py-2 font-medium">Date</th>
+                  <th className="px-3 py-2 font-medium">Merchant</th>
+                  <th className="px-3 py-2 font-medium">Category</th>
+                  <th className="px-3 py-2 text-right font-medium">Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                {history.map((h: any, i: number) => (
+                  <tr key={i} className="border-b border-border/40 last:border-0">
+                    <td className="px-3 py-2 text-neutral-600">{h.txn_date}</td>
+                    <td className="max-w-[180px] truncate px-3 py-2">{h.merchant_name}</td>
+                    <td className="px-3 py-2 text-neutral-600">{h.category}</td>
+                    <td className="px-3 py-2 text-right tabular-nums">{formatCAD(h.amount_cad)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       {/* AI recommendation */}
-      <div className="mt-4 flex items-start gap-3 rounded-lg border border-border bg-secondary/30 p-3">
-        <div className={cn("mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-background", rec.cls)}>
-          <RecIcon className="h-5 w-5" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <Sparkles className="h-3.5 w-3.5 text-primary" />
-            <span className="text-xs font-semibold uppercase tracking-wide">AI Recommendation:</span>
-            <span className={cn("text-xs font-bold uppercase", rec.cls)}>{rec.label}</span>
-            {req.ai_confidence != null && <span className="text-[13px] text-muted-foreground">({Math.round(req.ai_confidence * 100)}% confidence)</span>}
+      <div className="mt-5 rounded-lg border border-border bg-secondary/30 p-4">
+        <div className="flex items-start gap-3">
+          <div className={cn("mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-background", rec.cls)}>
+            <RecIcon className="h-5 w-5" />
           </div>
-          <p className="mt-1 text-sm text-muted-foreground">{req.ai_reasoning}</p>
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <Sparkles className="h-3.5 w-3.5 text-primary" />
+              <span className="text-xs font-semibold uppercase tracking-wide">AI recommendation</span>
+              <span className={cn("text-xs font-bold uppercase", rec.cls)}>{rec.label}</span>
+              {req.ai_confidence != null && (
+                <span className="text-[13px] text-muted-foreground">({Math.round(req.ai_confidence * 100)}% confidence)</span>
+              )}
+            </div>
+            {req.ai_reasoning && <p className="mt-2 text-sm leading-relaxed text-neutral-800">{req.ai_reasoning}</p>}
+          </div>
         </div>
+
+        {(ctx.approveCase || ctx.denyCase) && (
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            {ctx.approveCase && (
+              <div className="rounded-lg border border-primary/20 bg-primary/5 p-3">
+                <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-primary">
+                  <CircleCheck className="h-3.5 w-3.5" /> Case for approving
+                </div>
+                <p className="mt-1.5 text-sm leading-relaxed text-neutral-700">{ctx.approveCase}</p>
+              </div>
+            )}
+            {ctx.denyCase && (
+              <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-3">
+                <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-destructive">
+                  <CircleX className="h-3.5 w-3.5" /> Case for denying
+                </div>
+                <p className="mt-1.5 text-sm leading-relaxed text-neutral-700">{ctx.denyCase}</p>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Actions */}
-      <div className="mt-4 flex justify-end gap-2">
-        <button onClick={() => onDecide(req.id, "denied")} disabled={busy} className="inline-flex items-center gap-1.5 rounded-md border border-border px-4 py-2 text-sm font-medium hover:bg-destructive/10 hover:text-destructive disabled:opacity-50">
+      <div className="mt-5 flex justify-end gap-2 border-t border-border/60 pt-5">
+        <button onClick={() => onDecide(req.id, "denied")} disabled={busy} className="inline-flex items-center gap-1.5 rounded-md border border-border px-5 py-2.5 text-sm font-medium hover:bg-destructive/10 hover:text-destructive disabled:opacity-50">
           <X className="h-4 w-4" /> Deny
         </button>
-        <button onClick={() => onDecide(req.id, "approved")} disabled={busy} className="inline-flex items-center gap-1.5 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:opacity-50">
+        <button onClick={() => onDecide(req.id, "approved")} disabled={busy} className="inline-flex items-center gap-1.5 rounded-md bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:opacity-50">
           <Check className="h-4 w-4" /> Approve
         </button>
       </div>
@@ -219,13 +331,34 @@ function ApprovalCard({ req, busy, onDecide }: { req: any; busy: boolean; onDeci
   );
 }
 
-function Ctx({ icon: Icon, label, value, tone }: any) {
+function Detail({ icon: Icon, label, value, sub }: { icon: any; label: string; value: string; sub?: string }) {
+  return (
+    <div className="rounded-lg border border-border/60 bg-background/50 px-3 py-2.5">
+      <div className="flex items-center gap-1.5 text-[13px] text-muted-foreground">
+        <Icon className="h-3.5 w-3.5" /> {label}
+      </div>
+      <div className="mt-0.5 text-sm font-medium text-neutral-900">{value}</div>
+      {sub && <div className="mt-0.5 text-[13px] text-muted-foreground">{sub}</div>}
+    </div>
+  );
+}
+
+function Ctx({ icon: Icon, label, value, sub, tone }: any) {
   return (
     <div className="rounded-lg border border-border bg-background/50 p-2.5">
       <div className="flex items-center gap-1.5 text-[13px] text-muted-foreground">
         <Icon className="h-3 w-3" /> {label}
       </div>
       <div className={cn("mt-0.5 text-sm font-semibold tabular-nums", tone === "destructive" && "text-destructive", tone === "primary" && "text-primary")}>{value}</div>
+      {sub && <div className="mt-0.5 text-[13px] text-muted-foreground">{sub}</div>}
     </div>
   );
+}
+
+function formatDate(iso: string) {
+  try {
+    return new Date(iso + "T12:00:00").toLocaleDateString(undefined, { weekday: "short", year: "numeric", month: "short", day: "numeric" });
+  } catch {
+    return iso;
+  }
 }

@@ -16,6 +16,33 @@ export type ApprovalContext = {
   categoryThisMonth: number;
   categoryRemaining: number;
   month: string;
+  // Transaction snapshot (stored at queue build time)
+  txnDate?: string;
+  postingDate?: string;
+  description?: string;
+  mcc?: string;
+  subcategory?: string;
+  merchantCity?: string;
+  state?: string;
+  country?: string;
+  currency?: string;
+  isCrossBorder?: boolean;
+  // AI dual-rationale (populated after generateRecommendations)
+  approveCase?: string;
+  denyCase?: string;
+};
+
+export type MerchantHistoryRow = {
+  txn_date: string;
+  amount_cad: number;
+  category: string;
+  merchant_name: string;
+};
+
+export type RequestViolation = {
+  rule_name: string;
+  severity: string;
+  ai_reasoning: string | null;
 };
 
 function buildContext(card: string, category: string, merchant: string, date: string): ApprovalContext {
@@ -55,7 +82,8 @@ export function synthesizeRequests(): number {
   // plus a couple of split-charge groups for the approver to weigh in on.
   const candidates = db
     .prepare(
-      `SELECT id, transaction_code, category, merchant_name, amount_cad, txn_date, state_province, country
+      `SELECT id, transaction_code, category, merchant_name, amount_cad, txn_date, posting_date,
+              description, mcc, subcategory, merchant_city, state_province, country, currency, is_cross_border
        FROM transactions
        WHERE category NOT IN ('Payments & Settlements') AND direction='Debit' AND amount_cad >= 5000
        ORDER BY amount_cad DESC LIMIT 8`
@@ -84,7 +112,19 @@ export function synthesizeRequests(): number {
         merchant_name: r.merchant_name,
         amount_cad: r.amount_cad,
         reason: reasons[r.category] || "Expense requiring approval.",
-        ai_context: JSON.stringify({ ...ctx, state: r.state_province, country: r.country }),
+        ai_context: JSON.stringify({
+          ...ctx,
+          txnDate: r.txn_date,
+          postingDate: r.posting_date,
+          description: r.description,
+          mcc: r.mcc,
+          subcategory: r.subcategory,
+          merchantCity: r.merchant_city,
+          state: r.state_province,
+          country: r.country,
+          currency: r.currency,
+          isCrossBorder: !!r.is_cross_border,
+        }),
       });
     }
   });
@@ -102,27 +142,58 @@ export async function generateRecommendations(): Promise<number> {
 
   const payload = pending.map((r) => {
     const ctx = JSON.parse(r.ai_context || "{}");
+    const violations = db
+      .prepare(`SELECT rule_name, severity FROM violations WHERE transaction_id=? AND status='open'`)
+      .all(r.transaction_id) as RequestViolation[];
+    const merchantHistory = db
+      .prepare(
+        `SELECT txn_date, amount_cad, category, merchant_name FROM transactions
+         WHERE category NOT IN ('Payments & Settlements') AND direction='Debit'
+           AND transaction_code=? AND merchant_name LIKE ? AND id != ?
+         ORDER BY txn_date DESC LIMIT 5`
+      )
+      .all(r.transaction_code, `%${(r.merchant_name || "").slice(0, 12)}%`, r.transaction_id ?? 0) as MerchantHistoryRow[];
+    const card = db.prepare(`SELECT label, cardholder_alias FROM cards WHERE transaction_code=?`).get(r.transaction_code) as any;
+
     return {
       id: r.id,
       card: r.transaction_code,
+      cardholder: card?.cardholder_alias ?? card?.label,
       merchant: r.merchant_name,
       category: r.category,
       amount_cad: r.amount_cad,
       reason: r.reason,
+      txn_date: ctx.txnDate,
+      location: [ctx.merchantCity, ctx.state, ctx.country].filter(Boolean).join(", "),
+      description: ctx.description,
+      mcc: ctx.mcc,
+      cross_border: ctx.isCrossBorder,
       card_total_spend: ctx.cardTotalSpend,
+      card_txn_count: ctx.cardTxnCount,
       card_category_spend: ctx.cardCategorySpend,
       prior_txns_with_merchant: ctx.cardMerchantCount,
       category_budget: ctx.categoryBudget,
+      category_monthly_avg: ctx.categoryMonthlyAvg,
       category_spent_this_month: ctx.categoryThisMonth,
       category_remaining: ctx.categoryRemaining,
+      policy_flags: violations,
+      prior_merchant_txns: merchantHistory,
     };
   });
 
   const prompt = `${POLICY_SUMMARY}
 
-You are the finance approver for a small/medium business. For each pre-approval request below, decide a recommendation: "approve", "deny", or "review" (needs more info). Weigh: policy compliance, whether the amount fits the card's history and the category budget, and whether the merchant is an established/legitimate vendor. Established vendors with consistent history and budget headroom → approve. Over-budget or unusual merchant/amount → review or deny.
+You are the finance approver for a cross-border trucking / fleet SMB. For each pre-approval request, weigh policy compliance, card spend history, category budget headroom, merchant familiarity, location, and any policy flags.
 
-Return ONLY a JSON array: [{"id": <number>, "recommendation": "approve|deny|review", "confidence": <0..1>, "reasoning": "<2 sentences citing the history/budget numbers>"}].
+For each request return:
+- recommendation: "approve", "deny", or "review"
+- confidence: 0..1
+- reasoning: 2–3 sentences summarizing your call, citing specific numbers (amounts, budget remaining, prior merchant count)
+- approve_case: 2–3 sentences on why approving would be reasonable given the transaction details and context (even if you recommend deny/review)
+- deny_case: 2–3 sentences on why denying would be reasonable given the risks, policy, or budget pressure (even if you recommend approve/review)
+
+Return ONLY a JSON array:
+[{"id": <number>, "recommendation": "approve|deny|review", "confidence": <0..1>, "reasoning": "...", "approve_case": "...", "deny_case": "..."}]
 
 Requests:
 ${JSON.stringify(payload, null, 1)}`;
@@ -148,12 +219,16 @@ ${JSON.stringify(payload, null, 1)}`;
     parsed = JSON.parse(m[0]);
   }
 
-  const upd = db.prepare(`UPDATE requests SET ai_recommendation=?, ai_confidence=?, ai_reasoning=? WHERE id=?`);
+  const upd = db.prepare(`UPDATE requests SET ai_recommendation=?, ai_confidence=?, ai_reasoning=?, ai_context=? WHERE id=?`);
   let n = 0;
   const tx = db.transaction((items: any[]) => {
     for (const it of items) {
       const rec = ["approve", "deny", "review"].includes(it.recommendation) ? it.recommendation : "review";
-      upd.run(rec, Number(it.confidence) || null, it.reasoning ?? null, it.id);
+      const row = pending.find((r) => r.id === it.id);
+      const ctx = JSON.parse(row?.ai_context || "{}");
+      if (it.approve_case) ctx.approveCase = it.approve_case;
+      if (it.deny_case) ctx.denyCase = it.deny_case;
+      upd.run(rec, Number(it.confidence) || null, it.reasoning ?? null, JSON.stringify(ctx), it.id);
       n++;
     }
   });
@@ -161,12 +236,62 @@ ${JSON.stringify(payload, null, 1)}`;
   return n;
 }
 
+function enrichRequest(row: any) {
+  const db = getDb();
+  const context: ApprovalContext = JSON.parse(row.ai_context || "{}");
+  const NON_OP = `category NOT IN ('Payments & Settlements') AND direction='Debit'`;
+
+  const card = db.prepare(`SELECT label, cardholder_alias FROM cards WHERE transaction_code=?`).get(row.transaction_code) as any;
+
+  const merchantHistory = db
+    .prepare(
+      `SELECT txn_date, amount_cad, category, merchant_name FROM transactions
+       WHERE ${NON_OP} AND transaction_code=? AND merchant_name LIKE ? AND id != ?
+       ORDER BY txn_date DESC LIMIT 5`
+    )
+    .all(row.transaction_code, `%${(row.merchant_name || "").slice(0, 12)}%`, row.transaction_id ?? 0) as MerchantHistoryRow[];
+
+  const violations = row.transaction_id
+    ? (db
+        .prepare(`SELECT rule_name, severity, ai_reasoning FROM violations WHERE transaction_id=? AND status='open'`)
+        .all(row.transaction_id) as RequestViolation[])
+    : [];
+
+  // Backfill txn fields for rows queued before the richer snapshot was stored.
+  if (row.transaction_id && !context.txnDate) {
+    const txn = db.prepare(`SELECT * FROM transactions WHERE id=?`).get(row.transaction_id) as any;
+    if (txn) {
+      Object.assign(context, {
+        txnDate: txn.txn_date,
+        postingDate: txn.posting_date,
+        description: txn.description,
+        mcc: txn.mcc,
+        subcategory: txn.subcategory,
+        merchantCity: txn.merchant_city,
+        state: txn.state_province,
+        country: txn.country,
+        currency: txn.currency,
+        isCrossBorder: !!txn.is_cross_border,
+      });
+    }
+  }
+
+  return {
+    ...row,
+    context,
+    cardholder: card?.cardholder_alias ?? card?.label ?? row.transaction_code,
+    cardLabel: card?.label,
+    merchantHistory,
+    violations,
+  };
+}
+
 export function getRequests(status?: string): any[] {
   const db = getDb();
   const rows = db
     .prepare(`SELECT * FROM requests ${status ? "WHERE status=?" : ""} ORDER BY (status='pending') DESC, amount_cad DESC`)
     .all(...(status ? [status] : [])) as any[];
-  return rows.map((r) => ({ ...r, context: JSON.parse(r.ai_context || "{}") }));
+  return rows.map(enrichRequest);
 }
 
 export function decideRequest(id: number, decision: "approved" | "denied", by = "Finance Manager") {
