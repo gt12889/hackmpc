@@ -11,6 +11,7 @@ export const dynamic = "force-dynamic";
 // Overview = Spend overview + Budgets (consolidated from /dashboard and /budgets).
 export default function OverviewPage() {
   return (
+    <div className="typography-overview-exempt">
     <SubTabs
       actions={<ImportDialog variant="toolbar" />}
       items={[
@@ -28,5 +29,6 @@ export default function OverviewPage() {
         },
       ]}
     />
+    </div>
   );
 }

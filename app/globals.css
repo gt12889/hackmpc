@@ -83,8 +83,14 @@
   * {
     @apply border-border;
   }
+  /* 19px root (+1pt vs 112.5% / 18px). Overview page opts out via .typography-overview-exempt */
   html {
-    font-size: 112.5%;
+    font-size: 118.75%;
+  }
+
+  /* Keeps /overview at the previous 18px effective scale (18 ÷ 19). */
+  .typography-overview-exempt {
+    font-size: 94.736842%;
   }
   /* All type: Helvetica, bold, across the whole app (per design direction). */
   html,
